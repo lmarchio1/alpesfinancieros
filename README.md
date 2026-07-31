@@ -17,6 +17,14 @@ npm run dev
 - `npm run build` — build de producción en `dist/`
 - `npm run preview` — previsualiza el build de producción
 
+## Deploy
+
+En vivo en **https://lmarchio1.github.io/alpesfinancieros/**. Cada push a `master`
+dispara `.github/workflows/deploy.yml`, que buildea con Vite y publica `dist/` en
+GitHub Pages (fuente configurada como "GitHub Actions" en Settings → Pages). El
+`base: '/alpesfinancieros/'` en `vite.config.js` es necesario para que los assets
+resuelvan bien bajo esa subruta.
+
 ## Estructura
 
 ```
