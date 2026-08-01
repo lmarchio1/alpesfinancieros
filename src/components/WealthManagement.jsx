@@ -1,6 +1,7 @@
 import SectionHeading from './ui/SectionHeading'
 import Card from './ui/Card'
 import Modelo360Donut from './ui/Modelo360Donut'
+import oroMercado from '../assets/oro-mercado.jpg'
 
 const ICONS = {
   shield: (
@@ -145,16 +146,32 @@ export default function WealthManagement() {
             </Card>
           ))}
         </div>
+      </div>
 
-        <div className="mt-20">
+      <div className="relative mt-20 overflow-hidden">
+        <img
+          src={oroMercado}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(12,9,3,0.85) 0%, rgba(12,9,3,0.62) 30%, rgba(12,9,3,0.6) 65%, rgba(12,9,3,0.85) 100%)',
+          }}
+        />
+
+        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <span className="text-sm font-semibold uppercase tracking-wider text-brand-600">
+            <span className="text-sm font-semibold uppercase tracking-wider text-amber-300">
               Modelo de asesoramiento 360°
             </span>
-            <h3 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+            <h3 className="mt-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">
               Todo tu patrimonio, bajo un mismo techo
             </h3>
-            <p className="mt-3 text-base text-slate-600">
+            <p className="mt-3 text-base text-slate-300">
               Cuatro disciplinas coordinadas por un mismo equipo, para que ninguna decisión se
               tome sin ver el panorama completo.
             </p>
@@ -166,7 +183,10 @@ export default function WealthManagement() {
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:col-span-3">
               {MODELO_360.map((bloque) => (
-                <Card key={bloque.title} className={`flex items-center gap-4 border-l-4 p-5 ${bloque.border}`}>
+                <Card
+                  key={bloque.title}
+                  className={`flex items-center gap-4 border-l-4 bg-white/95 p-5 shadow-lg backdrop-blur ${bloque.border}`}
+                >
                   <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${bloque.color}`}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6">
                       {ICONS[bloque.icon]}
@@ -178,7 +198,9 @@ export default function WealthManagement() {
             </div>
           </div>
         </div>
+      </div>
 
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div
           className="mt-20 rounded-3xl p-8 sm:p-12"
           style={{
