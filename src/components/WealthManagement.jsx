@@ -78,10 +78,10 @@ const ITEMS = [
 ]
 
 const MODELO_360 = [
-  { icon: 'pie', color: 'bg-blue-50 text-blue-600', border: 'border-l-blue-600', title: 'Gestión financiera' },
-  { icon: 'scale', color: 'bg-rose-50 text-rose-600', border: 'border-l-rose-600', title: 'Sucesión y legal' },
-  { icon: 'bank', color: 'bg-emerald-50 text-emerald-600', border: 'border-l-emerald-600', title: 'Eficiencia fiscal' },
-  { icon: 'home', color: 'bg-amber-50 text-amber-600', border: 'border-l-amber-600', title: 'Gobernanza familiar' },
+  { icon: 'pie', color: 'bg-[#fdf6e3] text-[#c9971c]', border: 'border-l-[#c9971c]', title: 'Gestión financiera' },
+  { icon: 'scale', color: 'bg-[#fbeed6] text-[#a8681a]', border: 'border-l-[#a8681a]', title: 'Sucesión y legal' },
+  { icon: 'bank', color: 'bg-[#f7e3d3] text-[#8a4f1e]', border: 'border-l-[#8a4f1e]', title: 'Eficiencia fiscal' },
+  { icon: 'home', color: 'bg-[#f0e0cc] text-[#5f3a16]', border: 'border-l-[#5f3a16]', title: 'Gobernanza familiar' },
 ]
 
 const PROCESO = [
