@@ -19,20 +19,13 @@ const COLUMNS = [
       { label: 'Prensa', href: '#contacto' },
     ],
   },
-  {
-    title: 'Legales',
-    links: [
-      { label: 'Términos y condiciones', href: '#' },
-      { label: 'Política de privacidad', href: '#' },
-    ],
-  },
 ]
 
 export default function Footer() {
   return (
     <footer className="border-t border-slate-200 bg-slate-950 text-slate-300">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 gap-10 md:grid-cols-5">
+        <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
           <div className="col-span-2">
             <Logo variant="light" />
             <p className="mt-4 max-w-sm text-sm text-slate-400">

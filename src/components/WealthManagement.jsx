@@ -27,6 +27,27 @@ const ICONS = {
   ),
 }
 
+const PROCESO = [
+  {
+    paso: '01',
+    title: 'Planificación',
+    description:
+      'Relevamos tu situación patrimonial, tu horizonte y tus objetivos para armar una hoja de ruta clara, antes de hablar de instrumentos.',
+  },
+  {
+    paso: '02',
+    title: 'Implementación',
+    description:
+      'Elegimos los instrumentos según tu perfil de riesgo, priorizando diversificación y eficiencia por sobre la moda del momento.',
+  },
+  {
+    paso: '03',
+    title: 'Acompañamiento',
+    description:
+      'Revisamos el plan con regularidad, lo ajustamos frente a los cambios del mercado y te mantenemos informado en cada paso.',
+  },
+]
+
 const ITEMS = [
   {
     icon: 'shield',
@@ -73,6 +94,37 @@ export default function WealthManagement() {
               <p className="mt-2 text-sm leading-relaxed text-slate-600">{item.description}</p>
             </Card>
           ))}
+        </div>
+
+        <div className="mt-20">
+          <div className="max-w-2xl">
+            <span className="text-sm font-semibold uppercase tracking-wider text-brand-600">
+              Nuestro proceso
+            </span>
+            <h3 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+              Acompañamiento real, no una transacción
+            </h3>
+            <p className="mt-3 text-base text-slate-600">
+              No vendemos productos ni cobramos por operación: cobramos un fee por el servicio de
+              gestión, así nuestros intereses quedan alineados con los tuyos en cada decisión.
+            </p>
+          </div>
+
+          <div className="relative mt-10 grid grid-cols-1 gap-8 md:grid-cols-3">
+            <div
+              aria-hidden="true"
+              className="absolute top-6 left-0 right-0 hidden h-px bg-slate-200 md:block"
+            />
+            {PROCESO.map((paso) => (
+              <div key={paso.paso} className="relative">
+                <span className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-brand-600 font-bold text-white">
+                  {paso.paso}
+                </span>
+                <h4 className="mt-4 font-semibold text-slate-900">{paso.title}</h4>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">{paso.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
