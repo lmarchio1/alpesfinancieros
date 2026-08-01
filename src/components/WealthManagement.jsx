@@ -1,5 +1,6 @@
 import SectionHeading from './ui/SectionHeading'
 import Card from './ui/Card'
+import Modelo360Donut from './ui/Modelo360Donut'
 
 const ICONS = {
   shield: (
@@ -76,58 +77,34 @@ const ITEMS = [
 ]
 
 const MODELO_360 = [
-  {
-    icon: 'pie',
-    color: 'bg-blue-50 text-blue-600',
-    title: 'Gestión financiera',
-    items: ['Asset allocation y portafolios a medida', 'Reporte global consolidado', 'Custodia internacional multibanco'],
-  },
-  {
-    icon: 'scale',
-    color: 'bg-rose-50 text-rose-600',
-    title: 'Sucesión y legal',
-    items: [
-      'Planificación sucesoria (estate planning)',
-      'Estructuras offshore, trusts y fideicomisos',
-      'Protección patrimonial integral',
-    ],
-  },
-  {
-    icon: 'bank',
-    color: 'bg-emerald-50 text-emerald-600',
-    title: 'Eficiencia fiscal',
-    items: ['Optimización impositiva internacional', 'Cumplimiento normativo (CRS / FATCA)', 'Real estate y activos alternativos'],
-  },
-  {
-    icon: 'home',
-    color: 'bg-amber-50 text-amber-600',
-    title: 'Gobernanza familiar',
-    items: [
-      'Protocolo familiar y sucesión empresaria',
-      'Capacitación de las próximas generaciones',
-      'CFO / concierge administrativo',
-    ],
-  },
+  { icon: 'pie', color: 'bg-blue-50 text-blue-600', border: 'border-l-blue-600', title: 'Gestión financiera' },
+  { icon: 'scale', color: 'bg-rose-50 text-rose-600', border: 'border-l-rose-600', title: 'Sucesión y legal' },
+  { icon: 'bank', color: 'bg-emerald-50 text-emerald-600', border: 'border-l-emerald-600', title: 'Eficiencia fiscal' },
+  { icon: 'home', color: 'bg-amber-50 text-amber-600', border: 'border-l-amber-600', title: 'Gobernanza familiar' },
 ]
 
 const PROCESO = [
   {
     paso: '01',
+    color: 'bg-blue-600',
     title: 'Diagnóstico',
     description: 'Auditoría inicial del patrimonio, las estructuras existentes y los objetivos familiares.',
   },
   {
     paso: '02',
+    color: 'bg-rose-600',
     title: 'Estrategia 360°',
     description: 'Diseño de la arquitectura legal, fiscal y de asignación de activos a medida.',
   },
   {
     paso: '03',
+    color: 'bg-emerald-600',
     title: 'Implementación',
     description: 'Apertura de cuentas, ejecución legal e instalación de los canales de custodia.',
   },
   {
     paso: '04',
+    color: 'bg-amber-600',
     title: 'Monitoreo',
     description: 'Consolidación global de reportes y reuniones periódicas de gobernanza.',
   },
@@ -183,39 +160,44 @@ export default function WealthManagement() {
             </p>
           </div>
 
-          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2">
-            {MODELO_360.map((bloque) => (
-              <Card key={bloque.title} className="p-6">
-                <div className={`flex h-11 w-11 items-center justify-center rounded-lg ${bloque.color}`}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6">
-                    {ICONS[bloque.icon]}
-                  </svg>
-                </div>
-                <h4 className="mt-4 font-semibold text-slate-900">{bloque.title}</h4>
-                <ul className="mt-3 space-y-2">
-                  {bloque.items.map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-slate-600">
-                      <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-slate-400" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </Card>
-            ))}
+          <div className="mt-10 grid grid-cols-1 items-center gap-10 lg:grid-cols-5">
+            <div className="lg:col-span-2">
+              <Modelo360Donut />
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:col-span-3">
+              {MODELO_360.map((bloque) => (
+                <Card key={bloque.title} className={`flex items-center gap-4 border-l-4 p-5 ${bloque.border}`}>
+                  <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${bloque.color}`}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6">
+                      {ICONS[bloque.icon]}
+                    </svg>
+                  </div>
+                  <h4 className="font-semibold text-slate-900">{bloque.title}</h4>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="mt-20">
-          <div className="max-w-2xl">
+        <div
+          className="mt-20 rounded-3xl p-8 sm:p-12"
+          style={{
+            background:
+              'linear-gradient(135deg, rgba(37,99,235,0.07), rgba(225,29,72,0.07) 35%, rgba(5,150,105,0.07) 65%, rgba(217,119,6,0.07))',
+          }}
+        >
+          <div className="mx-auto max-w-2xl text-center">
             <span className="text-sm font-semibold uppercase tracking-wider text-brand-600">
-              Metodología
+              Evaluación integral del patrimonio
             </span>
             <h3 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-              De la auditoría inicial a la gobernanza continua
+              Un proceso, no una única decisión
             </h3>
             <p className="mt-3 text-base text-slate-600">
-              No vendemos productos ni cobramos por operación: cobramos un fee por el servicio de
-              gestión, así nuestros intereses quedan alineados con los tuyos en cada decisión.
+              Nos enfocamos en definir la estrategia de inversión adecuada para vos —y en
+              sostenerla en el tiempo. No vendemos productos ni cobramos por operación: cobramos
+              un fee por el servicio de gestión, así nuestros intereses quedan alineados con los
+              tuyos en cada decisión.
             </p>
           </div>
 
@@ -225,8 +207,10 @@ export default function WealthManagement() {
               className="absolute top-6 left-0 right-0 hidden h-px bg-slate-200 md:block"
             />
             {PROCESO.map((paso) => (
-              <div key={paso.paso} className="relative">
-                <span className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-brand-600 font-bold text-white">
+              <div key={paso.paso} className="relative text-center md:text-left">
+                <span
+                  className={`relative z-10 mx-auto flex h-12 w-12 items-center justify-center rounded-full font-bold text-white md:mx-0 ${paso.color}`}
+                >
                   {paso.paso}
                 </span>
                 <h4 className="mt-4 font-semibold text-slate-900">{paso.title}</h4>
