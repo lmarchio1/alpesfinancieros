@@ -5,9 +5,7 @@ import toroWallStreet from '../assets/toro-wallstreet.jpg'
 
 const CONTACT_ENDPOINT = import.meta.env.VITE_CONTACT_ENDPOINT
 
-const SUBJECTS = ['Asesoría de inversión', 'Consulta sobre cotizaciones', 'Soporte técnico', 'Otro']
-
-const INITIAL_FORM = { name: '', email: '', phone: '', subject: SUBJECTS[0], message: '' }
+const INITIAL_FORM = { firstName: '', lastName: '', email: '', phone: '', message: '' }
 
 export default function ContactForm() {
   const [form, setForm] = useState(INITIAL_FORM)
@@ -42,11 +40,14 @@ export default function ContactForm() {
   }
 
   return (
-    <section id="contacto" className="relative overflow-hidden bg-[#0b0704] py-20">
+    <section
+      id="contacto"
+      className="relative flex min-h-[600px] items-center overflow-hidden bg-[#0b0704] py-20"
+    >
       <img
         src={toroWallStreet}
         alt="Toro de Wall Street"
-        className="absolute inset-0 h-full w-full object-cover object-[center_30%]"
+        className="absolute inset-0 h-full w-full object-cover object-[58%_18%]"
       />
       <div
         className="absolute inset-0"
@@ -56,7 +57,7 @@ export default function ContactForm() {
         }}
       />
 
-      <div className="relative mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           variant="dark"
           align="center"
@@ -68,15 +69,30 @@ export default function ContactForm() {
         <Card className="p-6 shadow-xl sm:p-8">
           <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div>
-              <label htmlFor="name" className="text-sm font-medium text-slate-700">
-                Nombre y apellido
+              <label htmlFor="firstName" className="text-sm font-medium text-slate-700">
+                Nombre
               </label>
               <input
-                id="name"
-                name="name"
+                id="firstName"
+                name="firstName"
                 type="text"
                 required
-                value={form.name}
+                value={form.firstName}
+                onChange={handleChange}
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="lastName" className="text-sm font-medium text-slate-700">
+                Apellido
+              </label>
+              <input
+                id="lastName"
+                name="lastName"
+                type="text"
+                required
+                value={form.lastName}
                 onChange={handleChange}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
               />
@@ -109,25 +125,6 @@ export default function ContactForm() {
                 onChange={handleChange}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
               />
-            </div>
-
-            <div>
-              <label htmlFor="subject" className="text-sm font-medium text-slate-700">
-                Motivo
-              </label>
-              <select
-                id="subject"
-                name="subject"
-                value={form.subject}
-                onChange={handleChange}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-              >
-                {SUBJECTS.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
             </div>
 
             <div className="sm:col-span-2">
