@@ -30,13 +30,13 @@ export default function Cotizaciones() {
         src={calculadoraMercado}
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 h-full w-full object-cover saturate-[1.3]"
+        className="absolute inset-0 h-full w-full object-cover saturate-[1.7]"
       />
       <div
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(180deg, rgba(4,10,6,0.86) 0%, rgba(4,14,8,0.4) 30%, rgba(4,14,8,0.42) 65%, rgba(4,10,6,0.88) 100%)',
+            'linear-gradient(180deg, rgba(4,10,6,0.88) 0%, rgba(4,10,6,0.8) 20%, rgba(4,14,8,0.3) 48%, rgba(4,14,8,0.32) 68%, rgba(4,10,6,0.85) 100%)',
         }}
       />
 

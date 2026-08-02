@@ -46,13 +46,13 @@ export default function ContactForm() {
       <img
         src={toroWallStreet}
         alt="Toro de Wall Street"
-        className="absolute inset-0 h-full w-full object-cover object-[58%_18%]"
+        className="absolute inset-0 h-full w-full object-cover object-[58%_18%] saturate-[1.35]"
       />
       <div
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(180deg, rgba(11,7,4,0.85) 0%, rgba(11,7,4,0.72) 45%, rgba(11,7,4,0.92) 100%)',
+            'linear-gradient(180deg, rgba(11,7,4,0.78) 0%, rgba(11,7,4,0.48) 45%, rgba(11,7,4,0.85) 100%)',
         }}
       />
 
