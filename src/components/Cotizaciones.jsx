@@ -2,34 +2,74 @@ import { useState } from 'react'
 import SectionHeading from './ui/SectionHeading'
 import DolaresTab from './cotizaciones/DolaresTab'
 import BonosTab from './cotizaciones/BonosTab'
+import calculadoraMercado from '../assets/calculadora-mercado.jpg'
 
-const TABS = [
+const TOGGLES = [
   { id: 'dolares', label: 'Dólares' },
   { id: 'bonos', label: 'Bonos' },
 ]
 
+const TOOLKIT_TAGS = [
+  'Dólar oficial, blue, MEP y CCL',
+  'Globales, Bonares, Boncer, Letras y duales',
+  'Calculadora de breakeven',
+  'Riesgo país en vivo',
+]
+
 export default function Cotizaciones() {
-  const [tab, setTab] = useState('dolares')
+  const [open, setOpen] = useState({ dolares: false, bonos: false })
+
+  const toggle = (id) => setOpen((prev) => ({ ...prev, [id]: !prev[id] }))
 
   return (
-    <section id="cotizaciones" className="py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section
+      id="cotizaciones"
+      className="relative flex min-h-[600px] items-center overflow-hidden bg-[#050a06] py-20"
+    >
+      <img
+        src={calculadoraMercado}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-cover saturate-[1.3]"
+      />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(4,10,6,0.86) 0%, rgba(4,14,8,0.4) 30%, rgba(4,14,8,0.42) 65%, rgba(4,10,6,0.88) 100%)',
+        }}
+      />
+
+      <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
+          variant="dark"
           eyebrow="Mercado"
-          title="Cotizaciones en tiempo real"
-          description="Dólar en todas sus variantes, y el universo completo de bonos argentinos: Globales, Bonares, Boncer, Letras y duales, con calculadora de rendimientos, breakeven y sensibilidad al riesgo país."
+          title="Herramientas de Mercado"
+          description="Accedé a las últimas novedades y detalles de lo que va ocurriendo en el mercado: cotizaciones del dólar en todas sus variantes y el universo completo de bonos argentinos, con la calculadora de rendimientos y breakeven siempre a mano."
         />
 
-        <div className="mb-8 inline-flex rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-200">
-          {TABS.map((t) => (
+        <div className="mb-8 flex flex-wrap gap-3">
+          {TOOLKIT_TAGS.map((tag) => (
+            <span
+              key={tag}
+              className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-slate-200 ring-1 ring-inset ring-white/20"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        <div className="mb-8 inline-flex rounded-xl bg-white/10 p-1 shadow-sm ring-1 ring-white/20 backdrop-blur-sm">
+          {TOGGLES.map((t) => (
             <button
               key={t.id}
               type="button"
-              onClick={() => setTab(t.id)}
+              onClick={() => toggle(t.id)}
+              aria-expanded={open[t.id]}
               className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
-                tab === t.id
+                open[t.id]
                   ? 'bg-brand-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
+                  : 'text-slate-200 hover:text-white'
               }`}
             >
               {t.label}
@@ -37,8 +77,12 @@ export default function Cotizaciones() {
           ))}
         </div>
 
-        {tab === 'dolares' && <DolaresTab />}
-        {tab === 'bonos' && <BonosTab />}
+        {open.dolares && (
+          <div className="mb-10">
+            <DolaresTab />
+          </div>
+        )}
+        {open.bonos && <BonosTab />}
       </div>
     </section>
   )

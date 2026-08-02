@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import SectionHeading from './ui/SectionHeading'
-import Card from './ui/Card'
 import toroWallStreet from '../assets/toro-wallstreet.jpg'
 
 const CONTACT_ENDPOINT = import.meta.env.VITE_CONTACT_ENDPOINT
@@ -66,81 +65,61 @@ export default function ContactForm() {
           description="Contanos qué necesitás y te respondemos a la brevedad."
         />
 
-        <Card className="p-6 shadow-xl sm:p-8">
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <div>
-              <label htmlFor="firstName" className="text-sm font-medium text-slate-700">
-                Nombre
-              </label>
-              <input
-                id="firstName"
-                name="firstName"
-                type="text"
-                required
-                value={form.firstName}
-                onChange={handleChange}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-              />
-            </div>
+        <div className="rounded-2xl bg-white/10 p-6 backdrop-blur-sm sm:p-8">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <input
+              aria-label="Nombre"
+              placeholder="Nombre"
+              name="firstName"
+              type="text"
+              required
+              value={form.firstName}
+              onChange={handleChange}
+              className="w-full rounded-lg border-0 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
 
-            <div>
-              <label htmlFor="lastName" className="text-sm font-medium text-slate-700">
-                Apellido
-              </label>
-              <input
-                id="lastName"
-                name="lastName"
-                type="text"
-                required
-                value={form.lastName}
-                onChange={handleChange}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-              />
-            </div>
+            <input
+              aria-label="Apellido"
+              placeholder="Apellido"
+              name="lastName"
+              type="text"
+              required
+              value={form.lastName}
+              onChange={handleChange}
+              className="w-full rounded-lg border-0 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
 
-            <div>
-              <label htmlFor="email" className="text-sm font-medium text-slate-700">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={form.email}
-                onChange={handleChange}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-              />
-            </div>
+            <input
+              aria-label="Email"
+              placeholder="Email"
+              name="email"
+              type="email"
+              required
+              value={form.email}
+              onChange={handleChange}
+              className="w-full rounded-lg border-0 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
 
-            <div>
-              <label htmlFor="phone" className="text-sm font-medium text-slate-700">
-                Teléfono (opcional)
-              </label>
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                value={form.phone}
-                onChange={handleChange}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-              />
-            </div>
+            <input
+              aria-label="Teléfono (opcional)"
+              placeholder="Teléfono (opcional)"
+              name="phone"
+              type="tel"
+              value={form.phone}
+              onChange={handleChange}
+              className="w-full rounded-lg border-0 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
 
-            <div className="sm:col-span-2">
-              <label htmlFor="message" className="text-sm font-medium text-slate-700">
-                Mensaje
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                rows={4}
-                required
-                value={form.message}
-                onChange={handleChange}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-              />
-            </div>
+            <textarea
+              aria-label="Mensaje"
+              placeholder="Mensaje"
+              name="message"
+              rows={4}
+              required
+              value={form.message}
+              onChange={handleChange}
+              className="w-full rounded-lg border-0 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 sm:col-span-2"
+            />
 
             <div className="sm:col-span-2">
               <button
@@ -152,13 +131,13 @@ export default function ContactForm() {
               </button>
 
               {status === 'sent' && (
-                <p className="mt-3 text-sm text-emerald-600">
+                <p className="mt-3 text-sm text-emerald-400">
                   ¡Gracias! Recibimos tu mensaje y te vamos a contactar pronto.
                   {!CONTACT_ENDPOINT && ' (modo demo: no se envió a ningún servidor)'}
                 </p>
               )}
               {status === 'error' && (
-                <p className="mt-3 text-sm text-rose-600">
+                <p className="mt-3 text-sm text-rose-400">
                   Ocurrió un error al enviar el mensaje. Probá de nuevo.
                 </p>
               )}
@@ -170,7 +149,7 @@ export default function ContactForm() {
               )}
             </div>
           </form>
-        </Card>
+        </div>
       </div>
     </section>
   )
