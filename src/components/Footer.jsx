@@ -39,12 +39,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 border-t border-slate-800 pt-8">
-          <p className="text-xs leading-relaxed text-slate-500">
-            La información publicada en este sitio es de carácter informativo y no constituye
-            una recomendación ni oferta de inversión. Las cotizaciones pueden tener demoras y
-            estar sujetas a cambios. Antes de invertir, consultá con un asesor matriculado.
-          </p>
-          <p className="mt-4 text-xs text-slate-500">
+          <p className="text-xs text-slate-500">
             © {YEAR} Alpes Estados Financieros. Todos los derechos reservados.
           </p>
         </div>
