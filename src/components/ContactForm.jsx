@@ -24,7 +24,11 @@ export default function ContactForm() {
         const res = await fetch(CONTACT_ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(form),
+          body: JSON.stringify({
+            ...form,
+            _cc: 'daniel.marchioni@alpesestadosfinancieros.com',
+            _subject: 'Nueva consulta desde alpesestadosfinancieros.com.ar',
+          }),
         })
         if (!res.ok) throw new Error('No se pudo enviar el formulario')
       } else {
