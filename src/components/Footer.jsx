@@ -13,13 +13,15 @@ export default function Footer() {
   return (
     <footer className="border-t border-slate-200 bg-slate-950 text-slate-300">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-3">
+        <div className="grid grid-cols-1 items-center gap-10 sm:grid-cols-3">
           <div className="sm:col-span-2">
-            <Logo variant="light" />
-            <p className="mt-4 max-w-sm text-sm text-slate-400">
-              Información de mercado, cotizaciones y seguimiento de inversiones para tomar
-              mejores decisiones financieras en Argentina.
-            </p>
+            <Logo
+              variant="light"
+              iconClassName="h-16 w-auto sm:h-20"
+              nameClassName="text-3xl sm:text-4xl"
+              taglineClassName="text-xs sm:text-sm"
+              gap="gap-4"
+            />
           </div>
 
           <div>
