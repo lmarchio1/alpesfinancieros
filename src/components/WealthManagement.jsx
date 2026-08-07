@@ -112,25 +112,32 @@ const PROCESO = [
   },
 ]
 
-export default function WealthManagement() {
-  const procesoRef = useRef(null)
-  const [procesoVisible, setProcesoVisible] = useState(false)
+function useRevealOnScroll(threshold = 0.3) {
+  const ref = useRef(null)
+  const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    const el = procesoRef.current
+    const el = ref.current
     if (!el) return
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setProcesoVisible(true)
+          setVisible(true)
           observer.disconnect()
         }
       },
-      { threshold: 0.3 }
+      { threshold }
     )
     observer.observe(el)
     return () => observer.disconnect()
   }, [])
+
+  return [ref, visible]
+}
+
+export default function WealthManagement() {
+  const [itemsRef, itemsVisible] = useRevealOnScroll()
+  const [procesoRef, procesoVisible] = useRevealOnScroll()
 
   return (
     <section id="gestion" className="py-20">
@@ -153,10 +160,16 @@ export default function WealthManagement() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {ITEMS.map((item) => (
-            <Card key={item.title} className="p-6">
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+        <div ref={itemsRef} className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {ITEMS.map((item, i) => (
+            <Card
+              key={item.title}
+              className={`group p-6 transition-all duration-700 ease-out hover:-translate-y-1 hover:shadow-lg motion-reduce:transition-none ${
+                itemsVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
+              }`}
+              style={{ transitionDelay: itemsVisible ? `${i * 120}ms` : '0ms' }}
+            >
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition-colors duration-300 group-hover:bg-brand-600 group-hover:text-white">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6">
                   {ICONS[item.icon]}
                 </svg>
