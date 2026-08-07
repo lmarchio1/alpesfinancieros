@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import SectionHeading from './ui/SectionHeading'
+import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
 import toroWallStreet from '../assets/toro-wallstreet.jpg'
 
 const CONTACT_ENDPOINT = import.meta.env.VITE_CONTACT_ENDPOINT
@@ -9,6 +10,7 @@ const INITIAL_FORM = { firstName: '', lastName: '', email: '', phone: '', messag
 export default function ContactForm() {
   const [form, setForm] = useState(INITIAL_FORM)
   const [status, setStatus] = useState('idle') // idle | sending | sent | error
+  const [formRef, formVisible] = useRevealOnScroll()
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -69,7 +71,12 @@ export default function ContactForm() {
           description="Contanos qué necesitás y te respondemos a la brevedad."
         />
 
-        <div className="rounded-2xl bg-white/10 p-6 backdrop-blur-sm sm:p-8">
+        <div
+          ref={formRef}
+          className={`rounded-2xl bg-white/10 p-6 backdrop-blur-sm transition-all duration-700 ease-out motion-reduce:transition-none sm:p-8 ${
+            formVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
+          }`}
+        >
           <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <input
               aria-label="Nombre"
@@ -135,10 +142,22 @@ export default function ContactForm() {
               </button>
 
               {status === 'sent' && (
-                <p className="mt-3 text-sm text-emerald-400">
-                  ¡Gracias! Recibimos tu mensaje y te vamos a contactar pronto.
-                  {!CONTACT_ENDPOINT && ' (modo demo: no se envió a ningún servidor)'}
-                </p>
+                <div className="mt-3 flex items-start gap-2 text-sm text-emerald-400">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    className="mt-0.5 h-5 w-5 shrink-0 animate-pop motion-reduce:animate-none"
+                  >
+                    <circle cx="12" cy="12" r="10" className="opacity-30" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12.5l2.5 2.5L16 9.5" />
+                  </svg>
+                  <p>
+                    ¡Gracias! Recibimos tu mensaje y te vamos a contactar pronto.
+                    {!CONTACT_ENDPOINT && ' (modo demo: no se envió a ningún servidor)'}
+                  </p>
+                </div>
               )}
               {status === 'error' && (
                 <p className="mt-3 text-sm text-rose-400">

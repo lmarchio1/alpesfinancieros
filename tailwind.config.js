@@ -28,9 +28,20 @@ export default {
         'spin-slow': {
           to: { transform: 'rotate(360deg)' },
         },
+        'fade-up': {
+          '0%': { opacity: '0', transform: 'translateY(16px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        pop: {
+          '0%': { opacity: '0', transform: 'scale(0)' },
+          '60%': { opacity: '1', transform: 'scale(1.15)' },
+          '100%': { transform: 'scale(1)' },
+        },
       },
       animation: {
         'spin-slow': 'spin-slow 80s linear infinite',
+        'fade-up': 'fade-up 0.8s ease-out both',
+        pop: 'pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both',
       },
     },
   },

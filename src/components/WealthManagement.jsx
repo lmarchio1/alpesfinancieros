@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
 import SectionHeading from './ui/SectionHeading'
 import Card from './ui/Card'
 import Modelo360Donut from './ui/Modelo360Donut'
+import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
 import oroMercado from '../assets/oro-mercado.jpg'
 
 const ICONS = {
@@ -111,29 +111,6 @@ const PROCESO = [
     description: 'Consolidación global de reportes y reuniones periódicas de gobernanza.',
   },
 ]
-
-function useRevealOnScroll(threshold = 0.3) {
-  const ref = useRef(null)
-  const [visible, setVisible] = useState(false)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true)
-          observer.disconnect()
-        }
-      },
-      { threshold }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-
-  return [ref, visible]
-}
 
 export default function WealthManagement() {
   const [itemsRef, itemsVisible] = useRevealOnScroll()

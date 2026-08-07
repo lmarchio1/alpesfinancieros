@@ -3,6 +3,7 @@ import { usePolling } from '../../hooks/usePolling'
 import { fetchDolares } from '../../services/dolaresApi'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
+import FlashPrice from '../ui/FlashPrice'
 
 const formatArs = (value) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(value)
@@ -49,8 +50,12 @@ export default function DolaresTab() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {data.map((d) => (
-          <Card key={d.casa} className="p-5">
+        {data.map((d, i) => (
+          <Card
+            key={d.casa}
+            className="animate-fade-up p-5 motion-reduce:animate-none"
+            style={{ animationDelay: `${i * 80}ms` }}
+          >
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-slate-900">{d.nombre}</h3>
               <Badge variant="neutral">{d.casa}</Badge>
@@ -58,11 +63,11 @@ export default function DolaresTab() {
             <div className="mt-4 flex items-end justify-between">
               <div>
                 <p className="text-xs text-slate-500">Compra</p>
-                <p className="text-lg font-bold text-slate-900">{formatArs(d.compra)}</p>
+                <FlashPrice value={d.compra} formatted={formatArs(d.compra)} className="text-lg font-bold" />
               </div>
               <div className="text-right">
                 <p className="text-xs text-slate-500">Venta</p>
-                <p className="text-lg font-bold text-slate-900">{formatArs(d.venta)}</p>
+                <FlashPrice value={d.venta} formatted={formatArs(d.venta)} className="text-lg font-bold" />
               </div>
             </div>
           </Card>
