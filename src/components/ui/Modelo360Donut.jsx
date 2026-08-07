@@ -33,21 +33,26 @@ export default function Modelo360Donut() {
           </radialGradient>
         </defs>
 
-        <g transform="rotate(-90 100 100)">
-          {SEGMENTOS.map((_, i) => (
-            <circle
-              key={i}
-              cx="100"
-              cy="100"
-              r={R}
-              fill="none"
-              stroke={`url(#ring-grad-${i})`}
-              strokeWidth={STROKE}
-              strokeLinecap="round"
-              strokeDasharray={`${SEG_LEN} ${CIRCUM - SEG_LEN}`}
-              strokeDashoffset={-(i * QUARTER)}
-            />
-          ))}
+        <g
+          className="origin-center animate-spin-slow motion-reduce:animate-none"
+          style={{ transformOrigin: '100px 100px' }}
+        >
+          <g transform="rotate(-90 100 100)">
+            {SEGMENTOS.map((_, i) => (
+              <circle
+                key={i}
+                cx="100"
+                cy="100"
+                r={R}
+                fill="none"
+                stroke={`url(#ring-grad-${i})`}
+                strokeWidth={STROKE}
+                strokeLinecap="round"
+                strokeDasharray={`${SEG_LEN} ${CIRCUM - SEG_LEN}`}
+                strokeDashoffset={-(i * QUARTER)}
+              />
+            ))}
+          </g>
         </g>
 
         <circle cx="100" cy="100" r="51" fill="black" fillOpacity="0.18" />

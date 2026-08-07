@@ -24,6 +24,14 @@ export default {
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
+      keyframes: {
+        'spin-slow': {
+          to: { transform: 'rotate(360deg)' },
+        },
+      },
+      animation: {
+        'spin-slow': 'spin-slow 80s linear infinite',
+      },
     },
   },
   plugins: [],
