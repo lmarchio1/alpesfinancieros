@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import SectionHeading from './ui/SectionHeading'
 import Card from './ui/Card'
 import Modelo360Donut from './ui/Modelo360Donut'
@@ -112,6 +113,25 @@ const PROCESO = [
 ]
 
 export default function WealthManagement() {
+  const procesoRef = useRef(null)
+  const [procesoVisible, setProcesoVisible] = useState(false)
+
+  useEffect(() => {
+    const el = procesoRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setProcesoVisible(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.3 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <section id="gestion" className="py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -223,15 +243,21 @@ export default function WealthManagement() {
             </p>
           </div>
 
-          <div className="relative mt-10 grid grid-cols-1 gap-8 md:grid-cols-4">
+          <div ref={procesoRef} className="relative mt-10 grid grid-cols-1 gap-8 md:grid-cols-4">
             <div
               aria-hidden="true"
               className="absolute top-6 left-0 right-0 hidden h-px bg-slate-200 md:block"
             />
-            {PROCESO.map((paso) => (
-              <div key={paso.paso} className="relative text-center md:text-left">
+            {PROCESO.map((paso, i) => (
+              <div
+                key={paso.paso}
+                className={`relative text-center transition-all duration-700 ease-out motion-reduce:transition-none md:text-left ${
+                  procesoVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
+                }`}
+                style={{ transitionDelay: procesoVisible ? `${i * 150}ms` : '0ms' }}
+              >
                 <span
-                  className={`relative z-10 mx-auto flex h-12 w-12 items-center justify-center rounded-full font-bold text-white md:mx-0 ${paso.color}`}
+                  className={`relative z-10 mx-auto flex h-12 w-12 items-center justify-center rounded-full font-bold text-white transition-transform duration-300 ease-out hover:scale-125 hover:shadow-lg md:mx-0 ${paso.color}`}
                 >
                   {paso.paso}
                 </span>
