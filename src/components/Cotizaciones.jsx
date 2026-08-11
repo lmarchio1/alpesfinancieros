@@ -44,8 +44,8 @@ export default function Cotizaciones() {
         <SectionHeading
           variant="dark"
           eyebrow="Mercado"
-          title="Herramientas de Mercado"
-          description="Accedé a las últimas novedades y detalles de lo que va ocurriendo en el mercado: cotizaciones del dólar en todas sus variantes y el universo completo de bonos argentinos, con la calculadora de rendimientos y breakeven siempre a mano."
+          title="Cotizaciones de Mercado"
+          description="Precio del dólar en todas sus variantes y cotizaciones de letras y bonos, actualizados en tiempo real."
         />
 
         <div className="mb-8 flex flex-wrap gap-3">
