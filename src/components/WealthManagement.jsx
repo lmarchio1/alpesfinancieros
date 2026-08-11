@@ -89,24 +89,28 @@ const PROCESO = [
   {
     paso: '01',
     color: 'bg-blue-600',
+    glow: 'shadow-blue-500/40',
     title: 'Diagnóstico',
     description: 'Auditoría inicial del patrimonio, las estructuras existentes y los objetivos familiares.',
   },
   {
     paso: '02',
     color: 'bg-rose-600',
+    glow: 'shadow-rose-500/40',
     title: 'Estrategia 360°',
     description: 'Diseño de la arquitectura legal, fiscal y de asignación de activos a medida.',
   },
   {
     paso: '03',
     color: 'bg-emerald-600',
+    glow: 'shadow-emerald-500/40',
     title: 'Implementación',
     description: 'Apertura de cuentas, ejecución legal e instalación de los canales de custodia.',
   },
   {
     paso: '04',
     color: 'bg-amber-600',
+    glow: 'shadow-amber-500/40',
     title: 'Monitoreo',
     description: 'Consolidación global de reportes y reuniones periódicas de gobernanza.',
   },
@@ -236,7 +240,14 @@ export default function WealthManagement() {
           <div ref={procesoRef} className="relative mt-10 grid grid-cols-1 gap-8 md:grid-cols-4">
             <div
               aria-hidden="true"
-              className="absolute top-6 left-0 right-0 hidden h-px bg-slate-200 md:block"
+              className="absolute top-7 left-0 right-0 hidden h-px bg-slate-200 md:block"
+            />
+            <div
+              aria-hidden="true"
+              className={`absolute top-7 left-0 hidden h-px origin-left bg-slate-400 transition-transform duration-[1400ms] ease-out motion-reduce:transition-none md:block ${
+                procesoVisible ? 'scale-x-100' : 'scale-x-0'
+              }`}
+              style={{ right: 0 }}
             />
             {PROCESO.map((paso, i) => (
               <div
@@ -247,7 +258,7 @@ export default function WealthManagement() {
                 style={{ transitionDelay: procesoVisible ? `${i * 150}ms` : '0ms' }}
               >
                 <span
-                  className={`relative z-10 mx-auto flex h-12 w-12 items-center justify-center rounded-full font-bold text-white transition-transform duration-300 ease-out hover:scale-125 hover:shadow-lg md:mx-0 ${paso.color}`}
+                  className={`relative z-10 mx-auto flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold text-white shadow-lg transition-transform duration-300 ease-out hover:scale-125 md:mx-0 ${paso.color} ${paso.glow}`}
                 >
                   {paso.paso}
                 </span>
