@@ -171,7 +171,7 @@ export default function WealthManagement() {
           {ITEMS.map((item, i) => (
             <Card
               key={item.title}
-              className={`group p-6 shadow-md shadow-slate-200/70 transition-all duration-700 ease-out hover:-translate-y-1 hover:shadow-xl motion-reduce:transition-none ${
+              className={`group !bg-alpesBronze/10 p-6 shadow-md shadow-slate-200/70 transition-all duration-700 ease-out hover:-translate-y-1 hover:shadow-xl motion-reduce:transition-none ${
                 itemsVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
               }`}
               style={{ transitionDelay: itemsVisible ? `${i * 120}ms` : '0ms' }}
