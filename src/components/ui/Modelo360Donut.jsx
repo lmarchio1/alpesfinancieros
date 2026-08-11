@@ -12,7 +12,7 @@ const QUARTER = CIRCUM / 4
 const GAP = 9
 const SEG_LEN = QUARTER - GAP
 
-export default function Modelo360Donut() {
+export default function Modelo360Donut({ activeIndex = null }) {
   return (
     <div className="relative mx-auto h-full max-h-80 w-full max-w-80">
       <div
@@ -38,20 +38,26 @@ export default function Modelo360Donut() {
           style={{ transformOrigin: '100px 100px' }}
         >
           <g transform="rotate(-90 100 100)">
-            {SEGMENTOS.map((_, i) => (
-              <circle
-                key={i}
-                cx="100"
-                cy="100"
-                r={R}
-                fill="none"
-                stroke={`url(#ring-grad-${i})`}
-                strokeWidth={STROKE}
-                strokeLinecap="round"
-                strokeDasharray={`${SEG_LEN} ${CIRCUM - SEG_LEN}`}
-                strokeDashoffset={-(i * QUARTER)}
-              />
-            ))}
+            {SEGMENTOS.map((_, i) => {
+              const isActive = activeIndex === i
+              const isDimmed = activeIndex !== null && !isActive
+              return (
+                <circle
+                  key={i}
+                  cx="100"
+                  cy="100"
+                  r={R}
+                  fill="none"
+                  stroke={`url(#ring-grad-${i})`}
+                  strokeWidth={isActive ? STROKE + 8 : STROKE}
+                  strokeOpacity={isDimmed ? 0.45 : 1}
+                  strokeLinecap="round"
+                  strokeDasharray={`${SEG_LEN} ${CIRCUM - SEG_LEN}`}
+                  strokeDashoffset={-(i * QUARTER)}
+                  style={{ transition: 'stroke-width 300ms ease-out, stroke-opacity 300ms ease-out' }}
+                />
+              )
+            })}
           </g>
         </g>
 

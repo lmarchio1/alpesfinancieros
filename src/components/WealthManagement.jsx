@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import SectionHeading from './ui/SectionHeading'
 import Card from './ui/Card'
 import Modelo360Donut from './ui/Modelo360Donut'
@@ -79,10 +80,34 @@ const ITEMS = [
 ]
 
 const MODELO_360 = [
-  { icon: 'pie', color: 'bg-[#fdf6e3] text-[#c9971c]', border: 'border-l-[#c9971c]', title: 'Gestión financiera' },
-  { icon: 'scale', color: 'bg-[#fbeed6] text-[#a8681a]', border: 'border-l-[#a8681a]', title: 'Sucesión y legal' },
-  { icon: 'bank', color: 'bg-[#f7e3d3] text-[#8a4f1e]', border: 'border-l-[#8a4f1e]', title: 'Eficiencia fiscal' },
-  { icon: 'home', color: 'bg-[#f0e0cc] text-[#5f3a16]', border: 'border-l-[#5f3a16]', title: 'Gobernanza familiar' },
+  {
+    icon: 'pie',
+    color: 'bg-[#fdf6e3] text-[#c9971c]',
+    border: 'border-l-[#c9971c]',
+    title: 'Gestión financiera',
+    description: 'Diseño y seguimiento de tu cartera de inversiones, alineada a tus objetivos y perfil de riesgo.',
+  },
+  {
+    icon: 'scale',
+    color: 'bg-[#fbeed6] text-[#a8681a]',
+    border: 'border-l-[#a8681a]',
+    title: 'Sucesión y legal',
+    description: 'Planificación sucesoria y estructuras legales que protegen el patrimonio familiar a largo plazo.',
+  },
+  {
+    icon: 'bank',
+    color: 'bg-[#f7e3d3] text-[#8a4f1e]',
+    border: 'border-l-[#8a4f1e]',
+    title: 'Eficiencia fiscal',
+    description: 'Optimización de la carga impositiva dentro del marco legal vigente, en cada jurisdicción relevante.',
+  },
+  {
+    icon: 'home',
+    color: 'bg-[#f0e0cc] text-[#5f3a16]',
+    border: 'border-l-[#5f3a16]',
+    title: 'Gobernanza familiar',
+    description: 'Acuerdos y protocolos que ordenan la toma de decisiones patrimoniales entre generaciones.',
+  },
 ]
 
 const PROCESO = [
@@ -119,6 +144,7 @@ const PROCESO = [
 export default function WealthManagement() {
   const [itemsRef, itemsVisible] = useRevealOnScroll()
   const [procesoRef, procesoVisible] = useRevealOnScroll()
+  const [activeDisciplina, setActiveDisciplina] = useState(null)
 
   return (
     <section id="gestion" className="py-20">
@@ -193,20 +219,30 @@ export default function WealthManagement() {
 
           <div className="mt-10 grid grid-cols-1 items-center gap-10 lg:grid-cols-5">
             <div className="lg:col-span-2">
-              <Modelo360Donut />
+              <Modelo360Donut activeIndex={activeDisciplina} />
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:col-span-3">
-              {MODELO_360.map((bloque) => (
+              {MODELO_360.map((bloque, i) => (
                 <Card
                   key={bloque.title}
-                  className={`flex items-center gap-4 border-l-4 bg-white/95 p-5 shadow-lg backdrop-blur ${bloque.border}`}
+                  tabIndex={0}
+                  onMouseEnter={() => setActiveDisciplina(i)}
+                  onMouseLeave={() => setActiveDisciplina(null)}
+                  onFocus={() => setActiveDisciplina(i)}
+                  onBlur={() => setActiveDisciplina(null)}
+                  className={`group flex items-start gap-4 border-l-4 bg-white/95 p-5 shadow-lg backdrop-blur transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl focus:-translate-y-1 focus:shadow-xl focus:outline-none ${bloque.border}`}
                 >
-                  <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${bloque.color}`}>
+                  <div
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg transition-transform duration-300 ease-out group-hover:scale-110 ${bloque.color}`}
+                  >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6">
                       {ICONS[bloque.icon]}
                     </svg>
                   </div>
-                  <h4 className="font-semibold text-slate-900">{bloque.title}</h4>
+                  <div>
+                    <h4 className="font-semibold text-slate-900">{bloque.title}</h4>
+                    <p className="mt-1 text-sm leading-relaxed text-slate-600">{bloque.description}</p>
+                  </div>
                 </Card>
               ))}
             </div>
