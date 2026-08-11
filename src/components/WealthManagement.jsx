@@ -171,12 +171,12 @@ export default function WealthManagement() {
           {ITEMS.map((item, i) => (
             <Card
               key={item.title}
-              className={`group !bg-alpesBronze/10 p-6 shadow-md shadow-slate-200/70 transition-all duration-700 ease-out hover:-translate-y-1 hover:shadow-xl motion-reduce:transition-none ${
+              className={`group !bg-[#faf3e8] p-6 shadow-md shadow-slate-200/70 transition-all duration-700 ease-out hover:-translate-y-1 hover:shadow-xl motion-reduce:transition-none ${
                 itemsVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
               }`}
               style={{ transitionDelay: itemsVisible ? `${i * 120}ms` : '0ms' }}
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-alpesBronze/10 text-alpesBronze transition-colors duration-300 group-hover:bg-alpesBronze group-hover:text-white">
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#8a4f1e]/10 text-[#8a4f1e] transition-colors duration-300 group-hover:bg-[#8a4f1e] group-hover:text-white">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6">
                   {ICONS[item.icon]}
                 </svg>
