@@ -82,29 +82,29 @@ const ITEMS = [
 const MODELO_360 = [
   {
     icon: 'pie',
-    color: 'bg-[#fdf6e3] text-[#c9971c]',
-    border: 'border-l-[#c9971c]',
+    color: 'bg-[#fdf6e3] text-[#dba61f] group-hover:bg-[#dba61f] group-hover:text-white',
+    border: 'border-l-[#dba61f]',
     title: 'Gestión financiera',
     description: 'Diseño y seguimiento de tu cartera de inversiones, alineada a tus objetivos y perfil de riesgo.',
   },
   {
     icon: 'scale',
-    color: 'bg-[#fbeed6] text-[#a8681a]',
-    border: 'border-l-[#a8681a]',
+    color: 'bg-[#fbeed6] text-[#c17a1e] group-hover:bg-[#c17a1e] group-hover:text-white',
+    border: 'border-l-[#c17a1e]',
     title: 'Sucesión y legal',
     description: 'Planificación sucesoria y estructuras legales que protegen el patrimonio familiar a largo plazo.',
   },
   {
     icon: 'bank',
-    color: 'bg-[#f7e3d3] text-[#8a4f1e]',
-    border: 'border-l-[#8a4f1e]',
+    color: 'bg-[#f7e3d3] text-[#a35f24] group-hover:bg-[#a35f24] group-hover:text-white',
+    border: 'border-l-[#a35f24]',
     title: 'Eficiencia fiscal',
     description: 'Optimización de la carga impositiva dentro del marco legal vigente, en cada jurisdicción relevante.',
   },
   {
     icon: 'home',
-    color: 'bg-[#f0e0cc] text-[#5f3a16]',
-    border: 'border-l-[#5f3a16]',
+    color: 'bg-[#f0e0cc] text-[#7a4a1c] group-hover:bg-[#7a4a1c] group-hover:text-white',
+    border: 'border-l-[#7a4a1c]',
     title: 'Gobernanza familiar',
     description: 'Acuerdos y protocolos que ordenan la toma de decisiones patrimoniales entre generaciones.',
   },
@@ -230,10 +230,10 @@ export default function WealthManagement() {
                   onMouseLeave={() => setActiveDisciplina(null)}
                   onFocus={() => setActiveDisciplina(i)}
                   onBlur={() => setActiveDisciplina(null)}
-                  className={`group flex items-start gap-4 border-l-4 bg-white/95 p-5 shadow-lg backdrop-blur transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl focus:-translate-y-1 focus:shadow-xl focus:outline-none ${bloque.border}`}
+                  className={`group flex items-start gap-4 border-l-[6px] bg-white/95 p-5 shadow-lg backdrop-blur transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl focus:-translate-y-1 focus:shadow-xl focus:outline-none ${bloque.border}`}
                 >
                   <div
-                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg transition-transform duration-300 ease-out group-hover:scale-110 ${bloque.color}`}
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg transition-all duration-300 ease-out group-hover:scale-110 ${bloque.color}`}
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6">
                       {ICONS[bloque.icon]}

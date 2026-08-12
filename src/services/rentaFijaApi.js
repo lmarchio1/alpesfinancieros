@@ -41,3 +41,12 @@ export async function fetchRentaFija() {
 
   return { bonos, letras: letrasOrdenadas, riesgoPais }
 }
+
+// Valor de riesgo país del día hábil anterior, para comparar contra el último dato.
+// Este endpoint no tiene una versión liviana por fecha: trae toda la serie histórica,
+// así que solo conviene pedirlo una vez (no en cada poll).
+export async function fetchRiesgoPaisAnterior() {
+  const historico = await getJson('indices/riesgo-pais')
+  if (!Array.isArray(historico) || historico.length < 2) return null
+  return historico[historico.length - 2]
+}
