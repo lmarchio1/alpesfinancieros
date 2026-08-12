@@ -38,8 +38,11 @@ function TablaUsd({ bonos }) {
       </thead>
       <tbody className="divide-y divide-slate-100">
         {bonos.map((b) => (
-          <tr key={b.ticker} className="hover:bg-slate-50">
-            <td className="px-5 py-3 font-semibold text-slate-900">{b.ticker}</td>
+          <tr
+            key={b.ticker}
+            className="group border-l-4 border-transparent transition-colors duration-200 hover:border-brand-500 hover:bg-brand-50/60"
+          >
+            <td className="px-5 py-3 font-semibold text-slate-900 transition-colors duration-200 group-hover:text-brand-700">{b.ticker}</td>
             <td className="px-5 py-3 text-slate-500">{b.ley}</td>
             <td className="px-5 py-3 text-right text-slate-900">USD {b.precio.toFixed(2)}</td>
             <td className="px-5 py-3 text-right">
@@ -66,8 +69,11 @@ function TablaBoncer({ bonos }) {
       </thead>
       <tbody className="divide-y divide-slate-100">
         {bonos.map((b) => (
-          <tr key={b.ticker} className="hover:bg-slate-50">
-            <td className="px-5 py-3 font-semibold text-slate-900">{b.ticker}</td>
+          <tr
+            key={b.ticker}
+            className="group border-l-4 border-transparent transition-colors duration-200 hover:border-brand-500 hover:bg-brand-50/60"
+          >
+            <td className="px-5 py-3 font-semibold text-slate-900 transition-colors duration-200 group-hover:text-brand-700">{b.ticker}</td>
             <td className="px-5 py-3 text-right text-slate-900">{formatArs(b.precioArs)}</td>
             <td className="px-5 py-3 text-right text-slate-600">{b.tirPorcentaje}%</td>
             <td className="px-5 py-3 text-right text-slate-500">{formatDate(b.fechaVencimiento)}</td>
@@ -91,8 +97,11 @@ function TablaLetras({ letras }) {
       </thead>
       <tbody className="divide-y divide-slate-100">
         {letras.map((l) => (
-          <tr key={l.ticker} className="hover:bg-slate-50">
-            <td className="px-5 py-3 font-semibold text-slate-900">{l.ticker}</td>
+          <tr
+            key={l.ticker}
+            className="group border-l-4 border-transparent transition-colors duration-200 hover:border-brand-500 hover:bg-brand-50/60"
+          >
+            <td className="px-5 py-3 font-semibold text-slate-900 transition-colors duration-200 group-hover:text-brand-700">{l.ticker}</td>
             <td className="px-5 py-3 text-right text-slate-900">{formatArs(l.precioActual)}</td>
             <td className="px-5 py-3 text-right">
               <VarBadge value={l.variacionPorcentaje} />
@@ -118,8 +127,11 @@ function TablaDuales({ bonos }) {
       </thead>
       <tbody className="divide-y divide-slate-100">
         {bonos.map((b) => (
-          <tr key={b.ticker} className="hover:bg-slate-50">
-            <td className="px-5 py-3 font-semibold text-slate-900">{b.ticker}</td>
+          <tr
+            key={b.ticker}
+            className="group border-l-4 border-transparent transition-colors duration-200 hover:border-brand-500 hover:bg-brand-50/60"
+          >
+            <td className="px-5 py-3 font-semibold text-slate-900 transition-colors duration-200 group-hover:text-brand-700">{b.ticker}</td>
             <td className="px-5 py-3 text-right text-slate-900">{formatArs(b.precio)}</td>
             <td className="px-5 py-3 text-right">
               <VarBadge value={b.variacionPorcentaje} />

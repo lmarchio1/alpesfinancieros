@@ -1,22 +1,20 @@
-// Metadata estática (vencimiento, ley, duración aproximada) para Globales,
-// Bonares y duales. El precio y la variación se completan en vivo desde
-// data912.com en src/services/bondsLiveApi.js — acá solo va lo que no
-// cambia día a día.
-
-export const GLOBALES_META = {
-  GD29: { vencimiento: '2029-07-09', ley: 'NY', duracionAnios: 2.5 },
-  GD30: { vencimiento: '2030-07-09', ley: 'NY', duracionAnios: 3.2 },
-  GD35: { vencimiento: '2035-07-09', ley: 'NY', duracionAnios: 5.9 },
-  GD38: { vencimiento: '2038-01-09', ley: 'NY', duracionAnios: 7.1 },
-  GD41: { vencimiento: '2041-07-09', ley: 'NY', duracionAnios: 7.9 },
-  GD46: { vencimiento: '2046-07-09', ley: 'NY', duracionAnios: 8.7 },
-}
-
-export const BONARES_META = {
-  AL29: { vencimiento: '2029-07-09', ley: 'ARG', duracionAnios: 2.5 },
-  AL30: { vencimiento: '2030-07-09', ley: 'ARG', duracionAnios: 3.2 },
-  AL35: { vencimiento: '2035-07-09', ley: 'ARG', duracionAnios: 5.9 },
-  AL41: { vencimiento: '2041-07-09', ley: 'ARG', duracionAnios: 7.9 },
+// Los Globales (ley NY, prefijo GD) y Bonares (ley Arg, prefijo AL/AE) de la
+// reingeniería 2020 comparten el mismo esquema de vencimientos: alcanza con
+// saber a qué año vence un ticker para completar su vencimiento y duración
+// aproximada. Esto permite que bondsLiveApi.js detecte automáticamente
+// cualquier serie nueva que aparezca en data912.com (por ejemplo, si faltara
+// AE38) sin tener que hardcodear cada ticker a mano.
+//
+// Si en el futuro se emite una serie con un año de vencimiento que no está
+// en este mapa, alcanza con sumar una línea acá — no hace falta tocar la
+// lógica de bondsLiveApi.js.
+export const MATURITY_BY_YEAR = {
+  29: { vencimiento: '2029-07-09', duracionAnios: 2.5 },
+  30: { vencimiento: '2030-07-09', duracionAnios: 3.2 },
+  35: { vencimiento: '2035-07-09', duracionAnios: 5.9 },
+  38: { vencimiento: '2038-01-09', duracionAnios: 7.1 },
+  41: { vencimiento: '2041-07-09', duracionAnios: 7.9 },
+  46: { vencimiento: '2046-07-09', duracionAnios: 8.7 },
 }
 
 export const DUALES_META = {
