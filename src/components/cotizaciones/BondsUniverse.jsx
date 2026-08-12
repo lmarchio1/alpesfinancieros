@@ -62,6 +62,7 @@ function TablaBoncer({ bonos }) {
       <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
         <tr>
           <th className="px-5 py-3 font-medium">Ticker</th>
+          <th className="px-5 py-3 font-medium">Ley</th>
           <th className="px-5 py-3 font-medium text-right">Precio</th>
           <th className="px-5 py-3 font-medium text-right">TIR</th>
           <th className="px-5 py-3 font-medium text-right">Vencimiento</th>
@@ -74,8 +75,11 @@ function TablaBoncer({ bonos }) {
             className="group border-l-4 border-transparent transition-colors duration-200 hover:border-brand-500 hover:bg-brand-50/60"
           >
             <td className="px-5 py-3 font-semibold text-slate-900 transition-colors duration-200 group-hover:text-brand-700">{b.ticker}</td>
+            <td className="px-5 py-3 text-slate-500">ARG</td>
             <td className="px-5 py-3 text-right text-slate-900">{formatArs(b.precioArs)}</td>
-            <td className="px-5 py-3 text-right text-slate-600">{b.tirPorcentaje}%</td>
+            <td className="px-5 py-3 text-right">
+              <Badge variant="brand">{b.tirPorcentaje}%</Badge>
+            </td>
             <td className="px-5 py-3 text-right text-slate-500">{formatDate(b.fechaVencimiento)}</td>
           </tr>
         ))}
