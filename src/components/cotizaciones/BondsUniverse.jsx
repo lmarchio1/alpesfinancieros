@@ -6,6 +6,12 @@ const formatDate = (value) => new Date(value).toLocaleDateString('es-AR')
 const formatArs = (value) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(value)
 
+const ROW_CLASS =
+  'group animate-fade-up border-l-4 border-transparent transition-colors duration-200 hover:border-brand-500 hover:bg-brand-50/60 motion-reduce:animate-none'
+const TICKER_CLASS =
+  'px-5 py-3 font-semibold text-slate-900 transition-colors duration-200 group-hover:text-brand-700'
+const rowDelay = (i) => ({ animationDelay: `${i * 40}ms` })
+
 const GRUPOS = [
   { id: 'globales', label: 'Globales' },
   { id: 'bonares', label: 'Bonares' },
@@ -37,12 +43,9 @@ function TablaUsd({ bonos }) {
         </tr>
       </thead>
       <tbody className="divide-y divide-slate-100">
-        {bonos.map((b) => (
-          <tr
-            key={b.ticker}
-            className="group border-l-4 border-transparent transition-colors duration-200 hover:border-brand-500 hover:bg-brand-50/60"
-          >
-            <td className="px-5 py-3 font-semibold text-slate-900 transition-colors duration-200 group-hover:text-brand-700">{b.ticker}</td>
+        {bonos.map((b, i) => (
+          <tr key={b.ticker} className={ROW_CLASS} style={rowDelay(i)}>
+            <td className={TICKER_CLASS}>{b.ticker}</td>
             <td className="px-5 py-3 text-slate-500">{b.ley}</td>
             <td className="px-5 py-3 text-right text-slate-900">USD {b.precio.toFixed(2)}</td>
             <td className="px-5 py-3 text-right">
@@ -69,12 +72,9 @@ function TablaBoncer({ bonos }) {
         </tr>
       </thead>
       <tbody className="divide-y divide-slate-100">
-        {bonos.map((b) => (
-          <tr
-            key={b.ticker}
-            className="group border-l-4 border-transparent transition-colors duration-200 hover:border-brand-500 hover:bg-brand-50/60"
-          >
-            <td className="px-5 py-3 font-semibold text-slate-900 transition-colors duration-200 group-hover:text-brand-700">{b.ticker}</td>
+        {bonos.map((b, i) => (
+          <tr key={b.ticker} className={ROW_CLASS} style={rowDelay(i)}>
+            <td className={TICKER_CLASS}>{b.ticker}</td>
             <td className="px-5 py-3 text-slate-500">ARG</td>
             <td className="px-5 py-3 text-right text-slate-900">{formatArs(b.precioArs)}</td>
             <td className="px-5 py-3 text-right">
@@ -94,18 +94,17 @@ function TablaLetras({ letras }) {
       <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
         <tr>
           <th className="px-5 py-3 font-medium">Ticker</th>
+          <th className="px-5 py-3 font-medium">Ley</th>
           <th className="px-5 py-3 font-medium text-right">Precio</th>
           <th className="px-5 py-3 font-medium text-right">Var.</th>
           <th className="px-5 py-3 font-medium text-right">Vencimiento</th>
         </tr>
       </thead>
       <tbody className="divide-y divide-slate-100">
-        {letras.map((l) => (
-          <tr
-            key={l.ticker}
-            className="group border-l-4 border-transparent transition-colors duration-200 hover:border-brand-500 hover:bg-brand-50/60"
-          >
-            <td className="px-5 py-3 font-semibold text-slate-900 transition-colors duration-200 group-hover:text-brand-700">{l.ticker}</td>
+        {letras.map((l, i) => (
+          <tr key={l.ticker} className={ROW_CLASS} style={rowDelay(i)}>
+            <td className={TICKER_CLASS}>{l.ticker}</td>
+            <td className="px-5 py-3 text-slate-500">ARG</td>
             <td className="px-5 py-3 text-right text-slate-900">{formatArs(l.precioActual)}</td>
             <td className="px-5 py-3 text-right">
               <VarBadge value={l.variacionPorcentaje} />
@@ -124,18 +123,17 @@ function TablaDuales({ bonos }) {
       <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
         <tr>
           <th className="px-5 py-3 font-medium">Ticker</th>
+          <th className="px-5 py-3 font-medium">Ley</th>
           <th className="px-5 py-3 font-medium text-right">Precio</th>
           <th className="px-5 py-3 font-medium text-right">Var.</th>
           <th className="px-5 py-3 font-medium text-right">Vencimiento</th>
         </tr>
       </thead>
       <tbody className="divide-y divide-slate-100">
-        {bonos.map((b) => (
-          <tr
-            key={b.ticker}
-            className="group border-l-4 border-transparent transition-colors duration-200 hover:border-brand-500 hover:bg-brand-50/60"
-          >
-            <td className="px-5 py-3 font-semibold text-slate-900 transition-colors duration-200 group-hover:text-brand-700">{b.ticker}</td>
+        {bonos.map((b, i) => (
+          <tr key={b.ticker} className={ROW_CLASS} style={rowDelay(i)}>
+            <td className={TICKER_CLASS}>{b.ticker}</td>
+            <td className="px-5 py-3 text-slate-500">ARG</td>
             <td className="px-5 py-3 text-right text-slate-900">{formatArs(b.precio)}</td>
             <td className="px-5 py-3 text-right">
               <VarBadge value={b.variacionPorcentaje} />
@@ -176,11 +174,11 @@ export default function BondsUniverse({ globales, bonares, duales, boncer, letra
       </div>
 
       <div className="overflow-x-auto">
-        {grupo === 'globales' && <TablaUsd bonos={globales} />}
-        {grupo === 'bonares' && <TablaUsd bonos={bonares} />}
-        {grupo === 'boncer' && <TablaBoncer bonos={boncer} />}
-        {grupo === 'letras' && <TablaLetras letras={letras} />}
-        {grupo === 'duales' && <TablaDuales bonos={duales} />}
+        {grupo === 'globales' && <TablaUsd key="globales" bonos={globales} />}
+        {grupo === 'bonares' && <TablaUsd key="bonares" bonos={bonares} />}
+        {grupo === 'boncer' && <TablaBoncer key="boncer" bonos={boncer} />}
+        {grupo === 'letras' && <TablaLetras key="letras" letras={letras} />}
+        {grupo === 'duales' && <TablaDuales key="duales" bonos={duales} />}
       </div>
 
       {grupo === 'duales' && (
