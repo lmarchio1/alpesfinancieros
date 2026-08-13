@@ -67,7 +67,7 @@ export default function ContactForm() {
           variant="dark"
           align="center"
           eyebrow="Contacto"
-          title="Hablá con un asesor"
+          title="Hablá con nosotros"
           description="Contanos qué necesitás y te respondemos a la brevedad."
         />
 
