@@ -274,6 +274,7 @@ export default function WealthManagement() {
           </div>
 
           <div ref={procesoRef} className="relative mt-10 grid grid-cols-1 gap-8 md:grid-cols-4">
+            {/* Línea horizontal (desktop) */}
             <div
               aria-hidden="true"
               className="absolute top-7 left-0 right-0 hidden h-px bg-slate-200 md:block"
@@ -285,21 +286,36 @@ export default function WealthManagement() {
               }`}
               style={{ right: 0 }}
             />
+
+            {/* Línea vertical (mobile) */}
+            <div
+              aria-hidden="true"
+              className="absolute left-7 top-7 bottom-7 block w-px bg-slate-200 md:hidden"
+            />
+            <div
+              aria-hidden="true"
+              className={`absolute left-7 top-7 bottom-7 block w-px origin-top bg-slate-400 transition-transform duration-[1400ms] ease-out motion-reduce:transition-none md:hidden ${
+                procesoVisible ? 'scale-y-100' : 'scale-y-0'
+              }`}
+            />
+
             {PROCESO.map((paso, i) => (
               <div
                 key={paso.paso}
-                className={`relative text-center transition-all duration-700 ease-out motion-reduce:transition-none md:text-left ${
+                className={`relative flex items-start gap-4 text-left transition-all duration-700 ease-out motion-reduce:transition-none md:block ${
                   procesoVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
                 }`}
                 style={{ transitionDelay: procesoVisible ? `${i * 150}ms` : '0ms' }}
               >
                 <span
-                  className={`relative z-10 mx-auto flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold text-white shadow-lg transition-transform duration-300 ease-out hover:scale-125 md:mx-0 ${paso.color} ${paso.glow}`}
+                  className={`relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white shadow-lg transition-transform duration-300 ease-out hover:scale-125 ${paso.color} ${paso.glow}`}
                 >
                   {paso.paso}
                 </span>
-                <h4 className="mt-4 font-semibold text-slate-900">{paso.title}</h4>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{paso.description}</p>
+                <div className="md:mt-4">
+                  <h4 className="font-semibold text-slate-900">{paso.title}</h4>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{paso.description}</p>
+                </div>
               </div>
             ))}
           </div>
