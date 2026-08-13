@@ -19,7 +19,7 @@ export default function Hero() {
       <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
         <div className="max-w-2xl">
           <span className="inline-flex animate-fade-up items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-brand-200 ring-1 ring-inset ring-white/20 backdrop-blur motion-reduce:animate-none">
-            Gestión patrimonial · Cotizaciones actualizadas todos los días hábiles
+            Gestión patrimonial · Datos de mercado actualizados todos los días hábiles
           </span>
           <h1
             className="mt-6 animate-fade-up text-4xl font-bold tracking-tight text-white drop-shadow-sm motion-reduce:animate-none sm:text-5xl lg:text-6xl"
@@ -49,7 +49,7 @@ export default function Hero() {
               href="#cotizaciones"
               className="rounded-lg bg-white/10 px-5 py-3 text-sm font-semibold text-white ring-1 ring-inset ring-white/20 backdrop-blur transition-colors hover:bg-white/20"
             >
-              Ver cotizaciones
+              Ver datos de mercado
             </a>
           </div>
         </div>

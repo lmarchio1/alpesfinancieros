@@ -1,6 +1,7 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { usePolling } from '../../hooks/usePolling'
 import { fetchInflacionMensual } from '../../services/inflacionApi'
+import { fetchExpectativaInflacionREM } from '../../services/remApi'
 import { valorActualizado, factorAcumulado, inflacionInteranual } from '../../utils/inflacionMath'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
@@ -40,6 +41,13 @@ export default function InflacionTab() {
 
   const interanual = useMemo(() => (data ? inflacionInteranual(data) : null), [data])
 
+  const [rem, setRem] = useState(null)
+  useEffect(() => {
+    fetchExpectativaInflacionREM()
+      .then(setRem)
+      .catch(() => setRem(null))
+  }, [])
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -76,16 +84,29 @@ export default function InflacionTab() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {interanual !== null && (
           <Card className="p-6">
             <p className="text-sm text-slate-500">Inflación interanual</p>
-            <p className="mt-1 text-3xl font-bold text-slate-900">{interanual.toFixed(1)}%</p>
-            <p className="mt-1 text-xs text-slate-400">Acumulado de los últimos 12 meses</p>
+            <p className="mt-1 text-3xl font-bold text-slate-900">{interanual.toFixed(2)}%</p>
+            <p className="mt-1 text-xs text-slate-400">Acumulado de los últimos 12 meses (dato oficial)</p>
           </Card>
         )}
 
-        <Card className="p-6 lg:col-span-2">
+        {rem && (
+          <Card className="p-6">
+            <p className="text-sm text-slate-500">Inflación esperada (REM · BCRA)</p>
+            <p className="mt-1 text-3xl font-bold text-slate-900">{rem.proximos12MesesPct.toFixed(2)}%</p>
+            <p className="mt-1 text-xs text-slate-400">
+              Mediana proyectada para los próximos 12 meses
+              {rem.anioActual && ` · ${rem.anioActual.anio}: ${rem.anioActual.pct.toFixed(1)}%`}
+            </p>
+          </Card>
+        )}
+      </div>
+
+      <div className="mt-4">
+        <Card className="p-6">
           <h3 className="font-semibold text-slate-900">¿Cuánto vale hoy tu plata?</h3>
           <p className="mt-1 text-sm text-slate-500">
             Ingresá un monto y desde cuándo lo tenías: te decimos qué valor tiene hoy ajustado por
@@ -128,7 +149,7 @@ export default function InflacionTab() {
               <div>
                 <p className="text-xs text-slate-500">Inflación acumulada en el período</p>
                 <p className="text-2xl font-bold text-slate-900">
-                  +{resultado.inflacionAcumuladaPct.toFixed(0)}%
+                  +{resultado.inflacionAcumuladaPct.toFixed(2)}%
                 </p>
               </div>
             </div>

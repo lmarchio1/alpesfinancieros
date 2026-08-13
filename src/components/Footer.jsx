@@ -4,7 +4,7 @@ const YEAR = new Date().getFullYear()
 
 const COMPANY_LINKS = [
   { label: 'Gestión patrimonial', href: '#gestion' },
-  { label: 'Cotizaciones', href: '#cotizaciones' },
+  { label: 'Datos de Mercado', href: '#cotizaciones' },
   { label: 'Quiénes somos', href: '#inicio' },
   { label: 'Contacto', href: '#contacto' },
 ]

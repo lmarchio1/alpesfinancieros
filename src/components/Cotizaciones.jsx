@@ -47,7 +47,7 @@ export default function Cotizaciones() {
         <SectionHeading
           variant="dark"
           eyebrow="Mercado"
-          title="Cotizaciones de Mercado"
+          title="Datos de Mercado"
           description="Precio del dólar en todas sus variantes y cotizaciones de letras y bonos, actualizados en tiempo real."
         />
 

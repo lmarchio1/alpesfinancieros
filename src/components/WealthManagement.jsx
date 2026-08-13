@@ -75,7 +75,7 @@ const ITEMS = [
   {
     icon: 'trending',
     title: 'Seguimiento en tiempo real',
-    description: 'Cotizaciones y calculadora de bonos actualizadas para decidir con información al día.',
+    description: 'Datos de mercado y calculadora de bonos actualizados para decidir con información al día.',
   },
 ]
 

@@ -4,7 +4,7 @@ import Logo from './ui/Logo'
 const NAV_LINKS = [
   { href: '#inicio', label: 'Inicio' },
   { href: '#gestion', label: 'Gestión Patrimonial' },
-  { href: '#cotizaciones', label: 'Cotizaciones' },
+  { href: '#cotizaciones', label: 'Datos de Mercado' },
   { href: '#contacto', label: 'Contacto' },
 ]
 
