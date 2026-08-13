@@ -147,7 +147,7 @@ export default function WealthManagement() {
   const [activeDisciplina, setActiveDisciplina] = useState(null)
 
   return (
-    <section id="gestion" className="py-20">
+    <section id="gestion" className="py-20 shadow-[inset_0_10px_14px_-12px_rgba(0,0,0,0.35)]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           align="center"
@@ -188,7 +188,7 @@ export default function WealthManagement() {
         </div>
       </div>
 
-      <div className="relative mt-20 overflow-hidden">
+      <div className="relative mt-20 overflow-hidden shadow-[inset_0_10px_14px_-12px_rgba(0,0,0,0.5),inset_0_-10px_14px_-12px_rgba(0,0,0,0.5)]">
         <img
           src={oroMercado}
           alt=""

@@ -27,7 +27,7 @@ export default function Cotizaciones() {
   return (
     <section
       id="cotizaciones"
-      className="relative flex min-h-[600px] items-center overflow-hidden bg-[#050a06] py-20"
+      className="relative flex min-h-[600px] items-center overflow-hidden bg-[#050a06] py-20 shadow-[inset_0_10px_14px_-12px_rgba(0,0,0,0.5)]"
     >
       <img
         src={calculadoraMercado}
