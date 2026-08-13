@@ -47,7 +47,7 @@ export default function Header() {
           href="#contacto"
           className="hidden rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 lg:inline-block"
         >
-          Hablar con nosotros
+          Hablá con nosotros
         </a>
 
         <button
@@ -91,7 +91,7 @@ export default function Header() {
               onClick={() => setIsOpen(false)}
               className="rounded-lg bg-brand-600 px-4 py-2 text-center text-sm font-semibold text-white"
             >
-              Hablar con nosotros
+              Hablá con nosotros
             </a>
           </div>
         </nav>
