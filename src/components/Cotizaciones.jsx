@@ -42,10 +42,6 @@ export default function Cotizaciones() {
             'linear-gradient(180deg, rgba(4,10,6,0.88) 0%, rgba(4,10,6,0.8) 20%, rgba(4,14,8,0.3) 48%, rgba(4,14,8,0.32) 68%, rgba(4,10,6,0.85) 100%)',
         }}
       />
-      <div
-        aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white to-transparent"
-      />
 
       <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading

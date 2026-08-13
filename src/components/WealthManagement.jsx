@@ -202,14 +202,6 @@ export default function WealthManagement() {
               'linear-gradient(180deg, rgba(12,9,3,0.85) 0%, rgba(12,9,3,0.62) 30%, rgba(12,9,3,0.6) 65%, rgba(12,9,3,0.85) 100%)',
           }}
         />
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white to-transparent"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-white"
-        />
 
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">

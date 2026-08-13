@@ -16,11 +16,6 @@ export default function Hero() {
         }}
       />
 
-      <div
-        aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-white"
-      />
-
       <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
         <div className="max-w-2xl">
           <span className="inline-flex animate-fade-up items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-brand-200 ring-1 ring-inset ring-white/20 backdrop-blur motion-reduce:animate-none">
