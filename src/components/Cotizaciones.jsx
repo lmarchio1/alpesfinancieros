@@ -2,11 +2,13 @@ import { useState } from 'react'
 import SectionHeading from './ui/SectionHeading'
 import DolaresTab from './cotizaciones/DolaresTab'
 import BonosTab from './cotizaciones/BonosTab'
+import InflacionTab from './cotizaciones/InflacionTab'
 import calculadoraMercado from '../assets/calculadora-mercado.jpg'
 
 const TOGGLES = [
   { id: 'dolares', label: 'Dólares' },
   { id: 'bonos', label: 'Bonos' },
+  { id: 'inflacion', label: 'Inflación' },
 ]
 
 const TOOLKIT_TAGS = [
@@ -14,10 +16,11 @@ const TOOLKIT_TAGS = [
   'Globales, Bonares, Boncer, Letras y duales',
   'Calculadora de breakeven',
   'Riesgo país en vivo',
+  'Calculadora de inflación',
 ]
 
 export default function Cotizaciones() {
-  const [open, setOpen] = useState({ dolares: false, bonos: false })
+  const [open, setOpen] = useState({ dolares: false, bonos: false, inflacion: false })
 
   const toggle = (id) => setOpen((prev) => ({ ...prev, [id]: !prev[id] }))
 
@@ -82,7 +85,12 @@ export default function Cotizaciones() {
             <DolaresTab />
           </div>
         )}
-        {open.bonos && <BonosTab />}
+        {open.bonos && (
+          <div className="mb-10">
+            <BonosTab />
+          </div>
+        )}
+        {open.inflacion && <InflacionTab />}
       </div>
     </section>
   )
