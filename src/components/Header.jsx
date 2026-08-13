@@ -5,7 +5,6 @@ const NAV_LINKS = [
   { href: '#inicio', label: 'Inicio' },
   { href: '#gestion', label: 'Gestión Patrimonial' },
   { href: '#cotizaciones', label: 'Datos de Mercado' },
-  { href: '#contacto', label: 'Contacto' },
 ]
 
 export default function Header() {
