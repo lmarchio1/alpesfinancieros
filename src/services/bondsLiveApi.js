@@ -1,5 +1,5 @@
 import { fetchArgBonds } from './data912Api'
-import { DUALES_META, MATURITY_BY_YEAR } from '../data/bondsReference'
+import { DUALES_META, MATURITY_BY_YEAR, BONARES_NUEVOS_META } from '../data/bondsReference'
 
 // Globales y Bonares en dólar MEP (sufijo "D"): detecta automáticamente cualquier
 // ticker que matchee el prefijo de la familia y cuyo año de vencimiento esté en
@@ -59,9 +59,14 @@ export async function fetchUniversoBonos() {
   const bonds = await fetchArgBonds()
   const porSimbolo = new Map(bonds.map((b) => [b.symbol, b]))
 
+  const bonaresNuevos = mapearGrupo(BONARES_NUEVOS_META, 'D', porSimbolo)
+  const bonares = [...mapearFamiliaPorAnio(['AL', 'AE'], 'ARG', porSimbolo), ...bonaresNuevos].sort(
+    (a, b) => new Date(a.vencimiento) - new Date(b.vencimiento)
+  )
+
   return {
     globales: mapearFamiliaPorAnio(['GD'], 'NY', porSimbolo),
-    bonares: mapearFamiliaPorAnio(['AL', 'AE'], 'ARG', porSimbolo),
+    bonares,
     duales: mapearGrupo(DUALES_META, '', porSimbolo),
   }
 }

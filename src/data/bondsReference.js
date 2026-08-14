@@ -21,3 +21,13 @@ export const DUALES_META = {
   TTS26: { vencimiento: '2026-09-15' },
   TTD26: { vencimiento: '2026-12-15' },
 }
+
+// Bonares "Bonar" emitidos en 2026 (ley Arg), fuera del esquema 2020 de
+// MATURITY_BY_YEAR: pagan renta mensual/semestral y devuelven el capital
+// íntegro al vencimiento, con fechas propias que no siguen el patrón 9/ene-9/jul.
+export const BONARES_NUEVOS_META = {
+  AO27: { vencimiento: '2027-10-29', ley: 'ARG', duracionAnios: 1.1 },
+  AO28: { vencimiento: '2028-10-31', ley: 'ARG', duracionAnios: 1.9 },
+  AO29: { vencimiento: '2029-10-31', ley: 'ARG', duracionAnios: 2.7 },
+  AN29: { vencimiento: '2029-11-30', ley: 'ARG', duracionAnios: 2.8 },
+}

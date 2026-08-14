@@ -5,6 +5,7 @@ import { fetchExpectativaInflacionREM } from '../../services/remApi'
 import { valorActualizado, factorAcumulado, mesesEnRango, inflacionInteranual } from '../../utils/inflacionMath'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
+import MonthPicker from '../ui/MonthPicker'
 
 const formatArs = (value) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(value)
@@ -148,8 +149,11 @@ export default function InflacionTab() {
                 max={maxMes}
                 value={desde}
                 onChange={(e) => setDesde(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 sm:hidden"
               />
+              <div className="hidden sm:block">
+                <MonthPicker value={desde} onChange={setDesde} min={minMes} max={maxMes} />
+              </div>
             </div>
             <div>
               <label className="text-xs font-medium text-slate-500">Hasta</label>
@@ -159,8 +163,11 @@ export default function InflacionTab() {
                 max={maxMes}
                 value={hasta}
                 onChange={(e) => setHasta(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 sm:hidden"
               />
+              <div className="hidden sm:block">
+                <MonthPicker value={hasta} onChange={setHasta} min={minMes} max={maxMes} />
+              </div>
             </div>
           </div>
 
