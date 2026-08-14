@@ -152,9 +152,20 @@ export default function BondsUniverse({ globales, bonares, duales, boncer, letra
   const fuente = grupo === 'boncer' ? 'argentinadatos.com' : grupo === 'letras' ? 'data912.com' : 'data912.com'
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden border-t-4 border-[#c17a1e]">
       <div className="flex flex-wrap items-center justify-between gap-3 p-6 pb-0">
-        <h3 className="font-semibold text-slate-900">Universo de bonos</h3>
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#fbeed6] text-[#c17a1e]">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 21h18M4 10v11M20 10v11M2 10l10-6 10 6M8 10v11M16 10v11"
+              />
+            </svg>
+          </div>
+          <h3 className="font-semibold text-slate-900">Universo de bonos</h3>
+        </div>
         <Badge variant="positive">● En vivo · {fuente}</Badge>
       </div>
 

@@ -70,16 +70,27 @@ export default function DolaresTab() {
       </div>
 
       {banda && (
-        <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-1 rounded-xl bg-white/10 px-4 py-3 text-sm text-slate-200 ring-1 ring-inset ring-white/20 backdrop-blur-sm">
-          <span className="font-semibold text-white">Banda cambiaria hoy</span>
-          <span>
-            Piso <strong className="text-emerald-300">{formatArsEntero(banda.piso)}</strong>
-          </span>
-          <span>
-            Techo <strong className="text-rose-300">{formatArsEntero(banda.techo)}</strong>
-          </span>
-          <span className="text-xs text-slate-400">· BCRA, se ajusta a diario con la inflación</span>
-        </div>
+        <Card className="mb-4 border-t-4 border-brand-500 p-4">
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </div>
+              <span className="font-semibold text-slate-900">Banda cambiaria hoy</span>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500">Piso</p>
+              <p className="text-lg font-bold text-emerald-600">{formatArsEntero(banda.piso)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500">Techo</p>
+              <p className="text-lg font-bold text-rose-600">{formatArsEntero(banda.techo)}</p>
+            </div>
+            <span className="text-xs text-slate-400">BCRA · se ajusta a diario con la inflación</span>
+          </div>
+        </Card>
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
