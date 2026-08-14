@@ -32,6 +32,12 @@ export default function DolaresTab() {
 
   const mayorista = useMemo(() => data?.find((d) => d.casa === 'mayorista'), [data])
 
+  const bandaPct = useMemo(() => {
+    if (!banda || !mayorista) return null
+    const raw = ((mayorista.venta - banda.piso) / (banda.techo - banda.piso)) * 100
+    return Math.min(96, Math.max(4, raw))
+  }, [banda, mayorista])
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -70,25 +76,47 @@ export default function DolaresTab() {
       </div>
 
       {banda && (
-        <Card className="mb-4 border-t-4 border-brand-500 p-4">
-          <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+        <Card className="mb-4 overflow-hidden border-t-4 border-brand-500 p-0">
+          <div className="bg-gradient-to-br from-brand-50 via-white to-[#fbeed6]/40 p-5">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-white">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M6 21V10l6-6 6 6v11M10 21v-6h4v6" />
                 </svg>
               </div>
-              <span className="font-semibold text-slate-900">Banda cambiaria hoy</span>
+              <div>
+                <p className="font-semibold text-slate-900">Banda cambiaria hoy</p>
+                <p className="text-xs text-slate-400">BCRA · se ajusta a diario con la inflación</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-slate-500">Piso</p>
-              <p className="text-lg font-bold text-emerald-600">{formatArsEntero(banda.piso)}</p>
+
+            <div className="mt-5 grid grid-cols-2 items-end gap-4 sm:grid-cols-[1fr_auto_1fr]">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">Piso</p>
+                <p className="mt-0.5 text-xl font-bold text-emerald-600">{formatArsEntero(banda.piso)}</p>
+              </div>
+
+              <div className="order-3 col-span-2 pt-3 sm:order-none sm:col-span-1 sm:px-5 sm:pt-6">
+                <div className="relative h-2 w-full rounded-full bg-gradient-to-r from-emerald-200 via-slate-200 to-rose-200">
+                  {bandaPct !== null && (
+                    <div
+                      className="absolute top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
+                      style={{ left: `${bandaPct}%` }}
+                    >
+                      <span className="mb-1.5 whitespace-nowrap rounded-md bg-slate-900 px-1.5 py-0.5 text-[10px] font-semibold text-white shadow-sm">
+                        Mayorista {formatArsEntero(mayorista.venta)}
+                      </span>
+                      <span className="h-3.5 w-3.5 rounded-full border-2 border-white bg-brand-600 shadow" />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="text-right">
+                <p className="text-xs font-semibold uppercase tracking-wide text-rose-600">Techo</p>
+                <p className="mt-0.5 text-xl font-bold text-rose-600">{formatArsEntero(banda.techo)}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-slate-500">Techo</p>
-              <p className="text-lg font-bold text-rose-600">{formatArsEntero(banda.techo)}</p>
-            </div>
-            <span className="text-xs text-slate-400">BCRA · se ajusta a diario con la inflación</span>
           </div>
         </Card>
       )}
