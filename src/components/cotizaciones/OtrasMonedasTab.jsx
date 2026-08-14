@@ -17,8 +17,8 @@ const MONEDAS_INFO = {
   COP: { nombre: 'Peso colombiano', simbolo: 'COP', unidad: 1000, border: 'border-amber-500', iconBg: 'bg-amber-50', iconText: 'text-amber-600' },
 }
 
-const formatFechaActualizacion = (utcString) =>
-  new Date(utcString).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+const formatFecha = (fechaIso) =>
+  new Date(`${fechaIso}T00:00:00Z`).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })
 
 export default function OtrasMonedasTab() {
   const fetcher = useCallback(() => fetchOtrasMonedas(), [])
@@ -52,9 +52,9 @@ export default function OtrasMonedasTab() {
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <Badge variant="neutral">Actualización diaria · open.er-api.com</Badge>
+        <Badge variant="info">Actualización diaria</Badge>
         <div className="flex items-center gap-3 text-xs text-slate-500">
-          {data.actualizadoUtc && <span>Última actualización {formatFechaActualizacion(data.actualizadoUtc)} hs</span>}
+          {data.fecha && <span>Cotización del {formatFecha(data.fecha)}</span>}
           <button type="button" onClick={refresh} className="font-medium text-brand-600 hover:underline">
             Actualizar
           </button>
@@ -73,14 +73,22 @@ export default function OtrasMonedasTab() {
               className={`group animate-fade-up border-t-4 p-5 shadow-md shadow-slate-200/70 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-2 hover:scale-[1.015] hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)] motion-reduce:transition-none motion-reduce:animate-none ${info.border}`}
               style={{ animationDelay: `${i * 80}ms` }}
             >
-              <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${info.iconBg} ${info.iconText} text-sm font-bold`}>
-                  {info.simbolo}
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-3">
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${info.iconBg} ${info.iconText} text-sm font-bold`}>
+                    {info.simbolo}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">{info.nombre}</p>
+                    <p className="text-xs text-slate-400">Cada {etiqueta}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-slate-900">{info.nombre}</p>
-                  <p className="text-xs text-slate-400">Cada {etiqueta}</p>
-                </div>
+                {m.variacionPct !== null && (
+                  <Badge variant={m.variacionPct >= 0 ? 'positive' : 'negative'}>
+                    {m.variacionPct >= 0 ? '+' : ''}
+                    {m.variacionPct.toFixed(2)}%
+                  </Badge>
+                )}
               </div>
               <div className="mt-4 flex items-end justify-between">
                 <div>

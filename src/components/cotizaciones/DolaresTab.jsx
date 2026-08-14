@@ -97,7 +97,7 @@ export default function DolaresTab() {
               </div>
 
               <div className="order-3 col-span-2 pt-3 sm:order-none sm:col-span-1 sm:px-5 sm:pt-6">
-                <div className="relative h-2 w-full rounded-full bg-gradient-to-r from-emerald-200 via-slate-200 to-rose-200">
+                <div className="relative h-2.5 w-full rounded-full bg-gradient-to-r from-emerald-400 via-slate-300 to-rose-400 shadow-inner ring-1 ring-black/10">
                   {bandaPct !== null && (
                     <div
                       className="absolute top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"

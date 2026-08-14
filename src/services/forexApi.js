@@ -1,22 +1,42 @@
-const BASE_URL = 'https://open.er-api.com/v6/latest/USD'
+const BASE_URL = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api'
 
 const MONEDAS = ['EUR', 'GBP', 'BRL', 'CLP', 'COP']
 
-export async function fetchOtrasMonedas() {
-  const res = await fetch(BASE_URL)
+async function fetchUsdRates(fecha) {
+  const res = await fetch(`${BASE_URL}@${fecha}/v1/currencies/usd.json`)
   if (!res.ok) throw new Error('No se pudieron obtener las cotizaciones')
-  const json = await res.json()
-  if (json.result !== 'success') throw new Error('No se pudieron obtener las cotizaciones')
+  return res.json()
+}
 
-  const arsPorUsd = json.rates.ARS
+function diaAnterior(fechaIso) {
+  const d = new Date(`${fechaIso}T00:00:00Z`)
+  d.setUTCDate(d.getUTCDate() - 1)
+  return d.toISOString().slice(0, 10)
+}
+
+export async function fetchOtrasMonedas() {
+  const hoy = await fetchUsdRates('latest')
+
+  let ayer = null
+  try {
+    ayer = await fetchUsdRates(diaAnterior(hoy.date))
+  } catch {
+    ayer = null
+  }
+
+  const arsPorUsd = hoy.usd.ars
   const cotizaciones = MONEDAS.map((codigo) => {
-    const usdPorUnidad = 1 / json.rates[codigo]
+    const clave = codigo.toLowerCase()
+    const usdPorUnidad = 1 / hoy.usd[clave]
+    const usdPorUnidadAyer = ayer?.usd?.[clave] ? 1 / ayer.usd[clave] : null
+
     return {
       codigo,
       usd: usdPorUnidad,
       ars: usdPorUnidad * arsPorUsd,
+      variacionPct: usdPorUnidadAyer ? ((usdPorUnidad - usdPorUnidadAyer) / usdPorUnidadAyer) * 100 : null,
     }
   })
 
-  return { cotizaciones, actualizadoUtc: json.time_last_update_utc }
+  return { cotizaciones, fecha: hoy.date }
 }

@@ -3,6 +3,7 @@ const VARIANTS = {
   negative: 'bg-rose-50 text-rose-700 ring-rose-600/20',
   neutral: 'bg-slate-100 text-slate-600 ring-slate-500/20',
   brand: 'bg-brand-50 text-brand-700 ring-brand-600/20',
+  info: 'bg-[#fbeed6] text-[#a35f24] ring-[#c17a1e]/30',
 }
 
 export default function Badge({ variant = 'neutral', children }) {
