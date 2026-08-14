@@ -34,6 +34,7 @@ export async function fetchOtrasMonedas() {
       codigo,
       usd: usdPorUnidad,
       ars: usdPorUnidad * arsPorUsd,
+      porUsd: hoy.usd[clave],
       variacionPct: usdPorUnidadAyer ? ((usdPorUnidad - usdPorUnidadAyer) / usdPorUnidadAyer) * 100 : null,
     }
   })

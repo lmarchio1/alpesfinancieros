@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { usePolling } from '../../hooks/usePolling'
 import { fetchOtrasMonedas } from '../../services/forexApi'
 import Card from '../ui/Card'
@@ -10,11 +10,11 @@ const formatUsd = (value) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
 
 const MONEDAS_INFO = {
-  EUR: { nombre: 'Euro', simbolo: '€', unidad: 1, border: 'border-indigo-500', iconBg: 'bg-indigo-50', iconText: 'text-indigo-600' },
-  GBP: { nombre: 'Libra esterlina', simbolo: '£', unidad: 1, border: 'border-rose-500', iconBg: 'bg-rose-50', iconText: 'text-rose-600' },
-  BRL: { nombre: 'Real brasileño', simbolo: 'R$', unidad: 1, border: 'border-emerald-500', iconBg: 'bg-emerald-50', iconText: 'text-emerald-600' },
-  CLP: { nombre: 'Peso chileno', simbolo: 'CLP', unidad: 1000, border: 'border-sky-500', iconBg: 'bg-sky-50', iconText: 'text-sky-600' },
-  COP: { nombre: 'Peso colombiano', simbolo: 'COP', unidad: 1000, border: 'border-amber-500', iconBg: 'bg-amber-50', iconText: 'text-amber-600' },
+  EUR: { nombre: 'Euro', simbolo: '€', unidad: 1, decimalesInverso: 4, border: 'border-indigo-500', iconBg: 'bg-indigo-50', iconText: 'text-indigo-600' },
+  GBP: { nombre: 'Libra esterlina', simbolo: '£', unidad: 1, decimalesInverso: 4, border: 'border-rose-500', iconBg: 'bg-rose-50', iconText: 'text-rose-600' },
+  BRL: { nombre: 'Real brasileño', simbolo: 'R$', unidad: 1, decimalesInverso: 2, border: 'border-emerald-500', iconBg: 'bg-emerald-50', iconText: 'text-emerald-600' },
+  CLP: { nombre: 'Peso chileno', simbolo: 'CLP', unidad: 1000, decimalesInverso: 0, border: 'border-sky-500', iconBg: 'bg-sky-50', iconText: 'text-sky-600' },
+  COP: { nombre: 'Peso colombiano', simbolo: 'COP', unidad: 1000, decimalesInverso: 0, border: 'border-amber-500', iconBg: 'bg-amber-50', iconText: 'text-amber-600' },
 }
 
 const formatFecha = (fechaIso) =>
@@ -23,6 +23,7 @@ const formatFecha = (fechaIso) =>
 export default function OtrasMonedasTab() {
   const fetcher = useCallback(() => fetchOtrasMonedas(), [])
   const { data, error, loading, refresh } = usePolling(fetcher, { intervalMs: 60 * 60 * 1000 })
+  const [inverso, setInverso] = useState(false)
 
   if (loading) {
     return (
@@ -52,7 +53,29 @@ export default function OtrasMonedasTab() {
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <Badge variant="info">Actualización diaria</Badge>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="inline-flex rounded-lg bg-slate-100 p-1 text-sm">
+            <button
+              type="button"
+              onClick={() => setInverso(false)}
+              className={`rounded-md px-3 py-1 font-medium transition-colors ${
+                !inverso ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              Moneda → $
+            </button>
+            <button
+              type="button"
+              onClick={() => setInverso(true)}
+              className={`rounded-md px-3 py-1 font-medium transition-colors ${
+                inverso ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              US$ → Moneda
+            </button>
+          </div>
+          <Badge variant="info">Actualización diaria</Badge>
+        </div>
         <div className="flex items-center gap-3 text-xs text-slate-500">
           {data.fecha && <span>Cotización del {formatFecha(data.fecha)}</span>}
           <button type="button" onClick={refresh} className="font-medium text-brand-600 hover:underline">
@@ -80,7 +103,7 @@ export default function OtrasMonedasTab() {
                   </div>
                   <div>
                     <p className="font-semibold text-slate-900">{info.nombre}</p>
-                    <p className="text-xs text-slate-400">Cada {etiqueta}</p>
+                    <p className="text-xs text-slate-400">{inverso ? `US$ → ${m.codigo}` : `Cada ${etiqueta}`}</p>
                   </div>
                 </div>
                 {m.variacionPct !== null && (
@@ -90,16 +113,25 @@ export default function OtrasMonedasTab() {
                   </Badge>
                 )}
               </div>
-              <div className="mt-4 flex items-end justify-between">
-                <div>
-                  <p className="text-xs text-slate-500">En pesos</p>
-                  <p className="text-lg font-bold text-slate-900">{formatArs(ars)}</p>
+              {inverso ? (
+                <div className="mt-4">
+                  <p className="text-xs text-slate-500">1 dólar estadounidense equivale a</p>
+                  <p className="text-2xl font-bold text-slate-900">
+                    {m.porUsd.toFixed(info.decimalesInverso)} {info.simbolo}
+                  </p>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs text-slate-500">En dólares</p>
-                  <p className="text-lg font-bold text-slate-900">{formatUsd(usd)}</p>
+              ) : (
+                <div className="mt-4 flex items-end justify-between">
+                  <div>
+                    <p className="text-xs text-slate-500">En pesos</p>
+                    <p className="text-lg font-bold text-slate-900">{formatArs(ars)}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-slate-500">En dólares</p>
+                    <p className="text-lg font-bold text-slate-900">{formatUsd(usd)}</p>
+                  </div>
                 </div>
-              </div>
+              )}
             </Card>
           )
         })}

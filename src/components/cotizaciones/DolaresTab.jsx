@@ -38,6 +38,11 @@ export default function DolaresTab() {
     return Math.min(96, Math.max(4, raw))
   }, [banda, mayorista])
 
+  const faltaParaTecho = useMemo(() => {
+    if (!banda || !mayorista) return null
+    return ((banda.techo - mayorista.venta) / mayorista.venta) * 100
+  }, [banda, mayorista])
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -90,7 +95,7 @@ export default function DolaresTab() {
               </div>
             </div>
 
-            <div className="mt-5 grid grid-cols-2 items-end gap-4 sm:grid-cols-[1fr_auto_1fr]">
+            <div className="mt-5 grid grid-cols-2 items-end gap-4 sm:grid-cols-[auto_1fr_auto]">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">Piso</p>
                 <p className="mt-0.5 text-xl font-bold text-emerald-600">{formatArsEntero(banda.piso)}</p>
@@ -105,6 +110,11 @@ export default function DolaresTab() {
                     >
                       <span className="mb-1.5 whitespace-nowrap rounded-md bg-slate-900 px-1.5 py-0.5 text-[10px] font-semibold text-white shadow-sm">
                         Mayorista {formatArsEntero(mayorista.venta)}
+                        {faltaParaTecho !== null && (
+                          <span className="ml-1 font-normal text-slate-300">
+                            · falta {faltaParaTecho.toFixed(1)}% para el techo
+                          </span>
+                        )}
                       </span>
                       <span className="h-3.5 w-3.5 rounded-full border-2 border-white bg-brand-600 shadow" />
                     </div>
