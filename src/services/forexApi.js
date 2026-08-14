@@ -9,7 +9,7 @@ export async function fetchOtrasMonedas() {
   if (json.result !== 'success') throw new Error('No se pudieron obtener las cotizaciones')
 
   const arsPorUsd = json.rates.ARS
-  return MONEDAS.map((codigo) => {
+  const cotizaciones = MONEDAS.map((codigo) => {
     const usdPorUnidad = 1 / json.rates[codigo]
     return {
       codigo,
@@ -17,4 +17,6 @@ export async function fetchOtrasMonedas() {
       ars: usdPorUnidad * arsPorUsd,
     }
   })
+
+  return { cotizaciones, actualizadoUtc: json.time_last_update_utc }
 }

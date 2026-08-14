@@ -17,9 +17,12 @@ const MONEDAS_INFO = {
   COP: { nombre: 'Peso colombiano', simbolo: 'COP', unidad: 1000, border: 'border-amber-500', iconBg: 'bg-amber-50', iconText: 'text-amber-600' },
 }
 
+const formatFechaActualizacion = (utcString) =>
+  new Date(utcString).toLocaleString('es-AR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+
 export default function OtrasMonedasTab() {
   const fetcher = useCallback(() => fetchOtrasMonedas(), [])
-  const { data, error, loading, updatedAt, refresh } = usePolling(fetcher, { intervalMs: 60 * 60 * 1000 })
+  const { data, error, loading, refresh } = usePolling(fetcher, { intervalMs: 60 * 60 * 1000 })
 
   if (loading) {
     return (
@@ -49,9 +52,9 @@ export default function OtrasMonedasTab() {
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <Badge variant="positive">● En vivo · open.er-api.com</Badge>
+        <Badge variant="neutral">Actualización diaria · open.er-api.com</Badge>
         <div className="flex items-center gap-3 text-xs text-slate-500">
-          {updatedAt && <span>Actualizado {updatedAt.toLocaleTimeString('es-AR')}</span>}
+          {data.actualizadoUtc && <span>Última actualización {formatFechaActualizacion(data.actualizadoUtc)} hs</span>}
           <button type="button" onClick={refresh} className="font-medium text-brand-600 hover:underline">
             Actualizar
           </button>
@@ -59,7 +62,7 @@ export default function OtrasMonedasTab() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {data.map((m, i) => {
+        {data.cotizaciones.map((m, i) => {
           const info = MONEDAS_INFO[m.codigo]
           const ars = m.ars * info.unidad
           const usd = m.usd * info.unidad
@@ -95,8 +98,9 @@ export default function OtrasMonedasTab() {
       </div>
 
       <p className="mt-5 text-xs text-slate-400">
-        Valores de referencia contra el dólar estadounidense. No sustituyen la cotización de tu banco o
-        broker al momento de operar.
+        Valores de referencia contra el dólar estadounidense, actualizados una vez por día. Pueden diferir
+        del precio de mercado en tiempo real — no sustituyen la cotización de tu banco o broker al momento
+        de operar.
       </p>
     </div>
   )
