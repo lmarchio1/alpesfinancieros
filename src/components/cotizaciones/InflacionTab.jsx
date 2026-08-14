@@ -20,10 +20,8 @@ function mesActual() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
 }
 
-function haceAnios(n) {
-  const now = new Date()
-  const y = now.getFullYear() - n
-  return `${y}-${String(now.getMonth() + 1).padStart(2, '0')}`
+function eneroAnioActual() {
+  return `${new Date().getFullYear()}-01`
 }
 
 export default function InflacionTab() {
@@ -31,7 +29,7 @@ export default function InflacionTab() {
   const { data, error, loading, updatedAt, refresh } = usePolling(fetcher, { intervalMs: 30 * 60 * 1000 })
 
   const [monto, setMonto] = useState(100000)
-  const [desde, setDesde] = useState(haceAnios(5))
+  const [desde, setDesde] = useState(eneroAnioActual())
   const [hasta, setHasta] = useState(mesActual())
 
   const minMes = data?.[0]?.fecha.slice(0, 7)
@@ -100,17 +98,32 @@ export default function InflacionTab() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {interanual !== null && (
-          <Card className="p-6">
-            <p className="text-sm text-slate-500">Inflación interanual</p>
-            <p className="mt-1 text-3xl font-bold text-slate-900">{interanual.toFixed(2)}%</p>
+          <Card className="border-t-4 border-brand-500 p-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 17l6-6 4 4 8-8M15 7h6v6" />
+                </svg>
+              </div>
+              <p className="text-sm text-slate-500">Inflación interanual</p>
+            </div>
+            <p className="mt-3 text-3xl font-bold text-slate-900">{interanual.toFixed(2)}%</p>
             <p className="mt-1 text-xs text-slate-400">Acumulado de los últimos 12 meses (dato oficial)</p>
           </Card>
         )}
 
         {rem && (
-          <Card className="p-6">
-            <p className="text-sm text-slate-500">Inflación esperada (REM · BCRA)</p>
-            <p className="mt-1 text-3xl font-bold text-slate-900">{rem.proximos12MesesPct.toFixed(2)}%</p>
+          <Card className="border-t-4 border-[#c17a1e] p-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#fbeed6] text-[#c17a1e]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+                  <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 9l-2 6-6 2 2-6 6-2z" />
+                </svg>
+              </div>
+              <p className="text-sm text-slate-500">Inflación esperada (REM · BCRA)</p>
+            </div>
+            <p className="mt-3 text-3xl font-bold text-slate-900">{rem.proximos12MesesPct.toFixed(2)}%</p>
             <p className="mt-1 text-xs text-slate-400">
               Mediana proyectada para los próximos 12 meses
               {rem.anioActual && ` · ${rem.anioActual.anio}: ${rem.anioActual.pct.toFixed(1)}%`}
@@ -120,7 +133,7 @@ export default function InflacionTab() {
       </div>
 
       <div className="mt-4">
-        <Card className="p-6">
+        <Card className="!bg-[#faf9f5] p-6">
           <h3 className="font-semibold text-slate-900">¿Cuánto vale hoy tu plata?</h3>
           <p className="mt-1 text-sm text-slate-500">
             Elegí un período y te mostramos la inflación acumulada mes a mes y a cuánto equivale tu
@@ -137,7 +150,7 @@ export default function InflacionTab() {
                   min="0"
                   value={monto}
                   onChange={(e) => setMonto(Number(e.target.value))}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                 />
               </div>
             </div>
@@ -149,7 +162,7 @@ export default function InflacionTab() {
                 max={maxMes}
                 value={desde}
                 onChange={(e) => setDesde(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 sm:hidden"
+                className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 sm:hidden"
               />
               <div className="hidden sm:block">
                 <MonthPicker value={desde} onChange={setDesde} min={minMes} max={maxMes} />
@@ -163,7 +176,7 @@ export default function InflacionTab() {
                 max={maxMes}
                 value={hasta}
                 onChange={(e) => setHasta(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 sm:hidden"
+                className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 sm:hidden"
               />
               <div className="hidden sm:block">
                 <MonthPicker value={hasta} onChange={setHasta} min={minMes} max={maxMes} />
@@ -182,13 +195,13 @@ export default function InflacionTab() {
                 <strong>{formatMes(hasta)}</strong>:
               </p>
               <div className="mt-2 grid grid-cols-2 gap-4">
-                <div>
+                <div className="rounded-xl bg-brand-50 p-4">
                   <p className="text-xs text-slate-500">Equivalen a</p>
                   <p className="text-2xl font-bold text-brand-600">{formatArs(resultado.valorHoy)}</p>
                 </div>
-                <div>
+                <div className="rounded-xl bg-[#fbeed6] p-4">
                   <p className="text-xs text-slate-500">Inflación acumulada</p>
-                  <p className="text-2xl font-bold text-slate-900">
+                  <p className="text-2xl font-bold text-[#a35f24]">
                     +{resultado.inflacionAcumuladaPct.toFixed(2)}%
                   </p>
                 </div>
@@ -197,11 +210,11 @@ export default function InflacionTab() {
               {detalleMensual.length > 0 && (
                 <div className="mt-6">
                   <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Mes a mes</p>
-                  <div className="mt-2 max-h-64 overflow-y-auto rounded-lg border border-slate-200">
+                  <div className="mt-2 max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-white">
                     <table className="w-full text-left text-sm">
                       <tbody className="divide-y divide-slate-100">
                         {detalleMensual.map((d) => (
-                          <tr key={d.fecha}>
+                          <tr key={d.fecha} className="transition-colors hover:bg-brand-50/60">
                             <td className="px-4 py-2 capitalize text-slate-600">{formatMes(d.fecha.slice(0, 7))}</td>
                             <td
                               className={`px-4 py-2 text-right font-semibold ${

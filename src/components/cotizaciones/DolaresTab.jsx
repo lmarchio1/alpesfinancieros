@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { usePolling } from '../../hooks/usePolling'
 import { fetchDolares, fetchDolaresAyer } from '../../services/dolaresApi'
+import { fetchBandaCambiaria } from '../../services/bcraApi'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
 import FlashPrice from '../ui/FlashPrice'
@@ -8,6 +9,8 @@ import DayChangeBadge from '../ui/DayChangeBadge'
 
 const formatArs = (value) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(value)
+const formatArsEntero = (value) =>
+  new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(value)
 
 export default function DolaresTab() {
   const fetcher = useCallback(() => fetchDolares(), [])
@@ -19,6 +22,15 @@ export default function DolaresTab() {
       .then(setAyer)
       .catch(() => setAyer(null))
   }, [])
+
+  const [banda, setBanda] = useState(null)
+  useEffect(() => {
+    fetchBandaCambiaria()
+      .then(setBanda)
+      .catch(() => setBanda(null))
+  }, [])
+
+  const mayorista = useMemo(() => data?.find((d) => d.casa === 'mayorista'), [data])
 
   if (loading) {
     return (
@@ -57,6 +69,19 @@ export default function DolaresTab() {
         </div>
       </div>
 
+      {banda && (
+        <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-1 rounded-xl bg-white/10 px-4 py-3 text-sm text-slate-200 ring-1 ring-inset ring-white/20 backdrop-blur-sm">
+          <span className="font-semibold text-white">Banda cambiaria hoy</span>
+          <span>
+            Piso <strong className="text-emerald-300">{formatArsEntero(banda.piso)}</strong>
+          </span>
+          <span>
+            Techo <strong className="text-rose-300">{formatArsEntero(banda.techo)}</strong>
+          </span>
+          <span className="text-xs text-slate-400">· BCRA, se ajusta a diario con la inflación</span>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {data.map((d, i) => {
           const ayerVenta = ayer?.[d.casa]?.venta
@@ -64,15 +89,25 @@ export default function DolaresTab() {
           const trendBorder =
             trend > 0 ? 'border-t-emerald-500' : trend < 0 ? 'border-t-rose-500' : 'border-t-slate-200'
 
+          const brecha =
+            mayorista && d.casa !== 'mayorista' ? ((d.venta - mayorista.venta) / mayorista.venta) * 100 : null
+
           return (
             <Card
               key={d.casa}
-              className={`animate-fade-up border-t-4 p-5 shadow-md shadow-slate-200/70 transition-all duration-300 ease-out hover:-translate-y-3 hover:scale-[1.03] hover:shadow-[0_35px_70px_15px_rgba(0,0,0,0.8)] motion-reduce:transition-none motion-reduce:animate-none ${trendBorder}`}
+              className={`group animate-fade-up border-t-4 p-5 shadow-md shadow-slate-200/70 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-2 hover:scale-[1.015] hover:bg-gradient-to-br hover:from-white hover:to-brand-50/60 hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)] motion-reduce:transition-none motion-reduce:animate-none ${trendBorder}`}
               style={{ animationDelay: `${i * 80}ms` }}
             >
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-slate-900">{d.nombre}</h3>
-                <Badge variant="neutral">{d.casa}</Badge>
+                {brecha !== null ? (
+                  <Badge variant="brand">
+                    {brecha >= 0 ? '+' : ''}
+                    {brecha.toFixed(1)}% vs mayorista
+                  </Badge>
+                ) : (
+                  <Badge variant="neutral">referencia</Badge>
+                )}
               </div>
               <div className="mt-4 flex items-end justify-between">
                 <div>

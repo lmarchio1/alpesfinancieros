@@ -47,7 +47,7 @@ function TablaUsd({ bonos }) {
           <tr key={b.ticker} className={ROW_CLASS} style={rowDelay(i)}>
             <td className={TICKER_CLASS}>{b.ticker}</td>
             <td className="px-5 py-3 text-slate-500">{b.ley}</td>
-            <td className="px-5 py-3 text-right text-slate-900">USD {b.precio.toFixed(2)}</td>
+            <td className="px-5 py-3 text-right font-bold text-slate-900">USD {b.precio.toFixed(2)}</td>
             <td className="px-5 py-3 text-right">
               <VarBadge value={b.variacionPorcentaje} />
             </td>
@@ -76,7 +76,7 @@ function TablaBoncer({ bonos }) {
           <tr key={b.ticker} className={ROW_CLASS} style={rowDelay(i)}>
             <td className={TICKER_CLASS}>{b.ticker}</td>
             <td className="px-5 py-3 text-slate-500">ARG</td>
-            <td className="px-5 py-3 text-right text-slate-900">{formatArs(b.precioArs)}</td>
+            <td className="px-5 py-3 text-right font-bold text-slate-900">{formatArs(b.precioArs)}</td>
             <td className="px-5 py-3 text-right">
               <Badge variant="brand">{b.tirPorcentaje}%</Badge>
             </td>
@@ -105,7 +105,7 @@ function TablaLetras({ letras }) {
           <tr key={l.ticker} className={ROW_CLASS} style={rowDelay(i)}>
             <td className={TICKER_CLASS}>{l.ticker}</td>
             <td className="px-5 py-3 text-slate-500">ARG</td>
-            <td className="px-5 py-3 text-right text-slate-900">{formatArs(l.precioActual)}</td>
+            <td className="px-5 py-3 text-right font-bold text-slate-900">{formatArs(l.precioActual)}</td>
             <td className="px-5 py-3 text-right">
               <VarBadge value={l.variacionPorcentaje} />
             </td>
@@ -134,7 +134,7 @@ function TablaDuales({ bonos }) {
           <tr key={b.ticker} className={ROW_CLASS} style={rowDelay(i)}>
             <td className={TICKER_CLASS}>{b.ticker}</td>
             <td className="px-5 py-3 text-slate-500">ARG</td>
-            <td className="px-5 py-3 text-right text-slate-900">{formatArs(b.precio)}</td>
+            <td className="px-5 py-3 text-right font-bold text-slate-900">{formatArs(b.precio)}</td>
             <td className="px-5 py-3 text-right">
               <VarBadge value={b.variacionPorcentaje} />
             </td>
