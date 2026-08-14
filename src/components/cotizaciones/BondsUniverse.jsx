@@ -9,7 +9,7 @@ const formatArs = (value) =>
 const ROW_CLASS =
   'group animate-fade-up border-l-4 border-transparent transition-colors duration-200 hover:border-brand-500 hover:bg-brand-50/60 motion-reduce:animate-none'
 const TICKER_CLASS =
-  'px-5 py-3 font-semibold text-slate-900 transition-colors duration-200 group-hover:text-brand-700'
+  'px-5 py-3 font-semibold text-brand-600 transition-colors duration-200 group-hover:text-brand-800'
 const rowDelay = (i) => ({ animationDelay: `${i * 40}ms` })
 
 const GRUPOS = [
