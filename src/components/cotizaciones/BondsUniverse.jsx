@@ -193,11 +193,16 @@ export default function BondsUniverse({ globales, bonares, duales, boncer, letra
       </div>
 
       {grupo === 'duales' && (
-        <p className="px-6 pb-6 pt-2 text-xs text-slate-400">
+        <p className="px-6 pt-2 text-xs text-slate-400">
           Los duales pagan lo mayor entre una tasa fija y una tasa ligada a devaluación + spread;
           el precio de mercado ya refleja esa opcionalidad.
         </p>
       )}
+
+      <p className="px-6 pb-6 pt-2 text-xs text-slate-400">
+        Precios de referencia con posible demora, a título informativo. No constituyen asesoramiento
+        ni una recomendación de inversión — verificá siempre con tu banco o broker antes de operar.
+      </p>
     </Card>
   )
 }

@@ -88,9 +88,9 @@ export default function InflacionTab() {
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <Badge variant="positive">● En vivo · argentinadatos.com (INDEC)</Badge>
-        <div className="flex items-center gap-3 text-xs text-slate-500">
+        <div className="flex items-center gap-3 text-xs text-slate-300">
           {updatedAt && <span>Actualizado {updatedAt.toLocaleTimeString('es-AR')}</span>}
-          <button type="button" onClick={refresh} className="font-medium text-brand-600 hover:underline">
+          <button type="button" onClick={refresh} className="font-medium text-brand-300 hover:text-white hover:underline">
             Actualizar
           </button>
         </div>
@@ -236,7 +236,8 @@ export default function InflacionTab() {
 
           <p className="mt-5 text-xs text-slate-400">
             Cálculo con el índice de inflación mensual oficial (INDEC). Sirve para dimensionar la
-            pérdida de poder adquisitivo de la plata parada — no es una proyección a futuro.
+            pérdida de poder adquisitivo de la plata parada — no es una proyección a futuro y no
+            constituye asesoramiento ni una recomendación de inversión.
           </p>
         </Card>
       </div>

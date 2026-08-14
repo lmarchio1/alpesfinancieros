@@ -72,9 +72,9 @@ export default function DolaresTab() {
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <Badge variant="positive">● En vivo · dolarapi.com</Badge>
-        <div className="flex items-center gap-3 text-xs text-slate-500">
+        <div className="flex items-center gap-3 text-xs text-slate-300">
           {updatedAt && <span>Actualizado {updatedAt.toLocaleTimeString('es-AR')}</span>}
-          <button type="button" onClick={refresh} className="font-medium text-brand-600 hover:underline">
+          <button type="button" onClick={refresh} className="font-medium text-brand-300 hover:text-white hover:underline">
             Actualizar
           </button>
         </div>
@@ -174,6 +174,11 @@ export default function DolaresTab() {
           )
         })}
       </div>
+
+      <p className="mt-5 text-xs text-slate-300">
+        Cotizaciones de referencia, a título informativo. No constituyen asesoramiento ni una
+        recomendación de inversión — verificá siempre con tu banco o casa de cambio antes de operar.
+      </p>
     </div>
   )
 }

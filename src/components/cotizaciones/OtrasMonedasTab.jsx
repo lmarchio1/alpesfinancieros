@@ -12,9 +12,9 @@ const formatUsd = (value) =>
 const MONEDAS_INFO = {
   EUR: { nombre: 'Euro', simbolo: '€', unidad: 1, decimalesInverso: 4, border: 'border-indigo-500', iconBg: 'bg-indigo-50', iconText: 'text-indigo-600' },
   GBP: { nombre: 'Libra esterlina', simbolo: '£', unidad: 1, decimalesInverso: 4, border: 'border-rose-500', iconBg: 'bg-rose-50', iconText: 'text-rose-600' },
-  BRL: { nombre: 'Real brasileño', simbolo: 'R$', unidad: 1, decimalesInverso: 2, border: 'border-emerald-500', iconBg: 'bg-emerald-50', iconText: 'text-emerald-600' },
-  CLP: { nombre: 'Peso chileno', simbolo: 'CLP', unidad: 1000, decimalesInverso: 0, border: 'border-sky-500', iconBg: 'bg-sky-50', iconText: 'text-sky-600' },
-  COP: { nombre: 'Peso colombiano', simbolo: 'COP', unidad: 1000, decimalesInverso: 0, border: 'border-amber-500', iconBg: 'bg-amber-50', iconText: 'text-amber-600' },
+  BRL: { nombre: 'Real brasileño', simbolo: 'R$', unidad: 1, decimalesInverso: 4, border: 'border-emerald-500', iconBg: 'bg-emerald-50', iconText: 'text-emerald-600' },
+  CLP: { nombre: 'Peso chileno', simbolo: 'CLP', unidad: 1000, decimalesInverso: 2, border: 'border-sky-500', iconBg: 'bg-sky-50', iconText: 'text-sky-600' },
+  COP: { nombre: 'Peso colombiano', simbolo: 'COP', unidad: 1000, decimalesInverso: 2, border: 'border-amber-500', iconBg: 'bg-amber-50', iconText: 'text-amber-600' },
 }
 
 const formatFecha = (fechaIso) =>
@@ -76,9 +76,9 @@ export default function OtrasMonedasTab() {
           </div>
           <Badge variant="info">Actualización diaria</Badge>
         </div>
-        <div className="flex items-center gap-3 text-xs text-slate-500">
+        <div className="flex items-center gap-3 text-xs text-slate-300">
           {data.fecha && <span>Cotización del {formatFecha(data.fecha)}</span>}
-          <button type="button" onClick={refresh} className="font-medium text-brand-600 hover:underline">
+          <button type="button" onClick={refresh} className="font-medium text-brand-300 hover:text-white hover:underline">
             Actualizar
           </button>
         </div>
@@ -137,10 +137,11 @@ export default function OtrasMonedasTab() {
         })}
       </div>
 
-      <p className="mt-5 text-xs text-slate-400">
-        Valores de referencia contra el dólar estadounidense, actualizados una vez por día. Pueden diferir
-        del precio de mercado en tiempo real — no sustituyen la cotización de tu banco o broker al momento
-        de operar.
+      <p className="mt-5 text-xs text-slate-300">
+        Valores de referencia contra el dólar estadounidense, actualizados una vez por día. Son a título
+        informativo, no constituyen asesoramiento ni una recomendación de inversión, y pueden diferir del
+        precio de mercado en tiempo real — no sustituyen la cotización de tu banco o broker al momento de
+        operar.
       </p>
     </div>
   )

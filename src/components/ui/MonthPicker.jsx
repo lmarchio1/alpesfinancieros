@@ -47,7 +47,7 @@ export default function MonthPicker({ value, onChange, min, max }) {
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="mt-1 flex w-full items-center justify-between rounded-lg border border-slate-300 px-3 py-2 text-left text-sm capitalize text-slate-900 transition-colors hover:border-brand-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+        className="mt-1 flex w-full items-center justify-between rounded-lg border border-slate-300 bg-white px-3 py-2 text-left text-sm capitalize text-slate-900 transition-colors hover:border-brand-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
       >
         {formatted}
         <svg
