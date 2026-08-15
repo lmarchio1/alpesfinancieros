@@ -23,7 +23,12 @@ const MONEDAS_INFO = {
 }
 
 const formatFecha = (fechaIso) =>
-  new Date(`${fechaIso}T00:00:00Z`).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })
+  new Date(`${fechaIso}T00:00:00Z`).toLocaleDateString('es-AR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
 
 export default function OtrasMonedasTab() {
   const fetcher = useCallback(() => fetchOtrasMonedas(), [])

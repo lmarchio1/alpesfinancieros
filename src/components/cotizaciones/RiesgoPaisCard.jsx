@@ -34,7 +34,7 @@ export default function RiesgoPaisCard({ riesgoPais }) {
       <div className="flex items-center gap-3">
         <Badge variant="positive">● En vivo · argentinadatos.com</Badge>
         <span className="text-xs text-slate-400">
-          {new Date(riesgoPais.fecha).toLocaleDateString('es-AR')}
+          {new Date(riesgoPais.fecha).toLocaleDateString('es-AR', { timeZone: 'UTC' })}
         </span>
       </div>
     </Card>

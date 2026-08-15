@@ -5,7 +5,9 @@ import { retornoLetra, retornoBoncerNominal, calcularBreakeven, anualizar } from
 const formatArs = (value) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(value)
 const formatPct = (value) => `${(value * 100).toFixed(1)}%`
-const formatDate = (value) => new Date(value).toLocaleDateString('es-AR')
+// timeZone: 'UTC' evita que una fecha sin hora se corra un día para atrás al
+// mostrarla en un huso horario negativo como Argentina (UTC-3).
+const formatDate = (value) => new Date(value).toLocaleDateString('es-AR', { timeZone: 'UTC' })
 
 const DOLAR_LABELS = {
   oficial: 'Oficial',

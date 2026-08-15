@@ -2,7 +2,9 @@ import { useState } from 'react'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
 
-const formatDate = (value) => new Date(value).toLocaleDateString('es-AR')
+// timeZone: 'UTC' evita que una fecha sin hora (ej. "2029-07-09") se corra un día
+// para atrás al mostrarla en un huso horario negativo como Argentina (UTC-3).
+const formatDate = (value) => new Date(value).toLocaleDateString('es-AR', { timeZone: 'UTC' })
 const formatArs = (value) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(value)
 

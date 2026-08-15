@@ -2,8 +2,13 @@ import { fetchArgNotes } from './data912Api'
 
 const BASE_URL = 'https://api.argentinadatos.com/v1/finanzas'
 
+// La URL "pelada" de esta API la pide tantísima gente que el cache de Cloudflare
+// la sirve stale por más tiempo del que indica su propio Cache-Control: max-age=60
+// (verificado: la app se quedaba pegada un día entero en el valor de riesgo país).
+// Un parámetro único por pedido evita pegarle a esa entrada de cache compartida.
 async function getJson(path) {
-  const res = await fetch(`${BASE_URL}/${path}`)
+  const url = `${BASE_URL}/${path}?_=${Date.now()}`
+  const res = await fetch(url)
   if (!res.ok) throw new Error('No se pudo obtener la información de renta fija')
   return res.json()
 }
