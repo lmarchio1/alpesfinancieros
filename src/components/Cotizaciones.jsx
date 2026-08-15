@@ -64,7 +64,7 @@ export default function Cotizaciones() {
           ))}
         </div>
 
-        <div className="mb-8 inline-flex rounded-xl bg-slate-900/60 p-1 shadow-lg ring-1 ring-white/10 backdrop-blur-md">
+        <div className="mb-8 inline-flex rounded-xl bg-slate-900/35 p-1 shadow-md ring-1 ring-white/10 backdrop-blur-md">
           {TOGGLES.map((t) => (
             <button
               key={t.id}
