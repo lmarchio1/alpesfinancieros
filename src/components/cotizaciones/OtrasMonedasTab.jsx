@@ -15,11 +15,11 @@ const formatUsd = (value, decimales = 2) =>
   }).format(value)
 
 const MONEDAS_INFO = {
-  EUR: { nombre: 'Euro', simbolo: '€', unidad: 1, decimalesUsd: 4, decimalesInverso: 4, border: 'border-indigo-500', iconBg: 'bg-indigo-50', iconText: 'text-indigo-600' },
-  GBP: { nombre: 'Libra esterlina', simbolo: '£', unidad: 1, decimalesUsd: 4, decimalesInverso: 4, border: 'border-rose-500', iconBg: 'bg-rose-50', iconText: 'text-rose-600' },
-  BRL: { nombre: 'Real brasileño', simbolo: 'R$', unidad: 1, decimalesUsd: 4, decimalesInverso: 4, border: 'border-emerald-500', iconBg: 'bg-emerald-50', iconText: 'text-emerald-600' },
-  CLP: { nombre: 'Peso chileno', simbolo: 'CLP', unidad: 1000, decimalesUsd: 2, decimalesInverso: 0, border: 'border-sky-500', iconBg: 'bg-sky-50', iconText: 'text-sky-600' },
-  COP: { nombre: 'Peso colombiano', simbolo: 'COP', unidad: 1000, decimalesUsd: 2, decimalesInverso: 0, border: 'border-amber-500', iconBg: 'bg-amber-50', iconText: 'text-amber-600' },
+  EUR: { nombre: 'Euro', simbolo: '€', unidad: 1, decimalesUsd: 4, decimalesInverso: 4, border: 'border-indigo-500', icon: 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white' },
+  GBP: { nombre: 'Libra esterlina', simbolo: '£', unidad: 1, decimalesUsd: 4, decimalesInverso: 4, border: 'border-rose-500', icon: 'bg-rose-50 text-rose-600 group-hover:bg-rose-600 group-hover:text-white' },
+  BRL: { nombre: 'Real brasileño', simbolo: 'R$', unidad: 1, decimalesUsd: 4, decimalesInverso: 4, border: 'border-emerald-500', icon: 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white' },
+  CLP: { nombre: 'Peso chileno', simbolo: 'CLP', unidad: 1000, decimalesUsd: 2, decimalesInverso: 0, border: 'border-sky-500', icon: 'bg-sky-50 text-sky-600 group-hover:bg-sky-600 group-hover:text-white' },
+  COP: { nombre: 'Peso colombiano', simbolo: 'COP', unidad: 1000, decimalesUsd: 2, decimalesInverso: 0, border: 'border-amber-500', icon: 'bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white' },
 }
 
 const formatFecha = (fechaIso) =>
@@ -103,7 +103,7 @@ export default function OtrasMonedasTab() {
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-3">
-                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${info.iconBg} ${info.iconText} text-sm font-bold`}>
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-sm font-bold transition-all duration-300 ease-out group-hover:scale-110 ${info.icon}`}>
                     {info.simbolo}
                   </div>
                   <div>

@@ -12,6 +12,37 @@ const formatArs = (value) =>
 const formatArsEntero = (value) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(value)
 
+const CASA_ICON = {
+  oficial: {
+    color: 'bg-brand-50 text-brand-600 group-hover:bg-brand-600 group-hover:text-white',
+    path: 'M3 21h18M4 10h16M4 10l8-6 8 6M6 10v9M10 10v9M14 10v9M18 10v9',
+  },
+  blue: {
+    color: 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white',
+    path: 'M3 6h18v12H3zM7 6v12M17 6v12M12 9a3 3 0 100 6 3 3 0 000-6z',
+  },
+  bolsa: {
+    color: 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white',
+    path: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
+  },
+  contadoconliqui: {
+    color: 'bg-sky-50 text-sky-600 group-hover:bg-sky-600 group-hover:text-white',
+    path: 'M12 3a9 9 0 100 18 9 9 0 000-18zM3 12h18M12 3c2.2 2.4 3.5 5.5 3.5 9s-1.3 6.6-3.5 9c-2.2-2.4-3.5-5.5-3.5-9s1.3-6.6 3.5-9z',
+  },
+  mayorista: {
+    color: 'bg-slate-100 text-slate-600 group-hover:bg-slate-600 group-hover:text-white',
+    path: 'M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7M12 11v10',
+  },
+  cripto: {
+    color: 'bg-violet-50 text-violet-600 group-hover:bg-violet-600 group-hover:text-white',
+    path: 'M12 2l8 4.5v9L12 20l-8-4.5v-9L12 2zM9.5 10h5M12 8v8',
+  },
+  tarjeta: {
+    color: 'bg-rose-50 text-rose-600 group-hover:bg-rose-600 group-hover:text-white',
+    path: 'M3 6h18v12H3zM3 10h18M7 15h4',
+  },
+}
+
 export default function DolaresTab() {
   const fetcher = useCallback(() => fetchDolares(), [])
   const { data, error, loading, updatedAt, refresh } = usePolling(fetcher, { intervalMs: 60000 })
@@ -148,7 +179,18 @@ export default function DolaresTab() {
               style={{ animationDelay: `${i * 80}ms` }}
             >
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-slate-900">{d.nombre}</h3>
+                <div className="flex items-center gap-3">
+                  {CASA_ICON[d.casa] && (
+                    <div
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-all duration-300 ease-out group-hover:scale-110 ${CASA_ICON[d.casa].color}`}
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d={CASA_ICON[d.casa].path} />
+                      </svg>
+                    </div>
+                  )}
+                  <h3 className="font-semibold text-slate-900">{d.nombre}</h3>
+                </div>
                 {brecha !== null ? (
                   <Badge variant="brand">
                     {brecha >= 0 ? '+' : ''}

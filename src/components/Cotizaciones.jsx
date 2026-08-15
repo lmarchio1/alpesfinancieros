@@ -22,9 +22,9 @@ const TOOLKIT_TAGS = [
 ]
 
 export default function Cotizaciones() {
-  const [open, setOpen] = useState({ dolares: false, bonos: false, inflacion: false, monedas: false })
+  const [abierto, setAbierto] = useState(null)
 
-  const toggle = (id) => setOpen((prev) => ({ ...prev, [id]: !prev[id] }))
+  const toggle = (id) => setAbierto((prev) => (prev === id ? null : id))
 
   return (
     <section
@@ -70,9 +70,9 @@ export default function Cotizaciones() {
               key={t.id}
               type="button"
               onClick={() => toggle(t.id)}
-              aria-expanded={open[t.id]}
+              aria-expanded={abierto === t.id}
               className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
-                open[t.id]
+                abierto === t.id
                   ? 'bg-brand-600 text-white shadow-sm'
                   : 'text-slate-200 hover:text-white'
               }`}
@@ -82,22 +82,22 @@ export default function Cotizaciones() {
           ))}
         </div>
 
-        {open.dolares && (
+        {abierto === 'dolares' && (
           <div className="mb-10">
             <DolaresTab />
           </div>
         )}
-        {open.bonos && (
+        {abierto === 'bonos' && (
           <div className="mb-10">
             <BonosTab />
           </div>
         )}
-        {open.inflacion && (
+        {abierto === 'inflacion' && (
           <div className="mb-10">
             <InflacionTab />
           </div>
         )}
-        {open.monedas && <OtrasMonedasTab />}
+        {abierto === 'monedas' && <OtrasMonedasTab />}
       </div>
     </section>
   )

@@ -41,18 +41,18 @@ export default function BonosTab() {
   return (
     <div className="space-y-6">
       <RiesgoPaisCard riesgoPais={rentaFija.data.riesgoPais} />
-      <BreakevenCalculator letras={rentaFija.data.letras} bonos={rentaFija.data.bonos} dolares={dolares.data} />
-      <RiesgoPaisSensitivity
-        riesgoPais={rentaFija.data.riesgoPais}
-        globales={universo.data.globales}
-        bonares={universo.data.bonares}
-      />
       <BondsUniverse
         globales={universo.data.globales}
         bonares={universo.data.bonares}
         duales={universo.data.duales}
         boncer={rentaFija.data.bonos}
         letras={rentaFija.data.letras}
+      />
+      <BreakevenCalculator letras={rentaFija.data.letras} bonos={rentaFija.data.bonos} dolares={dolares.data} />
+      <RiesgoPaisSensitivity
+        riesgoPais={rentaFija.data.riesgoPais}
+        globales={universo.data.globales}
+        bonares={universo.data.bonares}
       />
     </div>
   )
