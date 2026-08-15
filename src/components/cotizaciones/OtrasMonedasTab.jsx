@@ -6,8 +6,13 @@ import Badge from '../ui/Badge'
 
 const formatArs = (value) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(value)
-const formatUsd = (value) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
+const formatUsd = (value, decimales = 2) =>
+  new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: decimales,
+    maximumFractionDigits: decimales,
+  }).format(value)
 
 const MONEDAS_INFO = {
   EUR: { nombre: 'Euro', simbolo: '€', unidad: 1, decimalesInverso: 4, border: 'border-indigo-500', iconBg: 'bg-indigo-50', iconText: 'text-indigo-600' },
@@ -76,9 +81,9 @@ export default function OtrasMonedasTab() {
           </div>
           <Badge variant="info">Actualización diaria</Badge>
         </div>
-        <div className="flex items-center gap-3 text-xs text-slate-300">
+        <div className="flex items-center gap-3 rounded-full bg-slate-900/60 px-3 py-1.5 text-xs text-slate-200 shadow-sm backdrop-blur-sm">
           {data.fecha && <span>Cotización del {formatFecha(data.fecha)}</span>}
-          <button type="button" onClick={refresh} className="font-medium text-brand-300 hover:text-white hover:underline">
+          <button type="button" onClick={refresh} className="font-semibold text-brand-300 hover:text-white hover:underline">
             Actualizar
           </button>
         </div>
@@ -128,7 +133,7 @@ export default function OtrasMonedasTab() {
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-slate-500">En dólares</p>
-                    <p className="text-lg font-bold text-slate-900">{formatUsd(usd)}</p>
+                    <p className="text-lg font-bold text-slate-900">{formatUsd(usd, info.decimalesInverso)}</p>
                   </div>
                 </div>
               )}
