@@ -1,3 +1,7 @@
+// La URL "@latest" del CDN tiene cache-control de 7 días (max-age=604800): el
+// navegador la sirve stale durante toda esa ventana aunque el contenido cambie
+// a diario. Pedimos la fecha exacta en la URL (cambia todos los días, rompe el
+// cache) y si el día de hoy todavía no está publicado, caemos a ayer.
 const BASE_URL = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api'
 
 const MONEDAS = ['EUR', 'GBP', 'BRL', 'CLP', 'COP']
@@ -8,6 +12,10 @@ async function fetchUsdRates(fecha) {
   return res.json()
 }
 
+function fechaArgentinaHoy() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
+}
+
 function diaAnterior(fechaIso) {
   const d = new Date(`${fechaIso}T00:00:00Z`)
   d.setUTCDate(d.getUTCDate() - 1)
@@ -15,7 +23,13 @@ function diaAnterior(fechaIso) {
 }
 
 export async function fetchOtrasMonedas() {
-  const hoy = await fetchUsdRates('latest')
+  const fechaHoy = fechaArgentinaHoy()
+  let hoy
+  try {
+    hoy = await fetchUsdRates(fechaHoy)
+  } catch {
+    hoy = await fetchUsdRates(diaAnterior(fechaHoy))
+  }
 
   let ayer = null
   try {
