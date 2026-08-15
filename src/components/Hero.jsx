@@ -1,4 +1,4 @@
-import heroMountains from '../assets/hero-mountains.jpg'
+import heroMountains from '../assets/hero-mountains.webp'
 
 export default function Hero() {
   return (
