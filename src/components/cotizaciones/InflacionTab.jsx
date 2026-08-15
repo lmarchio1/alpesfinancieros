@@ -28,7 +28,8 @@ export default function InflacionTab() {
   const fetcher = useCallback(() => fetchInflacionMensual(), [])
   const { data, error, loading, updatedAt, refresh } = usePolling(fetcher, { intervalMs: 30 * 60 * 1000 })
 
-  const [monto, setMonto] = useState(100000)
+  const [monto, setMonto] = useState('100000')
+  const montoNumerico = monto === '' ? 0 : Number(monto)
   const [desde, setDesde] = useState(eneroAnioActual())
   const [hasta, setHasta] = useState(mesActual())
 
@@ -41,10 +42,10 @@ export default function InflacionTab() {
     if (!rangoValido) return null
     const factor = factorAcumulado(data, desde, hasta)
     return {
-      valorHoy: valorActualizado(data, monto, desde, hasta),
+      valorHoy: valorActualizado(data, montoNumerico, desde, hasta),
       inflacionAcumuladaPct: (factor - 1) * 100,
     }
-  }, [data, monto, desde, hasta, rangoValido])
+  }, [data, montoNumerico, desde, hasta, rangoValido])
 
   const detalleMensual = useMemo(() => {
     if (!rangoValido) return []
@@ -149,7 +150,7 @@ export default function InflacionTab() {
                   type="number"
                   min="0"
                   value={monto}
-                  onChange={(e) => setMonto(Number(e.target.value))}
+                  onChange={(e) => setMonto(e.target.value)}
                   className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                 />
               </div>
