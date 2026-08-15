@@ -64,17 +64,17 @@ export default function Cotizaciones() {
           ))}
         </div>
 
-        <div className="mb-8 inline-flex rounded-xl bg-white/10 p-1 shadow-sm ring-1 ring-white/20 backdrop-blur-sm">
+        <div className="mb-8 inline-flex rounded-xl bg-slate-900/60 p-1 shadow-lg ring-1 ring-white/10 backdrop-blur-md">
           {TOGGLES.map((t) => (
             <button
               key={t.id}
               type="button"
               onClick={() => toggle(t.id)}
               aria-expanded={abierto === t.id}
-              className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors [text-shadow:0_1px_2px_rgba(0,0,0,0.4)] ${
                 abierto === t.id
                   ? 'bg-brand-600 text-white shadow-sm'
-                  : 'text-slate-200 hover:text-white'
+                  : 'text-slate-100 hover:text-white'
               }`}
             >
               {t.label}
