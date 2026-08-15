@@ -13,8 +13,12 @@ async function fetchValorDelDia(idVariable, fecha) {
   return json.results?.[0]?.detalle?.[0]?.valor ?? null
 }
 
+function fechaArgentinaHoy() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
+}
+
 export async function fetchBandaCambiaria() {
-  const fecha = new Date().toISOString().slice(0, 10)
+  const fecha = fechaArgentinaHoy()
   const [piso, techo] = await Promise.all([
     fetchValorDelDia(ID_PISO, fecha),
     fetchValorDelDia(ID_TECHO, fecha),

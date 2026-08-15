@@ -15,11 +15,11 @@ const formatUsd = (value, decimales = 2) =>
   }).format(value)
 
 const MONEDAS_INFO = {
-  EUR: { nombre: 'Euro', simbolo: '€', unidad: 1, decimalesInverso: 4, border: 'border-indigo-500', iconBg: 'bg-indigo-50', iconText: 'text-indigo-600' },
-  GBP: { nombre: 'Libra esterlina', simbolo: '£', unidad: 1, decimalesInverso: 4, border: 'border-rose-500', iconBg: 'bg-rose-50', iconText: 'text-rose-600' },
-  BRL: { nombre: 'Real brasileño', simbolo: 'R$', unidad: 1, decimalesInverso: 4, border: 'border-emerald-500', iconBg: 'bg-emerald-50', iconText: 'text-emerald-600' },
-  CLP: { nombre: 'Peso chileno', simbolo: 'CLP', unidad: 1000, decimalesInverso: 2, border: 'border-sky-500', iconBg: 'bg-sky-50', iconText: 'text-sky-600' },
-  COP: { nombre: 'Peso colombiano', simbolo: 'COP', unidad: 1000, decimalesInverso: 2, border: 'border-amber-500', iconBg: 'bg-amber-50', iconText: 'text-amber-600' },
+  EUR: { nombre: 'Euro', simbolo: '€', unidad: 1, decimalesUsd: 4, decimalesInverso: 4, border: 'border-indigo-500', iconBg: 'bg-indigo-50', iconText: 'text-indigo-600' },
+  GBP: { nombre: 'Libra esterlina', simbolo: '£', unidad: 1, decimalesUsd: 4, decimalesInverso: 4, border: 'border-rose-500', iconBg: 'bg-rose-50', iconText: 'text-rose-600' },
+  BRL: { nombre: 'Real brasileño', simbolo: 'R$', unidad: 1, decimalesUsd: 4, decimalesInverso: 4, border: 'border-emerald-500', iconBg: 'bg-emerald-50', iconText: 'text-emerald-600' },
+  CLP: { nombre: 'Peso chileno', simbolo: 'CLP', unidad: 1000, decimalesUsd: 2, decimalesInverso: 0, border: 'border-sky-500', iconBg: 'bg-sky-50', iconText: 'text-sky-600' },
+  COP: { nombre: 'Peso colombiano', simbolo: 'COP', unidad: 1000, decimalesUsd: 2, decimalesInverso: 0, border: 'border-amber-500', iconBg: 'bg-amber-50', iconText: 'text-amber-600' },
 }
 
 const formatFecha = (fechaIso) =>
@@ -133,7 +133,7 @@ export default function OtrasMonedasTab() {
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-slate-500">En dólares</p>
-                    <p className="text-lg font-bold text-slate-900">{formatUsd(usd, info.decimalesInverso)}</p>
+                    <p className="text-lg font-bold text-slate-900">{formatUsd(usd, info.decimalesUsd)}</p>
                   </div>
                 </div>
               )}

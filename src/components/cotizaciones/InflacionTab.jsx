@@ -88,9 +88,9 @@ export default function InflacionTab() {
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <Badge variant="positive">● En vivo · argentinadatos.com (INDEC)</Badge>
-        <div className="flex items-center gap-3 text-xs text-slate-300">
+        <div className="flex items-center gap-3 rounded-full bg-slate-900/60 px-3 py-1.5 text-xs text-slate-200 shadow-sm backdrop-blur-sm">
           {updatedAt && <span>Actualizado {updatedAt.toLocaleTimeString('es-AR')}</span>}
-          <button type="button" onClick={refresh} className="font-medium text-brand-300 hover:text-white hover:underline">
+          <button type="button" onClick={refresh} className="font-semibold text-brand-300 hover:text-white hover:underline">
             Actualizar
           </button>
         </div>
