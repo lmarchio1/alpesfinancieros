@@ -4,7 +4,7 @@ import DolaresTab from './cotizaciones/DolaresTab'
 import BonosTab from './cotizaciones/BonosTab'
 import InflacionTab from './cotizaciones/InflacionTab'
 import OtrasMonedasTab from './cotizaciones/OtrasMonedasTab'
-import calculadoraMercado from '../assets/calculadora-mercado.jpg'
+import calculadoraMercado from '../assets/calculadora-mercado.webp'
 
 const TOGGLES = [
   { id: 'dolares', label: 'Dólares' },
