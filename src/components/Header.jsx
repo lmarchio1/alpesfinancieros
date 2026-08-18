@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
 import Logo from './ui/Logo'
+import LinkedInIcon from './ui/LinkedInIcon'
 
 const NAV_LINKS = [
   { href: '#inicio', label: 'Inicio' },
   { href: '#gestion', label: 'Gestión Patrimonial' },
   { href: '#cotizaciones', label: 'Datos de Mercado' },
 ]
+
+const LINKEDIN_URL = 'https://www.linkedin.com/company/alpes-estados-financieros/'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -42,12 +45,23 @@ export default function Header() {
           ))}
         </nav>
 
-        <a
-          href="#contacto"
-          className="hidden rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 lg:inline-block"
-        >
-          Hablá con nosotros
-        </a>
+        <div className="hidden items-center gap-4 lg:flex">
+          <a
+            href={LINKEDIN_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Alpes Estados Financieros en LinkedIn"
+            className="text-slate-500 transition-colors hover:text-brand-600"
+          >
+            <LinkedInIcon className="h-5 w-5" />
+          </a>
+          <a
+            href="#contacto"
+            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700"
+          >
+            Hablá con nosotros
+          </a>
+        </div>
 
         <button
           type="button"
@@ -91,6 +105,15 @@ export default function Header() {
               className="rounded-lg bg-brand-600 px-4 py-2 text-center text-sm font-semibold text-white"
             >
               Hablá con nosotros
+            </a>
+            <a
+              href={LINKEDIN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm font-medium text-slate-700"
+            >
+              <LinkedInIcon className="h-5 w-5" />
+              LinkedIn
             </a>
           </div>
         </nav>

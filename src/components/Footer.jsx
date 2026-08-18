@@ -1,6 +1,8 @@
 import Logo from './ui/Logo'
+import LinkedInIcon from './ui/LinkedInIcon'
 
 const YEAR = new Date().getFullYear()
+const LINKEDIN_URL = 'https://www.linkedin.com/company/alpes-estados-financieros/'
 
 const COMPANY_LINKS = [
   { label: 'Gestión patrimonial', href: '#gestion' },
@@ -38,10 +40,19 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-slate-800 pt-8">
+        <div className="mt-12 flex flex-col items-center gap-4 border-t border-slate-800 pt-8 sm:flex-row sm:justify-between">
           <p className="text-xs text-slate-500">
             © {YEAR} Alpes Estados Financieros. Todos los derechos reservados.
           </p>
+          <a
+            href={LINKEDIN_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Alpes Estados Financieros en LinkedIn"
+            className="text-slate-400 transition-colors hover:text-white"
+          >
+            <LinkedInIcon className="h-5 w-5" />
+          </a>
         </div>
       </div>
     </footer>
