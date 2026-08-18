@@ -50,7 +50,7 @@ export default function Cotizaciones() {
           variant="dark"
           eyebrow="Mercado"
           title="Datos de Mercado"
-          description="Precio del dólar en todas sus variantes y cotizaciones de letras y bonos, actualizados en tiempo real."
+          description="Precio del dólar en todas sus variantes y cotizaciones de letras y bonos, actualizados todos los días hábiles."
         />
 
         <div className="mb-8 flex flex-wrap gap-3">
