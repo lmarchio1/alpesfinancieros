@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { usePolling } from '../../hooks/usePolling'
 import { fetchInflacionMensual } from '../../services/inflacionApi'
 import { fetchExpectativaInflacionREM } from '../../services/remApi'
+import { fetchTasaPlazoFijo30Dias } from '../../services/bcraApi'
 import { valorActualizado, factorAcumulado, mesesEnRango, inflacionInteranual } from '../../utils/inflacionMath'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
@@ -61,6 +62,13 @@ export default function InflacionTab() {
       .catch(() => setRem(null))
   }, [])
 
+  const [plazoFijo, setPlazoFijo] = useState(null)
+  useEffect(() => {
+    fetchTasaPlazoFijo30Dias()
+      .then(setPlazoFijo)
+      .catch(() => setPlazoFijo(null))
+  }, [])
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -97,7 +105,7 @@ export default function InflacionTab() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {interanual !== null && (
           <Card className="group border-t-4 border-brand-500 p-6 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70">
             <div className="flex items-center gap-3">
@@ -128,6 +136,24 @@ export default function InflacionTab() {
             <p className="mt-1 text-xs text-slate-400">
               Mediana proyectada para los próximos 12 meses
               {rem.anioActual && ` · ${rem.anioActual.anio}: ${rem.anioActual.pct.toFixed(1)}%`}
+            </p>
+          </Card>
+        )}
+
+        {plazoFijo && (
+          <Card className="group border-t-4 border-emerald-500 p-6 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v5l3 3M12 3a9 9 0 100 18 9 9 0 000-18z" />
+                </svg>
+              </div>
+              <p className="text-sm text-slate-500">Plazo fijo a 30 días (BCRA)</p>
+            </div>
+            <p className="mt-3 text-3xl font-bold text-slate-900">{plazoFijo.valor.toFixed(2)}%</p>
+            <p className="mt-1 text-xs text-slate-400">
+              Tasa nominal anual que pagan los bancos por un plazo fijo a 30 días — compará
+              contra la inflación esperada para ver si conviene ahorrar en pesos.
             </p>
           </Card>
         )}

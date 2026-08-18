@@ -5,6 +5,7 @@ import { fetchRentaFija } from '../../services/rentaFijaApi'
 import { fetchUniversoBonos } from '../../services/bondsLiveApi'
 import Card from '../ui/Card'
 import RiesgoPaisCard from './RiesgoPaisCard'
+import TasasReferenciaCard from './TasasReferenciaCard'
 import BreakevenCalculator from './BreakevenCalculator'
 import RiesgoPaisSensitivity from './RiesgoPaisSensitivity'
 import BondsUniverse from './BondsUniverse'
@@ -41,6 +42,7 @@ export default function BonosTab() {
   return (
     <div className="space-y-6">
       <RiesgoPaisCard riesgoPais={rentaFija.data.riesgoPais} />
+      <TasasReferenciaCard />
       <BondsUniverse
         globales={universo.data.globales}
         bonares={universo.data.bonares}
