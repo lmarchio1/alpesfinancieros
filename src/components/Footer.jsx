@@ -16,7 +16,7 @@ export default function Footer() {
     <footer className="border-t border-slate-200 bg-slate-950 text-slate-300">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 items-center gap-10 sm:grid-cols-3">
-          <div className="sm:col-span-2">
+          <div>
             <Logo
               variant="light"
               iconClassName="h-16 w-auto sm:h-20"
@@ -24,17 +24,6 @@ export default function Footer() {
               taglineClassName="text-xs sm:text-sm"
               gap="gap-4"
             />
-            <a
-              href={LINKEDIN_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-6 inline-flex items-center gap-3 rounded-full bg-white/10 py-2 pl-2 pr-5 text-sm font-semibold text-white ring-1 ring-white/20 transition-colors hover:bg-white/20"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0A66C2] text-white">
-                <LinkedInIcon className="h-5 w-5" />
-              </span>
-              Seguinos en LinkedIn
-            </a>
           </div>
 
           <div>
@@ -48,6 +37,21 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-white">Seguinos</h3>
+            <a
+              href={LINKEDIN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-center gap-3 rounded-full bg-white/10 py-2 pl-2 pr-5 text-sm font-semibold text-white ring-1 ring-white/20 transition-colors hover:bg-white/20"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0A66C2] text-white">
+                <LinkedInIcon className="h-5 w-5" />
+              </span>
+              LinkedIn
+            </a>
           </div>
         </div>
 
