@@ -24,6 +24,17 @@ export default function Footer() {
               taglineClassName="text-xs sm:text-sm"
               gap="gap-4"
             />
+            <a
+              href={LINKEDIN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 inline-flex items-center gap-3 rounded-full bg-white/10 py-2 pl-2 pr-5 text-sm font-semibold text-white ring-1 ring-white/20 transition-colors hover:bg-white/20"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0A66C2] text-white">
+                <LinkedInIcon className="h-5 w-5" />
+              </span>
+              Seguinos en LinkedIn
+            </a>
           </div>
 
           <div>
@@ -40,19 +51,10 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center gap-4 border-t border-slate-800 pt-8 sm:flex-row sm:justify-between">
+        <div className="mt-12 border-t border-slate-800 pt-8">
           <p className="text-xs text-slate-500">
             © {YEAR} Alpes Estados Financieros. Todos los derechos reservados.
           </p>
-          <a
-            href={LINKEDIN_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Alpes Estados Financieros en LinkedIn"
-            className="text-slate-400 transition-colors hover:text-white"
-          >
-            <LinkedInIcon className="h-5 w-5" />
-          </a>
         </div>
       </div>
     </footer>
