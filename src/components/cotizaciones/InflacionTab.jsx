@@ -183,31 +183,11 @@ export default function InflacionTab() {
             </div>
             <div>
               <label className="text-xs font-medium text-slate-500">Desde</label>
-              <input
-                type="month"
-                min={minMes}
-                max={maxMes}
-                value={desde}
-                onChange={(e) => setDesde(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 sm:hidden"
-              />
-              <div className="hidden sm:block">
-                <MonthPicker value={desde} onChange={setDesde} min={minMes} max={maxMes} />
-              </div>
+              <MonthPicker value={desde} onChange={setDesde} min={minMes} max={maxMes} />
             </div>
             <div>
               <label className="text-xs font-medium text-slate-500">Hasta</label>
-              <input
-                type="month"
-                min={minMes}
-                max={maxMes}
-                value={hasta}
-                onChange={(e) => setHasta(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 sm:hidden"
-              />
-              <div className="hidden sm:block">
-                <MonthPicker value={hasta} onChange={setHasta} min={minMes} max={maxMes} />
-              </div>
+              <MonthPicker value={hasta} onChange={setHasta} min={minMes} max={maxMes} />
             </div>
           </div>
 
@@ -221,14 +201,16 @@ export default function InflacionTab() {
                 Inflación acumulada de <strong>{formatMes(desde)}</strong> a{' '}
                 <strong>{formatMes(hasta)}</strong>:
               </p>
-              <div className="mt-2 grid grid-cols-2 gap-4">
-                <div className="rounded-xl bg-brand-50 p-4">
+              <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="min-w-0 rounded-xl bg-brand-50 p-4">
                   <p className="text-xs text-slate-500">Equivalen a</p>
-                  <p className="text-2xl font-bold text-brand-600">{formatArs(resultado.valorHoy)}</p>
+                  <p className="break-words text-xl font-bold text-brand-600 sm:text-2xl">
+                    {formatArs(resultado.valorHoy)}
+                  </p>
                 </div>
-                <div className="rounded-xl bg-[#fbeed6] p-4">
+                <div className="min-w-0 rounded-xl bg-[#fbeed6] p-4">
                   <p className="text-xs text-slate-500">Inflación acumulada</p>
-                  <p className="text-2xl font-bold text-[#a35f24]">
+                  <p className="break-words text-xl font-bold text-[#a35f24] sm:text-2xl">
                     +{resultado.inflacionAcumuladaPct.toFixed(2)}%
                   </p>
                 </div>
