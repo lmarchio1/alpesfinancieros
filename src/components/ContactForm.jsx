@@ -6,9 +6,16 @@ import toroWallStreet from '../assets/toro-wallstreet.jpg'
 
 const CONTACT_ENDPOINT = import.meta.env.VITE_CONTACT_ENDPOINT
 
-const DIRECCION = 'Rivadavia 1157, Piso 6 C, C1033AAB CABA, Argentina'
-const MAPS_EMBED_URL = 'https://www.google.com/maps?q=' + encodeURIComponent(DIRECCION) + '&output=embed'
-const MAPS_URL = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(DIRECCION)
+const DIRECCION = 'Av. Rivadavia 1157, Piso 6 C, C1033AAB CABA, Argentina'
+// La búsqueda por texto de Google confunde esta dirección con la calle Salta
+// (a varias cuadras) o con otras "Rivadavia" del país (Pergamino, San Isidro).
+// Coordenadas verificadas contra el código postal real (C1033AAB, San Nicolás,
+// CABA) vía geocodificación cruzada, para que el pin no dependa de que el
+// buscador de texto adivine bien.
+const MAPS_LAT = -34.6084703
+const MAPS_LNG = -58.3828441
+const MAPS_EMBED_URL = `https://www.google.com/maps?q=${MAPS_LAT},${MAPS_LNG}&z=17&output=embed`
+const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${MAPS_LAT},${MAPS_LNG}`
 const WHATSAPP_URL = 'https://wa.me/5491153439289'
 const EMAIL_CONTACTO = 'contacto@alpesestadosfinancieros.com'
 
