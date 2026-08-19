@@ -66,7 +66,7 @@ export default function ContactForm() {
       <img
         src={toroWallStreet}
         alt="Toro de Wall Street"
-        className="absolute inset-0 h-full w-full object-cover object-[58%_18%] saturate-[1.35]"
+        className="absolute inset-x-0 top-0 h-[560px] w-full object-cover object-[58%_18%] saturate-[1.35] lg:inset-0 lg:h-full"
       />
       <div
         className="absolute inset-0"
@@ -260,7 +260,7 @@ export default function ContactForm() {
                 </div>
               </div>
 
-              <div className="overflow-hidden rounded-xl">
+              <div className="overflow-hidden rounded-xl bg-slate-800">
                 <iframe
                   title="Ubicación de Alpes Estados Financieros"
                   src={MAPS_EMBED_URL}
