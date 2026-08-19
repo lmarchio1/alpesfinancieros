@@ -1,9 +1,16 @@
 import { useState } from 'react'
 import SectionHeading from './ui/SectionHeading'
+import WhatsAppIcon from './ui/WhatsAppIcon'
 import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
 import toroWallStreet from '../assets/toro-wallstreet.jpg'
 
 const CONTACT_ENDPOINT = import.meta.env.VITE_CONTACT_ENDPOINT
+
+const DIRECCION = 'Rivadavia 1157, Piso 6 C, C1033AAB CABA, Argentina'
+const MAPS_EMBED_URL = 'https://www.google.com/maps?q=' + encodeURIComponent(DIRECCION) + '&output=embed'
+const MAPS_URL = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(DIRECCION)
+const WHATSAPP_URL = 'https://wa.me/5491153439289'
+const TELEFONO_VISIBLE = '+54 9 11 5343-9289'
 
 const INITIAL_FORM = { firstName: '', lastName: '', email: '', phone: '', message: '' }
 
@@ -62,7 +69,7 @@ export default function ContactForm() {
         }}
       />
 
-      <div className="relative mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           variant="dark"
           align="center"
@@ -71,10 +78,69 @@ export default function ContactForm() {
           description="Contanos qué necesitás y te respondemos a la brevedad."
         />
 
-        <div
-          ref={formRef}
-          className={`rounded-2xl bg-white/10 p-6 backdrop-blur-sm transition-all duration-700 ease-out motion-reduce:transition-none sm:p-8 ${
-            formVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
+          <div className="lg:col-span-2 lg:self-start">
+            <div className="space-y-4 rounded-2xl bg-white/10 p-6 backdrop-blur-sm sm:p-8">
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 rounded-xl bg-[#25D366]/15 p-4 ring-1 ring-[#25D366]/30 transition-colors hover:bg-[#25D366]/25"
+              >
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white">
+                  <WhatsAppIcon className="h-6 w-6" />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-white">Escribinos por WhatsApp</p>
+                  <p className="text-sm text-slate-300">{TELEFONO_VISIBLE}</p>
+                </div>
+              </a>
+
+              <div className="flex items-start gap-3 p-4">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  className="mt-0.5 h-5 w-5 shrink-0 text-slate-300"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 21s-7-6.2-7-11.5A7 7 0 0119 9.5C19 14.8 12 21 12 21z"
+                  />
+                  <circle cx="12" cy="9.5" r="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <div>
+                  <p className="text-sm font-semibold text-white">Oficina</p>
+                  <a
+                    href={MAPS_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-slate-300 hover:text-white hover:underline"
+                  >
+                    {DIRECCION}
+                  </a>
+                </div>
+              </div>
+
+              <div className="overflow-hidden rounded-xl">
+                <iframe
+                  title="Ubicación de Alpes Estados Financieros"
+                  src={MAPS_EMBED_URL}
+                  className="h-56 w-full grayscale-[15%]"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div
+            ref={formRef}
+            className={`lg:col-span-3 rounded-2xl bg-white/10 p-6 backdrop-blur-sm transition-all duration-700 ease-out motion-reduce:transition-none sm:p-8 ${
+              formVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
           }`}
         >
           <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -172,6 +238,7 @@ export default function ContactForm() {
               )}
             </div>
           </form>
+          </div>
         </div>
       </div>
     </section>
