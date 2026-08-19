@@ -152,8 +152,8 @@ export default function WealthManagement() {
         <SectionHeading
           align="center"
           eyebrow="Gestión patrimonial · Multi-family office"
-          title="Un socio estratégico para tu patrimonio"
-          description="Como multi-family office, unificamos la gestión financiera, legal, fiscal y de gobernanza familiar bajo un mismo equipo, actuando siempre del lado de tus intereses."
+          title="Un socio estratégico e independiente para su patrimonio"
+          description="Como Multi-Family Office, unificamos la gestión financiera, legal, fiscal y de gobernanza bajo una misma estructura, alineando cada decisión exclusivamente con sus objetivos."
         />
 
         <div className="mb-10 flex flex-wrap justify-center gap-3">
