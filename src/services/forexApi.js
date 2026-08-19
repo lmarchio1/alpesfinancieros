@@ -1,15 +1,29 @@
-// La URL "@latest" del CDN tiene cache-control de 7 días (max-age=604800): el
-// navegador la sirve stale durante toda esa ventana aunque el contenido cambie
-// a diario. Pedimos la fecha exacta en la URL (cambia todos los días, rompe el
-// cache) y si el día de hoy todavía no está publicado, caemos a ayer.
 const BASE_URL = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api'
 
 const MONEDAS = ['EUR', 'GBP', 'BRL', 'CLP', 'COP']
 
-async function fetchUsdRates(fecha) {
-  const res = await fetch(`${BASE_URL}@${fecha}/v1/currencies/usd.json`)
+async function fetchJson(url) {
+  const res = await fetch(url)
   if (!res.ok) throw new Error('No se pudieron obtener las cotizaciones')
   return res.json()
+}
+
+// @latest siempre resuelve a la publicación más nueva disponible -confirmado
+// en vivo-, pero el navegador la cachea 7 días (Cache-Control: max-age=604800)
+// sin importar que el contenido cambie a diario. La query con la fecha de hoy
+// cambia una vez por día y fuerza al navegador a volver a pedirla.
+// (La alternativa de pedir la fecha exacta en la URL, @YYYY-MM-DD, evita ese
+// cache pero puede tardar horas en propagarse recién empezado el día -esa
+// ruta quedaba en 404 mientras @latest ya tenía el dato nuevo-, así que
+// @latest + cache-busting es la fuente primaria para "hoy".)
+function fetchUsdRatesLatest(fechaHoy) {
+  return fetchJson(`${BASE_URL}@latest/v1/currencies/usd.json?_=${fechaHoy}`)
+}
+
+// Para "ayer" sí conviene la fecha exacta en la URL: es una fecha que ya pasó
+// por completo, por lo que su publicación ya está estable y disponible.
+function fetchUsdRatesFecha(fecha) {
+  return fetchJson(`${BASE_URL}@${fecha}/v1/currencies/usd.json`)
 }
 
 function fechaArgentinaHoy() {
@@ -24,16 +38,11 @@ function diaAnterior(fechaIso) {
 
 export async function fetchOtrasMonedas() {
   const fechaHoy = fechaArgentinaHoy()
-  let hoy
-  try {
-    hoy = await fetchUsdRates(fechaHoy)
-  } catch {
-    hoy = await fetchUsdRates(diaAnterior(fechaHoy))
-  }
+  const hoy = await fetchUsdRatesLatest(fechaHoy)
 
   let ayer = null
   try {
-    ayer = await fetchUsdRates(diaAnterior(hoy.date))
+    ayer = await fetchUsdRatesFecha(diaAnterior(hoy.date))
   } catch {
     ayer = null
   }
