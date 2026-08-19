@@ -10,7 +10,7 @@ const DIRECCION = 'Rivadavia 1157, Piso 6 C, C1033AAB CABA, Argentina'
 const MAPS_EMBED_URL = 'https://www.google.com/maps?q=' + encodeURIComponent(DIRECCION) + '&output=embed'
 const MAPS_URL = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(DIRECCION)
 const WHATSAPP_URL = 'https://wa.me/5491153439289'
-const TELEFONO_VISIBLE = '+54 9 11 5343-9289'
+const EMAIL_CONTACTO = 'contacto@alpesestadosfinancieros.com'
 
 const INITIAL_FORM = { firstName: '', lastName: '', email: '', phone: '', message: '' }
 
@@ -92,7 +92,30 @@ export default function ContactForm() {
                 </span>
                 <div>
                   <p className="text-sm font-semibold text-white">Escribinos por WhatsApp</p>
-                  <p className="text-sm text-slate-300">{TELEFONO_VISIBLE}</p>
+                  <p className="text-sm text-slate-300">Respuesta rápida</p>
+                </div>
+              </a>
+
+              <a
+                href={`mailto:${EMAIL_CONTACTO}`}
+                className="flex items-start gap-3 rounded-xl p-4 transition-colors hover:bg-white/5"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  className="mt-0.5 h-5 w-5 shrink-0 text-slate-300"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 6h18v12H3zM3 7l9 6 9-6"
+                  />
+                </svg>
+                <div>
+                  <p className="text-sm font-semibold text-white">Email</p>
+                  <p className="text-sm text-slate-300 hover:text-white hover:underline">{EMAIL_CONTACTO}</p>
                 </div>
               </a>
 
@@ -143,6 +166,9 @@ export default function ContactForm() {
               formVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
           }`}
         >
+          <p className="mb-5 text-sm text-slate-300">
+            Mandanos tu consulta y nos comunicaremos con vos lo más pronto posible.
+          </p>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <input
               aria-label="Nombre"
