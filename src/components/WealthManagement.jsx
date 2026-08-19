@@ -266,10 +266,10 @@ export default function WealthManagement() {
               Un proceso, no una única decisión
             </h3>
             <p className="mt-3 text-base text-slate-600">
-              Nos enfocamos en definir la estrategia de inversión adecuada para vos —y en
-              sostenerla en el tiempo. No vendemos productos ni cobramos por operación: cobramos
-              un fee por el servicio de gestión, así nuestros intereses quedan alineados con los
-              tuyos en cada decisión.
+              Diseñamos e implementamos una estrategia patrimonial alineada exclusivamente con
+              los objetivos y la visión de cada familia o empresa. Nuestro compromiso es actuar
+              con absoluta independencia y rigor técnico, garantizando una administración sólida
+              y sostenible a lo largo del tiempo.
             </p>
           </div>
 
