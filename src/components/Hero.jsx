@@ -18,22 +18,17 @@ export default function Hero() {
 
       <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
         <div className="max-w-2xl">
-          <span className="inline-flex animate-fade-up items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-brand-200 ring-1 ring-inset ring-white/20 backdrop-blur motion-reduce:animate-none">
-            Gestión patrimonial · Datos de mercado actualizados todos los días hábiles
-          </span>
           <h1
-            className="mt-6 animate-fade-up text-4xl font-bold tracking-tight text-white drop-shadow-sm motion-reduce:animate-none sm:text-5xl lg:text-6xl"
-            style={{ animationDelay: '120ms' }}
+            className="animate-fade-up text-4xl font-bold tracking-tight text-white drop-shadow-sm motion-reduce:animate-none sm:text-5xl lg:text-6xl"
           >
-            Gestión patrimonial con la mirada puesta en la cumbre
+            Gestión financiera y patrimonial con visión estratégica.
           </h1>
           <p
             className="mt-6 animate-fade-up text-lg leading-relaxed text-slate-200 motion-reduce:animate-none"
-            style={{ animationDelay: '240ms' }}
+            style={{ animationDelay: '120ms' }}
           >
-            Alpes Estados Financieros combina asesoramiento patrimonial independiente con
-            seguimiento en tiempo real de tu cartera, el dólar en todas sus variantes y el
-            mercado de capitales argentino.
+            Multi-Family Office independiente dedicado a proteger y potenciar el patrimonio
+            familiar y corporativo mediante estrategias a medida y análisis global.
           </p>
           <div
             className="mt-8 flex animate-fade-up flex-wrap gap-4 motion-reduce:animate-none"
