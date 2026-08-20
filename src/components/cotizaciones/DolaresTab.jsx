@@ -116,11 +116,11 @@ export default function DolaresTab() {
       </div>
 
       {banda && (
-        <Card className="mb-4 overflow-hidden !bg-slate-50 p-5">
+        <Card className="group mb-4 overflow-hidden !bg-slate-50 p-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-white">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-white transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-brand-700">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M6 21V10l6-6 6 6v11M10 21v-6h4v6" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M4 10v11M20 10v11M2 10l10-6 10 6M8 10v11M16 10v11" />
               </svg>
             </div>
             <div>
