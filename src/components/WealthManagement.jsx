@@ -65,8 +65,9 @@ const ITEMS = [
   },
   {
     icon: 'compass',
-    title: 'Visión global de mercados',
-    description: 'Acceso a activos locales e internacionales para diversificar tu cartera.',
+    title: 'Visión global y diversificación',
+    description:
+      'Análisis integral de los mercados locales e internacionales para orientar una correcta diversificación, optimizando el patrimonio y reduciendo los riesgos.',
   },
   {
     icon: 'users',
