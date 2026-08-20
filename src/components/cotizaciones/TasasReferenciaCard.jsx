@@ -32,8 +32,8 @@ export default function TasasReferenciaCard() {
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">BADLAR</p>
             <p className="mt-0.5 text-2xl font-bold text-slate-900">{tasas.badlar.valor.toFixed(2)}%</p>
             <p className="mt-1 text-xs text-slate-400">
-              Tasa mayorista que pagan los bancos privados por depósitos a plazo fijo de más de
-              $1.000.000, a 30-35 días. Muchos bonos y créditos ajustan sus intereses en base a ella.
+              Tasa promedio para depósitos a plazo fijo mayoristas en bancos privados (estrato
+              superior a $1M, plazo 30-35 días).
             </p>
           </div>
         )}
@@ -42,7 +42,8 @@ export default function TasasReferenciaCard() {
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">TAMAR</p>
             <p className="mt-0.5 text-2xl font-bold text-slate-900">{tasas.tamar.valor.toFixed(2)}%</p>
             <p className="mt-1 text-xs text-slate-400">
-              Tasa Mayorista Argentina de Referencia calculada por el BCRA para depósitos mayoristas.
+              Tasa de referencia del BCRA para depósitos del segmento corporativo e institucional
+              (operaciones desde $1.000M).
             </p>
           </div>
         )}

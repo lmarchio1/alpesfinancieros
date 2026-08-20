@@ -12,6 +12,7 @@ const ROW_CLASS =
   'group animate-fade-up border-l-4 border-transparent transition-colors duration-200 hover:border-brand-500 hover:bg-brand-50/60 motion-reduce:animate-none'
 const TICKER_CLASS =
   'px-5 py-3 font-semibold text-brand-600 transition-colors duration-200 group-hover:text-brand-800'
+const HEAD_CLASS = 'border-b border-[#c17a1e]/25 bg-[#fbeed6]/50 text-xs font-semibold uppercase tracking-wide text-[#8a5719]'
 const rowDelay = (i) => ({ animationDelay: `${i * 40}ms` })
 
 const GRUPOS = [
@@ -34,7 +35,7 @@ function VarBadge({ value }) {
 function TablaUsd({ bonos }) {
   return (
     <table className="w-full min-w-[420px] text-left text-sm">
-      <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+      <thead className={HEAD_CLASS}>
         <tr>
           <th className="px-5 py-3 font-medium">Ticker</th>
           <th className="px-5 py-3 font-medium">Ley</th>
@@ -63,7 +64,7 @@ function TablaUsd({ bonos }) {
 function TablaLetras({ letras }) {
   return (
     <table className="w-full min-w-[420px] text-left text-sm">
-      <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+      <thead className={HEAD_CLASS}>
         <tr>
           <th className="px-5 py-3 font-medium">Ticker</th>
           <th className="px-5 py-3 font-medium">Ley</th>
@@ -92,7 +93,7 @@ function TablaLetras({ letras }) {
 function TablaDuales({ bonos }) {
   return (
     <table className="w-full min-w-[420px] text-left text-sm">
-      <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+      <thead className={HEAD_CLASS}>
         <tr>
           <th className="px-5 py-3 font-medium">Ticker</th>
           <th className="px-5 py-3 font-medium">Ley</th>
