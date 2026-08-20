@@ -159,7 +159,7 @@ export default function InflacionTab() {
       </div>
 
       <div className="mt-4">
-        <Card className="!bg-slate-100 p-6">
+        <Card className="!bg-slate-50 p-6">
           <h3 className="font-semibold text-slate-900">Evolución del Poder Adquisitivo</h3>
           <p className="mt-1 text-sm text-slate-500">
             Seleccione un período para evaluar el impacto inflacionario acumulado y el valor
@@ -201,13 +201,13 @@ export default function InflacionTab() {
                 <strong>{formatMes(hasta)}</strong>:
               </p>
               <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="min-w-0 rounded-xl bg-brand-50 p-4">
+                <div className="min-w-0 rounded-xl bg-white p-4 ring-1 ring-inset ring-brand-100">
                   <p className="text-xs text-slate-500">Capital equivalente actualizado</p>
                   <p className="break-words text-xl font-bold text-brand-600 sm:text-2xl">
                     {formatArs(resultado.valorHoy)}
                   </p>
                 </div>
-                <div className="min-w-0 rounded-xl bg-white p-4">
+                <div className="min-w-0 rounded-xl bg-white p-4 ring-1 ring-inset ring-slate-200">
                   <p className="text-xs text-slate-500">Inflación acumulada</p>
                   <p className="break-words text-xl font-bold text-slate-700 sm:text-2xl">
                     +{resultado.inflacionAcumuladaPct.toFixed(2)}%
@@ -241,25 +241,25 @@ export default function InflacionTab() {
               )}
             </>
           )}
-
-          <div className="mt-5 flex items-start gap-2 rounded-lg bg-slate-50 px-4 py-3 ring-1 ring-inset ring-slate-200">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              className="mt-0.5 h-4 w-4 shrink-0 text-slate-400"
-            >
-              <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8h.01M11 12h1v4h1" />
-            </svg>
-            <p className="text-xs text-slate-600">
-              Cálculo estimado en base al Índice de Precios al Consumidor (IPC - INDEC). Herramienta
-              analítica con fines históricos y didácticos para medir la variación del poder
-              adquisitivo. No constituye una proyección a futuro ni recomendación operativa.
-            </p>
-          </div>
         </Card>
+
+        <div className="mt-4 flex items-start gap-2 rounded-lg bg-slate-50 px-4 py-3 ring-1 ring-inset ring-slate-200">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            className="mt-0.5 h-4 w-4 shrink-0 text-slate-400"
+          >
+            <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8h.01M11 12h1v4h1" />
+          </svg>
+          <p className="text-xs text-slate-600">
+            Cálculo estimado en base al Índice de Precios al Consumidor (IPC - INDEC). Herramienta
+            analítica con fines históricos y didácticos para medir la variación del poder
+            adquisitivo. No constituye una proyección a futuro ni recomendación operativa.
+          </p>
+        </div>
       </div>
     </div>
   )
