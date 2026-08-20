@@ -111,7 +111,8 @@ const MODELO_360 = [
     color: 'bg-[#f0e0cc] text-[#7a4a1c] group-hover:bg-[#7a4a1c] group-hover:text-white',
     border: 'border-l-[#7a4a1c]',
     title: 'Gobernanza familiar',
-    description: 'Acuerdos y protocolos que ordenan la toma de decisiones patrimoniales entre generaciones.',
+    description:
+      'Acuerdos estratégicos para profesionalizar la administración del patrimonio y ordenar la toma de decisiones compartidas entre generaciones.',
   },
 ]
 
