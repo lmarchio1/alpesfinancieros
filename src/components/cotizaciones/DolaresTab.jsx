@@ -217,10 +217,23 @@ export default function DolaresTab() {
         })}
       </div>
 
-      <p className="mt-5 text-xs text-slate-300">
-        Cotizaciones de referencia, a título informativo. No constituyen asesoramiento ni una
-        recomendación de inversión — verificá siempre con tu banco o casa de cambio antes de operar.
-      </p>
+      <div className="mt-5 flex items-start gap-2 rounded-lg bg-black/30 px-4 py-3 ring-1 ring-inset ring-white/10">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          className="mt-0.5 h-4 w-4 shrink-0 text-slate-300"
+        >
+          <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8h.01M11 12h1v4h1" />
+        </svg>
+        <p className="text-xs text-slate-200">
+          Cotizaciones de referencia con fines exclusivamente informativos. No constituyen una
+          recomendación u oferta de compra/venta de divisas. Verificar condiciones con la entidad
+          correspondiente antes de operar.
+        </p>
+      </div>
     </div>
   )
 }

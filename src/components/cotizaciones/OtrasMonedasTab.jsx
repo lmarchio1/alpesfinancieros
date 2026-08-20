@@ -147,12 +147,23 @@ export default function OtrasMonedasTab() {
         })}
       </div>
 
-      <p className="mt-5 text-xs text-slate-300">
-        Valores de referencia contra el dólar estadounidense, actualizados una vez por día. Son a título
-        informativo, no constituyen asesoramiento ni una recomendación de inversión, y pueden diferir del
-        precio de mercado en tiempo real — no sustituyen la cotización de tu banco o broker al momento de
-        operar.
-      </p>
+      <div className="mt-5 flex items-start gap-2 rounded-lg bg-black/30 px-4 py-3 ring-1 ring-inset ring-white/10">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          className="mt-0.5 h-4 w-4 shrink-0 text-slate-300"
+        >
+          <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8h.01M11 12h1v4h1" />
+        </svg>
+        <p className="text-xs text-slate-200">
+          Valores de referencia actualizados diariamente con fines informativos. No constituyen una
+          recomendación operativa ni sustituyen la cotización de liquidación provista por cada
+          entidad bancaria.
+        </p>
+      </div>
     </div>
   )
 }
