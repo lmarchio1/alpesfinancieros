@@ -143,7 +143,7 @@ export default function BondsUniverse({ globales, bonares, duales, letras }) {
             type="button"
             onClick={() => setGrupo(g.id)}
             className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-              grupo === g.id ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              grupo === g.id ? 'bg-brand-600 text-white' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
             }`}
           >
             {g.label}
