@@ -43,6 +43,10 @@ const CASA_ICON = {
   },
 }
 
+const NOMBRE_OVERRIDE = {
+  contadoconliqui: 'CCL',
+}
+
 export default function DolaresTab() {
   const fetcher = useCallback(() => fetchDolares(), [])
   const { data, error, loading, updatedAt, refresh } = usePolling(fetcher, { intervalMs: 60000 })
@@ -112,50 +116,50 @@ export default function DolaresTab() {
       </div>
 
       {banda && (
-        <Card className="mb-4 overflow-hidden border-t-4 border-brand-500 p-0">
-          <div className="bg-gradient-to-br from-brand-50 via-white to-[#fbeed6]/40 p-5">
+        <Card className="mb-4 overflow-hidden border-t-4 border-brand-400 p-0">
+          <div className="bg-[#0F2942] p-5">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-white">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10 text-brand-200 ring-1 ring-inset ring-white/10">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M6 21V10l6-6 6 6v11M10 21v-6h4v6" />
                 </svg>
               </div>
               <div>
-                <p className="font-semibold text-slate-900">Banda cambiaria hoy</p>
-                <p className="text-xs text-slate-400">BCRA · se ajusta a diario con la inflación</p>
+                <p className="font-semibold text-white">Banda Cambiaria / Zona de No Intervención (BCRA)</p>
+                <p className="text-xs text-slate-300">Esquema de flotación administrada con ajuste diario por inflación (IPC).</p>
               </div>
             </div>
 
             <div className="mt-5 grid grid-cols-2 items-end gap-4 sm:grid-cols-[auto_1fr_auto]">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">Piso</p>
-                <p className="mt-0.5 text-xl font-bold text-emerald-600">{formatArsEntero(banda.piso)}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-400">Piso</p>
+                <p className="mt-0.5 text-xl font-bold text-emerald-400">{formatArsEntero(banda.piso)}</p>
               </div>
 
               <div className="order-3 col-span-2 pt-3 sm:order-none sm:col-span-1 sm:px-5 sm:pt-6">
-                <div className="relative h-2.5 w-full rounded-full bg-gradient-to-r from-emerald-400 via-slate-300 to-rose-400 shadow-inner ring-1 ring-black/10">
+                <div className="relative h-2.5 w-full rounded-full bg-gradient-to-r from-emerald-400 via-slate-500 to-rose-400 shadow-inner ring-1 ring-white/10">
                   {bandaPct !== null && (
                     <div
                       className="absolute top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
                       style={{ left: `${bandaPct}%` }}
                     >
-                      <span className="mb-1.5 whitespace-nowrap rounded-md bg-slate-900 px-1.5 py-0.5 text-[10px] font-semibold text-white shadow-sm">
+                      <span className="mb-1.5 whitespace-nowrap rounded-md bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-900 shadow-sm">
                         Mayorista {formatArsEntero(mayorista.venta)}
                         {faltaParaTecho !== null && (
-                          <span className="ml-1 font-normal text-slate-300">
+                          <span className="ml-1 font-normal text-slate-500">
                             · falta {faltaParaTecho.toFixed(1)}% para el techo
                           </span>
                         )}
                       </span>
-                      <span className="h-3.5 w-3.5 rounded-full border-2 border-white bg-brand-600 shadow" />
+                      <span className="h-3.5 w-3.5 rounded-full border-2 border-[#0F2942] bg-white shadow" />
                     </div>
                   )}
                 </div>
               </div>
 
               <div className="text-right">
-                <p className="text-xs font-semibold uppercase tracking-wide text-rose-600">Techo</p>
-                <p className="mt-0.5 text-xl font-bold text-rose-600">{formatArsEntero(banda.techo)}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-rose-400">Techo</p>
+                <p className="mt-0.5 text-xl font-bold text-rose-400">{formatArsEntero(banda.techo)}</p>
               </div>
             </div>
           </div>
@@ -189,7 +193,7 @@ export default function DolaresTab() {
                       </svg>
                     </div>
                   )}
-                  <h3 className="font-semibold text-slate-900">{d.nombre}</h3>
+                  <h3 className="font-semibold text-slate-900">{NOMBRE_OVERRIDE[d.casa] ?? d.nombre}</h3>
                 </div>
                 {brecha !== null ? (
                   <Badge variant="brand">
