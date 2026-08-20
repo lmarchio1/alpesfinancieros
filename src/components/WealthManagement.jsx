@@ -59,19 +59,19 @@ const ITEMS = [
     icon: 'shield',
     title: 'Independencia y transparencia',
     description:
-      'La integridad rige cada decisión: actuamos con absoluta independencia, garantizando que nuestros objetivos estén siempre alineados con nuestros clientes.',
+      'La integridad rige cada decisión: actuamos con absoluta independencia, garantizando que nuestros objetivos estén siempre alineados con los de nuestros clientes.',
   },
   {
     icon: 'compass',
     title: 'Visión global y diversificación',
     description:
-      'Análisis integral de los mercados locales e internacionales para orientar una correcta diversificación, optimizando el patrimonio y reduciendo los riesgos.',
+      'Análisis integral de los mercados locales e internacionales para orientar una adecuada asignación de activos, optimizando el patrimonio y mitigando riesgos.',
   },
   {
     icon: 'users',
-    title: 'Gestión personalizada',
+    title: 'Estrategia a medida',
     description:
-      'Diseñamos estrategias a medida para la realidad de cada cliente. Integramos la gestión financiera, la planificación patrimonial y la optimización fiscal con el máximo rigor profesional.',
+      'Diseñamos estrategias adaptadas a la realidad de cada cliente. Integramos la gestión financiera, la planificación patrimonial y la optimización fiscal con el máximo rigor profesional.',
   },
   {
     icon: 'trending',
