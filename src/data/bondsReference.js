@@ -17,6 +17,13 @@ export const MATURITY_BY_YEAR = {
   46: { vencimiento: '2046-07-09', duracionAnios: 8.7 },
 }
 
+// A diferencia de Globales/Bonares, data912.com no expone la fecha de
+// vencimiento de los duales (solo ticker y precio), así que no se puede
+// auto-detectar una serie nueva de forma confiable: hay que sumarla acá a
+// mano. Para revisar si salió una serie nueva, buscar en
+// https://data912.com/live/arg_bonds cualquier ticker con prefijo "TT" que
+// no termine en "C" o "D" (esos sufijos son variantes de precio del mismo
+// ticker, no series distintas) y que no esté ya en este mapa.
 export const DUALES_META = {
   TTS26: { vencimiento: '2026-09-15' },
   TTD26: { vencimiento: '2026-12-15' },
