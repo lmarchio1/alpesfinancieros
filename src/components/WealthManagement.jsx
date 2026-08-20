@@ -102,7 +102,8 @@ const MODELO_360 = [
     color: 'bg-[#f7e3d3] text-[#a35f24] group-hover:bg-[#a35f24] group-hover:text-white',
     border: 'border-l-[#a35f24]',
     title: 'Eficiencia fiscal',
-    description: 'Optimización de la carga impositiva dentro del marco legal vigente, en cada jurisdicción relevante.',
+    description:
+      'Estrategias tributarias integrales orientadas a minimizar el impacto fiscal y proteger el rendimiento del capital global.',
   },
   {
     icon: 'home',
