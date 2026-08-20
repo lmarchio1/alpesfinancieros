@@ -92,24 +92,24 @@ const MODELO_360 = [
   },
   {
     icon: 'scale',
-    color: 'bg-[#fbeed6] text-[#c17a1e] group-hover:bg-[#c17a1e] group-hover:text-white',
-    border: 'border-l-[#c17a1e]',
+    color: 'bg-[#fdf6e3] text-[#dba61f] group-hover:bg-[#dba61f] group-hover:text-white',
+    border: 'border-l-[#dba61f]',
     title: 'Planificación Sucesoria',
     description:
       'Asesoramiento integral en la transmisión ordenada del patrimonio, garantizando la protección del legado familiar.',
   },
   {
     icon: 'bank',
-    color: 'bg-[#f7e3d3] text-[#a35f24] group-hover:bg-[#a35f24] group-hover:text-white',
-    border: 'border-l-[#a35f24]',
+    color: 'bg-[#f7e0df] text-[#9a2e2e] group-hover:bg-[#9a2e2e] group-hover:text-white',
+    border: 'border-l-[#9a2e2e]',
     title: 'Eficiencia fiscal',
     description:
       'Estrategias tributarias integrales orientadas a minimizar el impacto fiscal y proteger el rendimiento del capital global.',
   },
   {
     icon: 'home',
-    color: 'bg-[#f0e0cc] text-[#7a4a1c] group-hover:bg-[#7a4a1c] group-hover:text-white',
-    border: 'border-l-[#7a4a1c]',
+    color: 'bg-[#efdadd] text-[#6b1220] group-hover:bg-[#6b1220] group-hover:text-white',
+    border: 'border-l-[#6b1220]',
     title: 'Gobernanza familiar',
     description:
       'Acuerdos y protocolos estratégicos que ordenan la toma de decisiones y profesionalizan la administración del patrimonio.',
