@@ -85,9 +85,9 @@ export default function RiesgoPaisSensitivity({ riesgoPais, globales, bonares })
       </div>
 
       <div className="mt-6 grid grid-cols-3 gap-4">
-        <div>
-          <p className="text-xs text-slate-500">Riesgo país simulado</p>
-          <p className="text-xl font-bold text-slate-900">{riesgoPaisEstimado} pb</p>
+        <div className="rounded-xl bg-brand-700 p-4">
+          <p className="text-xs text-white/70">Riesgo país simulado</p>
+          <p className="text-xl font-bold text-white">{riesgoPaisEstimado} pb</p>
         </div>
         <div>
           <p className="text-xs text-slate-500">Impacto estimado en precio</p>
@@ -96,8 +96,8 @@ export default function RiesgoPaisSensitivity({ riesgoPais, globales, bonares })
             {(impacto * 100).toFixed(1)}%
           </p>
         </div>
-        <div>
-          <p className="text-xs text-slate-500">Precio estimado {bono.ticker}</p>
+        <div className="rounded-xl bg-orange-400 p-4">
+          <p className="text-xs text-slate-900/70">Precio estimado {bono.ticker}</p>
           <p className="text-xl font-bold text-slate-900">USD {precioEstimado.toFixed(1)}</p>
         </div>
       </div>
