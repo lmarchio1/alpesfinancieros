@@ -60,7 +60,8 @@ const ITEMS = [
   {
     icon: 'shield',
     title: 'Independencia y transparencia',
-    description: 'Sin ataduras a bancos: recomendaciones alineadas solo con tus intereses.',
+    description:
+      'La integridad rige cada decisión: actuamos con absoluta independencia, garantizando que nuestros objetivos estén siempre alineados con nuestros clientes.',
   },
   {
     icon: 'compass',
