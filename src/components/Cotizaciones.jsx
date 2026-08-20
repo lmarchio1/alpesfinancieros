@@ -7,10 +7,10 @@ import OtrasMonedasTab from './cotizaciones/OtrasMonedasTab'
 import calculadoraMercado from '../assets/calculadora-mercado.webp'
 
 const TOGGLES = [
-  { id: 'dolares', label: 'Dólares' },
-  { id: 'bonos', label: 'Bonos' },
+  { id: 'dolares', label: 'Tipos de Cambio' },
+  { id: 'bonos', label: 'Renta Fija' },
   { id: 'inflacion', label: 'Inflación' },
-  { id: 'monedas', label: 'Otras Monedas' },
+  { id: 'monedas', label: 'Divisas Globales' },
 ]
 
 const TOOLKIT_TAGS = [
