@@ -66,7 +66,7 @@ export default function ContactForm() {
       <img
         src={toroWallStreet}
         alt="Toro de Wall Street"
-        className="absolute inset-x-0 top-0 h-[560px] w-full object-cover object-[58%_18%] saturate-[1.35] lg:inset-0 lg:h-full"
+        className="absolute inset-x-0 top-0 aspect-[16/9] h-auto w-full object-cover object-[58%_18%] saturate-[1.35] lg:inset-0 lg:aspect-auto lg:h-full"
       />
       <div
         className="absolute inset-0"
