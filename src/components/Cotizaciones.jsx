@@ -14,11 +14,11 @@ const TOGGLES = [
 ]
 
 const TOOLKIT_TAGS = [
-  'Dólar oficial, blue, MEP y CCL',
-  'Globales, Bonares, Boncer, Letras y duales',
-  'Calculadora de breakeven',
-  'Riesgo país en vivo',
-  'Calculadora de inflación',
+  'Brecha Cambiaria',
+  'Títulos Públicos',
+  'Tasas de depósitos',
+  'Riesgo Soberano',
+  'Métricas de Inflación',
 ]
 
 export default function Cotizaciones() {
