@@ -88,7 +88,7 @@ const MODELO_360 = [
     border: 'border-l-[#dba61f]',
     title: 'Estrategia Financiera',
     description:
-      'Diseño, análisis y seguimiento de la estructura financiera del patrimonio, orientando la toma de decisiones para preservar y potenciar el capital en el largo plazo.',
+      'Diseño, análisis y seguimiento de la estructura patrimonial para preservar y potenciar el capital en el largo plazo.',
   },
   {
     icon: 'scale',
@@ -96,7 +96,7 @@ const MODELO_360 = [
     border: 'border-l-[#c17a1e]',
     title: 'Planificación Sucesoria',
     description:
-      'Asesoramiento integral en la transmisión ordenada del patrimonio hacia los herederos, garantizando la continuidad y protección del legado familiar.',
+      'Asesoramiento integral en la transmisión ordenada del patrimonio, garantizando la protección del legado familiar.',
   },
   {
     icon: 'bank',
@@ -112,7 +112,7 @@ const MODELO_360 = [
     border: 'border-l-[#7a4a1c]',
     title: 'Gobernanza familiar',
     description:
-      'Acuerdos estratégicos para profesionalizar la administración del patrimonio y ordenar la toma de decisiones compartidas entre generaciones.',
+      'Acuerdos y protocolos estratégicos que ordenan la toma de decisiones y profesionalizan la administración del patrimonio.',
   },
 ]
 
