@@ -122,28 +122,32 @@ const PROCESO = [
     color: 'bg-blue-600',
     glow: 'shadow-blue-500/40',
     title: 'Diagnóstico',
-    description: 'Auditoría inicial del patrimonio, las estructuras existentes y los objetivos familiares.',
+    description:
+      'Relevamiento integral del patrimonio global, análisis de la estructura actual y alineación de objetivos.',
   },
   {
     paso: '02',
     color: 'bg-rose-600',
     glow: 'shadow-rose-500/40',
     title: 'Estrategia 360°',
-    description: 'Diseño de la arquitectura legal, fiscal y de asignación de activos a medida.',
+    description:
+      'Diseño de la planificación fiscal, arquitectura patrimonial y política de asignación de activos a medida.',
   },
   {
     paso: '03',
     color: 'bg-emerald-600',
     glow: 'shadow-emerald-500/40',
     title: 'Implementación',
-    description: 'Apertura de cuentas, ejecución legal e instalación de los canales de custodia.',
+    description:
+      'Acompañamiento en la puesta en marcha, coordinación operativa y articulación del plan estratégico definido.',
   },
   {
     paso: '04',
     color: 'bg-amber-600',
     glow: 'shadow-amber-500/40',
     title: 'Monitoreo',
-    description: 'Consolidación global de reportes y reuniones periódicas de gobernanza.',
+    description:
+      'Consolidación de reportes, seguimiento periódico de objetivos y acompañamiento continuo en la toma de decisiones.',
   },
 ]
 
