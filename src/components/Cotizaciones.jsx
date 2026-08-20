@@ -48,9 +48,9 @@ export default function Cotizaciones() {
       <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           variant="dark"
-          eyebrow="Mercado"
-          title="Datos de Mercado"
-          description="Precio del dólar en todas sus variantes y cotizaciones de letras y bonos, actualizados todos los días hábiles."
+          eyebrow="Monitor de Mercado"
+          title="Inteligencia de Mercado"
+          description="Monitoreo periódico y cotizaciones de referencia de tipos de cambio, títulos públicos, inflación e indicadores clave para la toma de decisiones estratégicas."
         />
 
         <div className="mb-8 flex flex-wrap gap-3">
