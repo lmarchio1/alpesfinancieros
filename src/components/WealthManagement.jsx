@@ -65,7 +65,7 @@ const ITEMS = [
     icon: 'compass',
     title: 'Visión global y diversificación',
     description:
-      'Análisis integral de los mercados locales e internacionales para orientar una adecuada asignación de activos, optimizando el patrimonio y mitigando riesgos.',
+      'Análisis integral y permanente de los mercados locales e internacionales, para orientar una adecuada asignación de activos, optimizando el patrimonio y mitigando los riesgos.',
   },
   {
     icon: 'users',
@@ -119,32 +119,32 @@ const MODELO_360 = [
 const PROCESO = [
   {
     paso: '01',
-    color: 'bg-blue-600',
-    glow: 'shadow-blue-500/40',
+    color: 'bg-[#dba61f]',
+    glow: 'shadow-[#dba61f]/40',
     title: 'Diagnóstico',
     description:
-      'Relevamiento integral del patrimonio global, análisis de la estructura actual y alineación de objetivos.',
+      'Relevamiento integral del patrimonio global, análisis detallado de la estructura actual y alineación de objetivos familiares.',
   },
   {
     paso: '02',
-    color: 'bg-rose-600',
-    glow: 'shadow-rose-500/40',
+    color: 'bg-[#c17a1e]',
+    glow: 'shadow-[#c17a1e]/40',
     title: 'Estrategia 360°',
     description:
-      'Diseño de la planificación fiscal, arquitectura patrimonial y política de asignación de activos a medida.',
+      'Diseño integral de la planificación fiscal, arquitectura patrimonial y política de asignación de activos a medida.',
   },
   {
     paso: '03',
-    color: 'bg-emerald-600',
-    glow: 'shadow-emerald-500/40',
+    color: 'bg-[#a35f24]',
+    glow: 'shadow-[#a35f24]/40',
     title: 'Implementación',
     description:
       'Acompañamiento en la puesta en marcha, coordinación operativa y articulación del plan estratégico definido.',
   },
   {
     paso: '04',
-    color: 'bg-amber-600',
-    glow: 'shadow-amber-500/40',
+    color: 'bg-[#7a4a1c]',
+    glow: 'shadow-[#7a4a1c]/40',
     title: 'Monitoreo',
     description:
       'Consolidación de reportes, seguimiento periódico de objetivos y acompañamiento continuo en la toma de decisiones.',
