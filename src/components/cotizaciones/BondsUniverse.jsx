@@ -17,7 +17,6 @@ const rowDelay = (i) => ({ animationDelay: `${i * 40}ms` })
 const GRUPOS = [
   { id: 'globales', label: 'Globales' },
   { id: 'bonares', label: 'Bonares' },
-  { id: 'boncer', label: 'Boncer' },
   { id: 'letras', label: 'Letras' },
   { id: 'duales', label: 'Duales' },
 ]
@@ -54,35 +53,6 @@ function TablaUsd({ bonos }) {
               <VarBadge value={b.variacionPorcentaje} />
             </td>
             <td className="px-5 py-3 text-right text-slate-500">{formatDate(b.vencimiento)}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  )
-}
-
-function TablaBoncer({ bonos }) {
-  return (
-    <table className="w-full min-w-[420px] text-left text-sm">
-      <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
-        <tr>
-          <th className="px-5 py-3 font-medium">Ticker</th>
-          <th className="px-5 py-3 font-medium">Ley</th>
-          <th className="px-5 py-3 font-medium text-right">Precio</th>
-          <th className="px-5 py-3 font-medium text-right">TIR</th>
-          <th className="px-5 py-3 font-medium text-right">Vencimiento</th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-slate-100">
-        {bonos.map((b, i) => (
-          <tr key={b.ticker} className={ROW_CLASS} style={rowDelay(i)}>
-            <td className={TICKER_CLASS}>{b.ticker}</td>
-            <td className="px-5 py-3 text-slate-500">ARG</td>
-            <td className="px-5 py-3 text-right font-semibold text-slate-900">{formatArs(b.precioArs)}</td>
-            <td className="px-5 py-3 text-right">
-              <Badge variant="brand">{b.tirPorcentaje}%</Badge>
-            </td>
-            <td className="px-5 py-3 text-right text-slate-500">{formatDate(b.fechaVencimiento)}</td>
           </tr>
         ))}
       </tbody>
@@ -148,10 +118,8 @@ function TablaDuales({ bonos }) {
   )
 }
 
-export default function BondsUniverse({ globales, bonares, duales, boncer, letras }) {
+export default function BondsUniverse({ globales, bonares, duales, letras }) {
   const [grupo, setGrupo] = useState('globales')
-
-  const fuente = grupo === 'boncer' ? 'argentinadatos.com' : grupo === 'letras' ? 'data912.com' : 'data912.com'
 
   return (
     <Card className="overflow-hidden border-t-4 border-[#c17a1e]">
@@ -168,7 +136,7 @@ export default function BondsUniverse({ globales, bonares, duales, boncer, letra
           </div>
           <h3 className="font-semibold text-slate-900">Universo de bonos</h3>
         </div>
-        <Badge variant="positive">● En vivo · {fuente}</Badge>
+        <Badge variant="positive">● En vivo · data912.com</Badge>
       </div>
 
       <div className="flex flex-wrap gap-1 p-6 pb-4">
@@ -189,7 +157,6 @@ export default function BondsUniverse({ globales, bonares, duales, boncer, letra
       <div className="overflow-x-auto pb-6">
         {grupo === 'globales' && <TablaUsd key="globales" bonos={globales} />}
         {grupo === 'bonares' && <TablaUsd key="bonares" bonos={bonares} />}
-        {grupo === 'boncer' && <TablaBoncer key="boncer" bonos={boncer} />}
         {grupo === 'letras' && <TablaLetras key="letras" letras={letras} />}
         {grupo === 'duales' && <TablaDuales key="duales" bonos={duales} />}
       </div>

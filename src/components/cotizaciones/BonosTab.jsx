@@ -52,7 +52,6 @@ export default function BonosTab() {
         globales={universo.data.globales}
         bonares={universo.data.bonares}
         duales={universo.data.duales}
-        boncer={rentaFija.data.bonos}
         letras={rentaFija.data.letras}
       />
 
