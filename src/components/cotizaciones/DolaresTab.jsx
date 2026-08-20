@@ -131,8 +131,8 @@ export default function DolaresTab() {
 
           <div className="mt-5 grid grid-cols-2 items-end gap-4 sm:grid-cols-[auto_1fr_auto]">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">Piso</p>
-              <p className="mt-0.5 text-xl font-bold text-emerald-600">{formatArsEntero(banda.piso)}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-400">Piso</p>
+              <p className="mt-0.5 text-xl font-bold text-emerald-400">{formatArsEntero(banda.piso)}</p>
             </div>
 
             <div className="order-3 col-span-2 pt-3 sm:order-none sm:col-span-1 sm:px-5 sm:pt-6">
@@ -157,8 +157,8 @@ export default function DolaresTab() {
             </div>
 
             <div className="text-right">
-              <p className="text-xs font-semibold uppercase tracking-wide text-red-600">Techo</p>
-              <p className="mt-0.5 text-xl font-bold text-red-600">{formatArsEntero(banda.techo)}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-red-400">Techo</p>
+              <p className="mt-0.5 text-xl font-bold text-red-400">{formatArsEntero(banda.techo)}</p>
             </div>
           </div>
         </Card>
