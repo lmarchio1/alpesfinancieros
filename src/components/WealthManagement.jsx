@@ -119,32 +119,32 @@ const MODELO_360 = [
 const PROCESO = [
   {
     paso: '01',
-    color: 'bg-[#dba61f]',
-    glow: 'shadow-[#dba61f]/40',
+    color: 'bg-brand-400',
+    glow: 'shadow-brand-400/40',
     title: 'Diagnóstico',
     description:
       'Relevamiento integral del patrimonio global, análisis detallado de la estructura actual y alineación de objetivos familiares.',
   },
   {
     paso: '02',
-    color: 'bg-[#c17a1e]',
-    glow: 'shadow-[#c17a1e]/40',
+    color: 'bg-brand-500',
+    glow: 'shadow-brand-500/40',
     title: 'Estrategia 360°',
     description:
       'Diseño integral de la planificación fiscal, arquitectura patrimonial y política de asignación de activos a medida.',
   },
   {
     paso: '03',
-    color: 'bg-[#a35f24]',
-    glow: 'shadow-[#a35f24]/40',
+    color: 'bg-brand-600',
+    glow: 'shadow-brand-600/40',
     title: 'Implementación',
     description:
       'Acompañamiento en la puesta en marcha, coordinación operativa y articulación del plan estratégico definido.',
   },
   {
     paso: '04',
-    color: 'bg-[#7a4a1c]',
-    glow: 'shadow-[#7a4a1c]/40',
+    color: 'bg-brand-700',
+    glow: 'shadow-brand-700/40',
     title: 'Monitoreo',
     description:
       'Consolidación de reportes, seguimiento periódico de objetivos y acompañamiento continuo en la toma de decisiones.',
