@@ -94,8 +94,9 @@ const MODELO_360 = [
     icon: 'scale',
     color: 'bg-[#fbeed6] text-[#c17a1e] group-hover:bg-[#c17a1e] group-hover:text-white',
     border: 'border-l-[#c17a1e]',
-    title: 'Sucesión y legal',
-    description: 'Planificación sucesoria y estructuras legales que protegen el patrimonio familiar a largo plazo.',
+    title: 'Planificación Sucesoria',
+    description:
+      'Asesoramiento integral en la transmisión ordenada del patrimonio hacia los herederos, garantizando la continuidad y protección del legado familiar.',
   },
   {
     icon: 'bank',
