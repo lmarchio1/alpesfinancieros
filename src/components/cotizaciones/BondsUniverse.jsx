@@ -123,10 +123,10 @@ export default function BondsUniverse({ globales, bonares, duales, letras }) {
   const [grupo, setGrupo] = useState('globales')
 
   return (
-    <Card className="overflow-hidden border-t-4 border-[#c17a1e]">
+    <Card className="group/card overflow-hidden border-t-4 border-[#c17a1e]">
       <div className="flex flex-wrap items-center justify-between gap-3 p-6 pb-0">
-        <div className="group flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-brand-600 group-hover:text-white">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition-all duration-300 ease-out group-hover/card:scale-110 group-hover/card:bg-brand-600 group-hover/card:text-white">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M6 21V13M11 21V8M16 21V11" />
             </svg>
