@@ -63,7 +63,7 @@ export default function BonosTab() {
           className="group flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-6 text-left shadow-sm shadow-slate-200/50 transition-colors hover:bg-slate-100"
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-brand-600 group-hover:text-white">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-white transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-brand-700">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
                 <path
                   strokeLinecap="round"
