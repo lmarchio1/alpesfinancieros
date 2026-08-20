@@ -72,7 +72,8 @@ const ITEMS = [
   {
     icon: 'users',
     title: 'Gestión personalizada',
-    description: 'Un plan patrimonial diseñado según tu perfil de riesgo y tus objetivos.',
+    description:
+      'Diseñamos estrategias a medida para la realidad de cada cliente. Integramos la gestión financiera, la planificación patrimonial y la optimización fiscal con el máximo rigor profesional.',
   },
   {
     icon: 'trending',
