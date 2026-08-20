@@ -86,8 +86,9 @@ const MODELO_360 = [
     icon: 'pie',
     color: 'bg-[#fdf6e3] text-[#dba61f] group-hover:bg-[#dba61f] group-hover:text-white',
     border: 'border-l-[#dba61f]',
-    title: 'Gestión financiera',
-    description: 'Diseño y seguimiento de tu cartera de inversiones, alineada a tus objetivos y perfil de riesgo.',
+    title: 'Estrategia Financiera',
+    description:
+      'Diseño, análisis y seguimiento de la estructura financiera del patrimonio, orientando la toma de decisiones para preservar y potenciar el capital en el largo plazo.',
   },
   {
     icon: 'scale',
