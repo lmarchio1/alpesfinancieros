@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import SectionHeading from './ui/SectionHeading'
-import WhatsAppIcon from './ui/WhatsAppIcon'
 import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
 import toroWallStreet from '../assets/toro-wallstreet.jpg'
 
@@ -16,7 +15,6 @@ const MAPS_LAT = -34.6084703
 const MAPS_LNG = -58.3828441
 const MAPS_EMBED_URL = `https://www.google.com/maps?q=${MAPS_LAT},${MAPS_LNG}&z=17&output=embed`
 const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${MAPS_LAT},${MAPS_LNG}`
-const WHATSAPP_URL = 'https://wa.me/5491155771583'
 const EMAIL_CONTACTO = 'contacto@alpesestadosfinancieros.com'
 
 const INITIAL_FORM = { firstName: '', lastName: '', email: '', phone: '', message: '' }
@@ -66,7 +64,7 @@ export default function ContactForm() {
       <img
         src={toroWallStreet}
         alt="Toro de Wall Street"
-        className="absolute inset-x-0 top-0 aspect-[16/9] h-auto w-full object-cover object-[58%_18%] saturate-[1.35] lg:inset-0 lg:aspect-auto lg:h-full"
+        className="absolute inset-0 h-full w-full object-cover object-[58%_18%] saturate-[1.35]"
       />
       <div
         className="absolute inset-0"
@@ -194,20 +192,6 @@ export default function ContactForm() {
 
           <div className="order-1 lg:order-2 lg:col-span-2 lg:self-start">
             <div className="space-y-4 rounded-2xl bg-white/10 p-6 backdrop-blur-sm sm:p-8">
-              <a
-                href={WHATSAPP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 rounded-xl bg-[#25D366]/15 p-4 ring-1 ring-[#25D366]/30 transition-colors hover:bg-[#25D366]/25"
-              >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white">
-                  <WhatsAppIcon className="h-6 w-6" />
-                </span>
-                <div>
-                  <p className="text-sm font-semibold text-white">Escribinos por WhatsApp</p>
-                  <p className="text-sm text-slate-300">Respuesta rápida</p>
-                </div>
-              </a>
 
               <a
                 href={`mailto:${EMAIL_CONTACTO}`}
