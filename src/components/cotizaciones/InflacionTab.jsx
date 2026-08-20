@@ -117,7 +117,7 @@ export default function InflacionTab() {
               <p className="text-sm text-slate-500">Inflación interanual</p>
             </div>
             <p className="mt-3 text-3xl font-bold text-slate-900">{interanual.toFixed(2)}%</p>
-            <p className="mt-1 text-xs text-slate-400">Acumulado de los últimos 12 meses (dato oficial)</p>
+            <p className="mt-1 text-xs text-slate-400">Variación acumulada de los últimos 12 meses (Dato oficial INDEC).</p>
           </Card>
         )}
 
@@ -134,7 +134,7 @@ export default function InflacionTab() {
             </div>
             <p className="mt-3 text-3xl font-bold text-slate-900">{rem.proximos12MesesPct.toFixed(2)}%</p>
             <p className="mt-1 text-xs text-slate-400">
-              Mediana proyectada para los próximos 12 meses
+              Mediana proyectada a 12 meses según el Relevamiento de Expectativas de Mercado.
               {rem.anioActual && ` · ${rem.anioActual.anio}: ${rem.anioActual.pct.toFixed(1)}%`}
             </p>
           </Card>
@@ -152,8 +152,7 @@ export default function InflacionTab() {
             </div>
             <p className="mt-3 text-3xl font-bold text-slate-900">{plazoFijo.valor.toFixed(2)}%</p>
             <p className="mt-1 text-xs text-slate-400">
-              Tasa nominal anual que pagan los bancos por un plazo fijo a 30 días — compará
-              contra la inflación esperada para ver si conviene ahorrar en pesos.
+              Tasa nominal anual de referencia del sistema financiero para colocaciones a 30 días.
             </p>
           </Card>
         )}
@@ -161,15 +160,15 @@ export default function InflacionTab() {
 
       <div className="mt-4">
         <Card className="!bg-[#faf9f5] p-6">
-          <h3 className="font-semibold text-slate-900">¿Cuánto vale hoy tu plata?</h3>
+          <h3 className="font-semibold text-slate-900">Evolución del Poder Adquisitivo</h3>
           <p className="mt-1 text-sm text-slate-500">
-            Elegí un período y te mostramos la inflación acumulada mes a mes y a cuánto equivale tu
-            plata al final del período.
+            Seleccione un período para evaluar el impacto inflacionario acumulado y el valor
+            actualizado en términos reales del capital.
           </p>
 
           <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
-              <label className="text-xs font-medium text-slate-500">Monto</label>
+              <label className="text-xs font-medium text-slate-500">Monto inicial</label>
               <div className="mt-1 flex items-center gap-2">
                 <span className="text-sm text-slate-500">$</span>
                 <input
@@ -182,11 +181,11 @@ export default function InflacionTab() {
               </div>
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-500">Desde</label>
+              <label className="text-xs font-medium text-slate-500">Período inicial</label>
               <MonthPicker value={desde} onChange={setDesde} min={minMes} max={maxMes} />
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-500">Hasta</label>
+              <label className="text-xs font-medium text-slate-500">Período final</label>
               <MonthPicker value={hasta} onChange={setHasta} min={minMes} max={maxMes} />
             </div>
           </div>
@@ -203,7 +202,7 @@ export default function InflacionTab() {
               </p>
               <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="min-w-0 rounded-xl bg-brand-50 p-4">
-                  <p className="text-xs text-slate-500">Equivalen a</p>
+                  <p className="text-xs text-slate-500">Capital equivalente actualizado</p>
                   <p className="break-words text-xl font-bold text-brand-600 sm:text-2xl">
                     {formatArs(resultado.valorHoy)}
                   </p>
@@ -244,9 +243,9 @@ export default function InflacionTab() {
           )}
 
           <p className="mt-5 text-xs text-slate-400">
-            Cálculo con el índice de inflación mensual oficial (INDEC). Sirve para dimensionar la
-            pérdida de poder adquisitivo de la plata parada — no es una proyección a futuro y no
-            constituye asesoramiento ni una recomendación de inversión.
+            Cálculo estimado en base al Índice de Precios al Consumidor (IPC - INDEC). Herramienta
+            analítica con fines históricos y didácticos para medir la variación del poder
+            adquisitivo. No constituye una proyección a futuro ni recomendación operativa.
           </p>
         </Card>
       </div>
