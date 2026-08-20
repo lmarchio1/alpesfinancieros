@@ -157,8 +157,8 @@ export default function DolaresTab() {
             </div>
 
             <div className="text-right">
-              <p className="text-xs font-semibold uppercase tracking-wide text-rose-600">Techo</p>
-              <p className="mt-0.5 text-xl font-bold text-rose-600">{formatArsEntero(banda.techo)}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-red-600">Techo</p>
+              <p className="mt-0.5 text-xl font-bold text-red-600">{formatArsEntero(banda.techo)}</p>
             </div>
           </div>
         </Card>
@@ -199,7 +199,7 @@ export default function DolaresTab() {
                     {brecha.toFixed(1)}%
                   </span>
                 ) : (
-                  <Badge variant="neutral">referencia</Badge>
+                  <Badge variant="neutral">Referencia</Badge>
                 )}
               </div>
               <div className="mt-4 flex items-end justify-between">
