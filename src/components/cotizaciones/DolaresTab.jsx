@@ -194,10 +194,10 @@ export default function DolaresTab() {
                   <h3 className="font-semibold text-slate-900">{NOMBRE_OVERRIDE[d.casa] ?? d.nombre}</h3>
                 </div>
                 {brecha !== null ? (
-                  <Badge variant="brand">
-                    {brecha >= 0 ? '+' : ''}
-                    {brecha.toFixed(1)}% vs mayorista
-                  </Badge>
+                  <span className="whitespace-nowrap rounded-full border border-[#CBD5E1] bg-[#F1F5F9] px-2.5 py-0.5 text-xs font-medium text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.05)]">
+                    Brecha {brecha >= 0 ? '+' : ''}
+                    {brecha.toFixed(1)}%
+                  </span>
                 ) : (
                   <Badge variant="neutral">referencia</Badge>
                 )}
