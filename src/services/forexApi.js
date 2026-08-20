@@ -10,14 +10,19 @@ async function fetchJson(url) {
 
 // @latest siempre resuelve a la publicación más nueva disponible -confirmado
 // en vivo-, pero el navegador la cachea 7 días (Cache-Control: max-age=604800)
-// sin importar que el contenido cambie a diario. La query con la fecha de hoy
-// cambia una vez por día y fuerza al navegador a volver a pedirla.
+// sin importar que el contenido cambie a diario. La query cambia una vez por
+// hora (no una vez por día) y fuerza al navegador a volver a pedirla: si solo
+// cambiara por día, alguien que entra a la página ANTES de que la fuente
+// publique el dato de hoy queda con esa respuesta vieja cacheada el resto del
+// día entero, aunque la fuente ya se haya actualizado -eso es justo lo que
+// pasó: la fuente ya tenía el dato nuevo pero el navegador seguía sirviendo
+// el de ayer-.
 // (La alternativa de pedir la fecha exacta en la URL, @YYYY-MM-DD, evita ese
 // cache pero puede tardar horas en propagarse recién empezado el día -esa
 // ruta quedaba en 404 mientras @latest ya tenía el dato nuevo-, así que
 // @latest + cache-busting es la fuente primaria para "hoy".)
-function fetchUsdRatesLatest(fechaHoy) {
-  return fetchJson(`${BASE_URL}@latest/v1/currencies/usd.json?_=${fechaHoy}`)
+function fetchUsdRatesLatest(cacheBuster) {
+  return fetchJson(`${BASE_URL}@latest/v1/currencies/usd.json?_=${cacheBuster}`)
 }
 
 // Para "ayer" sí conviene la fecha exacta en la URL: es una fecha que ya pasó
@@ -26,8 +31,17 @@ function fetchUsdRatesFecha(fecha) {
   return fetchJson(`${BASE_URL}@${fecha}/v1/currencies/usd.json`)
 }
 
-function fechaArgentinaHoy() {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
+function horaArgentinaCacheBuster() {
+  const partes = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(new Date())
+  const get = (tipo) => partes.find((p) => p.type === tipo)?.value
+  return `${get('year')}-${get('month')}-${get('day')}-${get('hour')}`
 }
 
 function diaAnterior(fechaIso) {
@@ -37,8 +51,7 @@ function diaAnterior(fechaIso) {
 }
 
 export async function fetchOtrasMonedas() {
-  const fechaHoy = fechaArgentinaHoy()
-  const hoy = await fetchUsdRatesLatest(fechaHoy)
+  const hoy = await fetchUsdRatesLatest(horaArgentinaCacheBuster())
 
   let ayer = null
   try {
