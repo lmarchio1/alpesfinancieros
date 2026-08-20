@@ -12,7 +12,7 @@ const ROW_CLASS =
   'group animate-fade-up border-l-4 border-transparent transition-colors duration-200 hover:border-brand-500 hover:bg-brand-50/60 motion-reduce:animate-none'
 const TICKER_CLASS =
   'px-5 py-3 font-semibold text-brand-600 transition-colors duration-200 group-hover:text-brand-800'
-const HEAD_CLASS = 'border-b border-[#c17a1e]/25 bg-[#fbeed6]/50 text-xs font-semibold uppercase tracking-wide text-[#8a5719]'
+const HEAD_CLASS = 'bg-brand-700 text-xs font-semibold uppercase tracking-wide text-brand-50'
 const rowDelay = (i) => ({ animationDelay: `${i * 40}ms` })
 
 const GRUPOS = [
@@ -125,8 +125,8 @@ export default function BondsUniverse({ globales, bonares, duales, letras }) {
   return (
     <Card className="overflow-hidden border-t-4 border-[#c17a1e]">
       <div className="flex flex-wrap items-center justify-between gap-3 p-6 pb-0">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#fbeed6] text-[#c17a1e]">
+        <div className="group flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#fbeed6] text-[#c17a1e] transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-[#c17a1e] group-hover:text-white">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
               <path
                 strokeLinecap="round"
