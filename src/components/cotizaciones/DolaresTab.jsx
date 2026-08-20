@@ -116,16 +116,16 @@ export default function DolaresTab() {
       </div>
 
       {banda && (
-        <Card className="group mb-4 overflow-hidden !bg-slate-50 p-5">
+        <Card className="group mb-4 overflow-hidden !border-white/10 !bg-[#0F2942] p-5 !shadow-[0_10px_25px_-5px_rgba(0,0,0,0.35)]">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-white transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-brand-700">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-brand-600 transition-transform duration-300 ease-out group-hover:scale-110">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M4 10v11M20 10v11M2 10l10-6 10 6M8 10v11M16 10v11" />
               </svg>
             </div>
             <div>
-              <p className="font-semibold text-slate-900">Banda Cambiaria / Zona de No Intervención (BCRA)</p>
-              <p className="text-xs text-slate-500">Esquema de flotación administrada con ajuste diario por inflación (IPC).</p>
+              <p className="font-semibold text-white">Banda Cambiaria / Zona de No Intervención (BCRA)</p>
+              <p className="text-xs text-slate-300">Esquema de flotación administrada con ajuste diario por inflación (IPC).</p>
             </div>
           </div>
 
@@ -136,21 +136,21 @@ export default function DolaresTab() {
             </div>
 
             <div className="order-3 col-span-2 pt-3 sm:order-none sm:col-span-1 sm:px-5 sm:pt-6">
-              <div className="relative h-2.5 w-full rounded-full bg-gradient-to-r from-emerald-400 via-slate-300 to-rose-400 shadow-inner ring-1 ring-black/10">
+              <div className="relative h-2.5 w-full rounded-full bg-gradient-to-r from-emerald-400 via-slate-300 to-rose-400 shadow-inner ring-1 ring-white/10">
                 {bandaPct !== null && (
                   <div
                     className="absolute top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
                     style={{ left: `${bandaPct}%` }}
                   >
-                    <span className="mb-1.5 whitespace-nowrap rounded-md bg-slate-900 px-1.5 py-0.5 text-[10px] font-semibold text-white shadow-sm">
+                    <span className="mb-1.5 whitespace-nowrap rounded-md bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-900 shadow-sm">
                       Mayorista {formatArsEntero(mayorista.venta)}
                       {faltaParaTecho !== null && (
-                        <span className="ml-1 font-normal text-slate-300">
+                        <span className="ml-1 font-normal text-slate-500">
                           · falta {faltaParaTecho.toFixed(1)}% para el techo
                         </span>
                       )}
                     </span>
-                    <span className="h-3.5 w-3.5 rounded-full border-2 border-white bg-brand-600 shadow" />
+                    <span className="h-3.5 w-3.5 rounded-full border-2 border-[#0F2942] bg-white shadow" />
                   </div>
                 )}
               </div>
