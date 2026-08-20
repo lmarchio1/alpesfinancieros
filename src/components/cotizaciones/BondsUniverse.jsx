@@ -186,7 +186,7 @@ export default function BondsUniverse({ globales, bonares, duales, boncer, letra
         ))}
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto pb-6">
         {grupo === 'globales' && <TablaUsd key="globales" bonos={globales} />}
         {grupo === 'bonares' && <TablaUsd key="bonares" bonos={bonares} />}
         {grupo === 'boncer' && <TablaBoncer key="boncer" bonos={boncer} />}
@@ -195,28 +195,11 @@ export default function BondsUniverse({ globales, bonares, duales, boncer, letra
       </div>
 
       {grupo === 'duales' && (
-        <p className="px-6 pt-2 text-xs text-slate-400">
+        <p className="px-6 pb-6 -mt-4 text-xs text-slate-400">
           Los duales pagan lo mayor entre una tasa fija y una tasa ligada a devaluación + spread;
           el precio de mercado ya refleja esa opcionalidad.
         </p>
       )}
-
-      <div className="mx-6 mb-6 mt-2 flex items-start gap-2 rounded-lg bg-slate-50 px-4 py-3 ring-1 ring-inset ring-slate-200">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          className="mt-0.5 h-4 w-4 shrink-0 text-slate-400"
-        >
-          <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8h.01M11 12h1v4h1" />
-        </svg>
-        <p className="text-xs text-slate-600">
-          Precios de referencia con posible demora provistos únicamente a título informativo. No
-          constituyen oferta pública ni recomendación de inversión en títulos valores.
-        </p>
-      </div>
     </Card>
   )
 }

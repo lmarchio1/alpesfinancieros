@@ -24,9 +24,9 @@ export default function RiesgoPaisSensitivity({ riesgoPais, globales, bonares })
 
   return (
     <Card className="p-6">
-      <h3 className="font-semibold text-slate-900">Sensibilidad de bonos en dólares al riesgo país</h3>
+      <h3 className="font-semibold text-slate-900">Impacto por Variación de Spread Soberano</h3>
       <p className="mt-1 text-sm text-slate-500">
-        Estimación con duración modificada: a mayor riesgo país, mayor rendimiento exigido y menor precio.
+        Estimación del impacto teórico en la cotización ante variaciones en la tasa de rendimiento exigida.
       </p>
 
       <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">

@@ -42,8 +42,7 @@ export default function TasasReferenciaCard() {
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">TAMAR</p>
             <p className="mt-0.5 text-2xl font-bold text-slate-900">{tasas.tamar.valor.toFixed(2)}%</p>
             <p className="mt-1 text-xs text-slate-400">
-              Tasa Mayorista Argentina de Referencia: reemplaza gradualmente a la BADLAR desde fines
-              de 2024, calculada sobre el mismo tipo de depósito mayorista.
+              Tasa Mayorista Argentina de Referencia calculada por el BCRA para depósitos mayoristas.
             </p>
           </div>
         )}

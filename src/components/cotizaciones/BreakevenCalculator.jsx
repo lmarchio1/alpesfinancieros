@@ -63,9 +63,9 @@ export default function BreakevenCalculator({ letras, bonos, dolares }) {
 
   return (
     <Card className="p-6">
-      <h3 className="font-semibold text-slate-900">Calculadora de breakeven: pesos vs. dólar</h3>
+      <h3 className="font-semibold text-slate-900">Análisis de Breakeven Cambiario</h3>
       <p className="mt-1 text-sm text-slate-500">
-        Compará el retorno de una Letra o un Boncer a vencimiento contra el costo de dolarizarte hoy.
+        Evaluación del tipo de cambio implícito de indiferencia frente a instrumentos en moneda local.
       </p>
 
       <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -154,9 +154,10 @@ export default function BreakevenCalculator({ letras, bonos, dolares }) {
           </div>
 
           <p className="mt-5 rounded-lg bg-brand-50 p-4 text-sm text-slate-700">
-            Si el dólar {DOLAR_LABELS[dolarTipo].toLowerCase()} al {formatDate(vencimiento)} está por debajo de{' '}
-            <strong>{formatArs(resultado.dolarBreakeven)}</strong>, te convino quedarte en {seleccionado.ticker}.
-            Si lo supera, te convenía dolarizarte hoy en lugar de entrar al instrumento en pesos.
+            Para cotizaciones de dólar {DOLAR_LABELS[dolarTipo].toLowerCase()} por debajo de{' '}
+            <strong>{formatArs(resultado.dolarBreakeven)}</strong>, el instrumento en pesos ({seleccionado.ticker}
+            ) ofrece mayor rendimiento efectivo. Por encima de dicho valor, el posicionamiento en moneda
+            extranjera resulta superior.
           </p>
           {seleccionado.tipo === 'boncer' && (
             <p className="mt-2 text-xs text-slate-400">
