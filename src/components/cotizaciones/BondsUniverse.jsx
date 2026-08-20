@@ -12,7 +12,7 @@ const ROW_CLASS =
   'group animate-fade-up border-l-4 border-transparent transition-colors duration-200 hover:border-brand-500 hover:bg-brand-50/60 motion-reduce:animate-none'
 const TICKER_CLASS =
   'px-5 py-3 font-semibold text-brand-600 transition-colors duration-200 group-hover:text-brand-800'
-const HEAD_CLASS = 'bg-brand-700 text-xs font-semibold uppercase tracking-wide text-brand-50'
+const HEAD_CLASS = 'border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600'
 const rowDelay = (i) => ({ animationDelay: `${i * 40}ms` })
 
 const GRUPOS = [
@@ -126,16 +126,12 @@ export default function BondsUniverse({ globales, bonares, duales, letras }) {
     <Card className="overflow-hidden border-t-4 border-[#c17a1e]">
       <div className="flex flex-wrap items-center justify-between gap-3 p-6 pb-0">
         <div className="group flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#fbeed6] text-[#c17a1e] transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-[#c17a1e] group-hover:text-white">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-brand-600 group-hover:text-white">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3 21h18M4 10v11M20 10v11M2 10l10-6 10 6M8 10v11M16 10v11"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M6 21V13M11 21V8M16 21V11" />
             </svg>
           </div>
-          <h3 className="font-semibold text-slate-900">Universo de bonos</h3>
+          <h3 className="font-semibold text-slate-900">Renta Fija Soberana</h3>
         </div>
         <Badge variant="positive">● En vivo · data912.com</Badge>
       </div>
