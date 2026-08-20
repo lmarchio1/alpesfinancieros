@@ -1,8 +1,8 @@
 const SEGMENTOS = [
-  { from: '#f3d78a', to: '#c9971c' }, // oro claro
-  { from: '#e0a94a', to: '#a8681a' }, // oro
-  { from: '#c98a4f', to: '#8a4f1e' }, // cobre
-  { from: '#a97a3a', to: '#5f3a16' }, // bronce
+  { from: '#f3d78a', to: '#dba61f' }, // dorado (Estrategia Financiera)
+  { from: '#f3d78a', to: '#dba61f' }, // dorado (Planificación Sucesoria)
+  { from: '#d9807f', to: '#9a2e2e' }, // rojo (Eficiencia fiscal)
+  { from: '#a9505b', to: '#6b1220' }, // bordó (Gobernanza familiar)
 ]
 
 const R = 72
