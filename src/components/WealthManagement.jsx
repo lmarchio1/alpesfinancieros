@@ -54,8 +54,6 @@ const ICONS = {
   ),
 }
 
-const PILARES = ['Sin conflictos de interés', 'Estructura multijurisdiccional', 'Gobernanza familiar']
-
 const ITEMS = [
   {
     icon: 'shield',
@@ -77,8 +75,9 @@ const ITEMS = [
   },
   {
     icon: 'trending',
-    title: 'Seguimiento en tiempo real',
-    description: 'Datos de mercado y calculadora de bonos actualizados para decidir con información al día.',
+    title: 'Monitoreo e inteligencia de datos',
+    description:
+      'Seguimiento continuo de variables macroeconómicas e indicadores clave de mercado, respaldando la toma de decisiones con análisis riguroso e información consolidada.',
   },
 ]
 
@@ -159,18 +158,7 @@ export default function WealthManagement() {
           description="Como Multi-Family Office, unificamos la gestión financiera, legal, fiscal y de gobernanza bajo una misma estructura, alineando cada decisión exclusivamente con sus objetivos."
         />
 
-        <div className="mb-10 flex flex-wrap justify-center gap-3">
-          {PILARES.map((pilar) => (
-            <span
-              key={pilar}
-              className="rounded-full bg-brand-50 px-4 py-1.5 text-sm font-medium text-brand-700 ring-1 ring-inset ring-brand-100"
-            >
-              {pilar}
-            </span>
-          ))}
-        </div>
-
-        <div ref={itemsRef} className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div ref={itemsRef} className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {ITEMS.map((item, i) => (
             <Card
               key={item.title}
