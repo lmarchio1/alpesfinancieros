@@ -133,7 +133,7 @@ export default function BreakevenCalculator({ letras, bonos, dolares }) {
       {resultado && (
         <>
           <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <div>
+            <div className="rounded-xl bg-slate-100 p-4">
               <p className="text-xs text-slate-500">Retorno en pesos ({resultado.dias} días)</p>
               <p className="text-xl font-bold text-slate-900">{formatPct(resultado.retornoTotal)}</p>
               <p className="text-xs text-slate-400">{formatPct(resultado.retornoAnualizado)} anualizado</p>
@@ -146,7 +146,7 @@ export default function BreakevenCalculator({ letras, bonos, dolares }) {
               <p className="text-xs text-slate-900/70">Dólar breakeven al vencimiento</p>
               <p className="text-xl font-bold text-slate-900">{formatArs(resultado.dolarBreakeven)}</p>
             </div>
-            <div>
+            <div className="rounded-xl bg-slate-100 p-4">
               <p className="text-xs text-slate-500">Devaluación implícita</p>
               <p className="text-xl font-bold text-slate-900">{formatPct(resultado.devaluacionImplicitaTotal)}</p>
               <p className="text-xs text-slate-400">{formatPct(resultado.devaluacionAnualizada)} anualizada</p>
