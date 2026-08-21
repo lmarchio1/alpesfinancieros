@@ -21,7 +21,7 @@ export default function Hero() {
           <h1
             className="animate-fade-up text-4xl font-bold tracking-tight text-white drop-shadow-sm motion-reduce:animate-none sm:text-5xl lg:text-6xl"
           >
-            Gestión financiera y patrimonial con visión estratégica.
+            Gestión Financiera y Patrimonial con Visión Estratégica
           </h1>
           <p
             className="mt-6 animate-fade-up text-lg leading-relaxed text-slate-200 motion-reduce:animate-none"
