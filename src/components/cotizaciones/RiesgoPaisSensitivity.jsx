@@ -89,7 +89,7 @@ export default function RiesgoPaisSensitivity({ riesgoPais, globales, bonares })
           <p className="text-xs text-white/70">Riesgo país simulado</p>
           <p className="text-xl font-bold text-white">{riesgoPaisEstimado} pb</p>
         </div>
-        <div>
+        <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-inset ring-slate-200">
           <p className="text-xs text-slate-500">Impacto estimado en precio</p>
           <p className={`text-xl font-bold ${impacto >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
             {impacto >= 0 ? '+' : ''}
