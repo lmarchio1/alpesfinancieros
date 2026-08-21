@@ -18,17 +18,11 @@ function noVencido(instrumento) {
 }
 
 export async function fetchRentaFija() {
-  const [bonosResp, letrasMeta, riesgoPais, notas] = await Promise.all([
-    getJson('bonos-cer'),
+  const [letrasMeta, riesgoPais, notas] = await Promise.all([
     getJson('letras'),
     getJson('indices/riesgo-pais/ultimo'),
     fetchArgNotes(),
   ])
-
-  const bonos = bonosResp.bonos
-    .filter(noVencido)
-    .sort((a, b) => b.volumen - a.volumen)
-    .slice(0, 6)
 
   const precioPorTicker = new Map(notas.map((n) => [n.symbol, n.c]))
 
@@ -44,7 +38,7 @@ export async function fetchRentaFija() {
     .sort((a, b) => new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento))
     .slice(0, 6)
 
-  return { bonos, letras: letrasOrdenadas, riesgoPais }
+  return { letras: letrasOrdenadas, riesgoPais }
 }
 
 // Valor de riesgo país del día hábil anterior, para comparar contra el último dato.

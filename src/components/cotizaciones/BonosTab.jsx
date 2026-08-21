@@ -92,7 +92,7 @@ export default function BonosTab() {
 
         {modelosAbierto && (
           <div className="mt-6 space-y-6">
-            <BreakevenCalculator letras={rentaFija.data.letras} bonos={rentaFija.data.bonos} dolares={dolares.data} />
+            <BreakevenCalculator letras={rentaFija.data.letras} dolares={dolares.data} />
             <RiesgoPaisSensitivity
               riesgoPais={rentaFija.data.riesgoPais}
               globales={universo.data.globales}

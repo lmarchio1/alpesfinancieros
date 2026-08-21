@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import Card from '../ui/Card'
-import { retornoLetra, retornoBoncerNominal, calcularBreakeven, anualizar } from '../../utils/bondMath'
+import { retornoLetra, calcularBreakeven, anualizar } from '../../utils/bondMath'
 
 const formatArs = (value) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(value)
@@ -19,17 +19,13 @@ const DOLAR_LABELS = {
   tarjeta: 'Tarjeta',
 }
 
-export default function BreakevenCalculator({ letras, bonos, dolares }) {
+export default function BreakevenCalculator({ letras, dolares }) {
   const opciones = useMemo(
-    () => [
-      ...letras.map((l) => ({ id: `letra-${l.ticker}`, tipo: 'letra', ticker: l.ticker, data: l })),
-      ...bonos.map((b) => ({ id: `boncer-${b.ticker}`, tipo: 'boncer', ticker: b.ticker, data: b })),
-    ],
-    [letras, bonos],
+    () => letras.map((l) => ({ id: `letra-${l.ticker}`, ticker: l.ticker, data: l })),
+    [letras],
   )
 
   const [selectedId, setSelectedId] = useState(opciones[0]?.id)
-  const [inflacionEsperada, setInflacionEsperada] = useState(25)
   const [dolarTipo, setDolarTipo] = useState('blue')
 
   const seleccionado = opciones.find((o) => o.id === selectedId) ?? opciones[0]
@@ -38,10 +34,7 @@ export default function BreakevenCalculator({ letras, bonos, dolares }) {
   const resultado = useMemo(() => {
     if (!seleccionado || !dolarSeleccionado) return null
 
-    const { retornoTotal, dias } =
-      seleccionado.tipo === 'letra'
-        ? retornoLetra(seleccionado.data)
-        : retornoBoncerNominal(seleccionado.data, inflacionEsperada / 100)
+    const { retornoTotal, dias } = retornoLetra(seleccionado.data)
 
     const dolarSpot = dolarSeleccionado.venta
     const { dolarBreakeven, devaluacionImplicitaTotal } = calcularBreakeven({ retornoTotal, dolarSpot })
@@ -55,7 +48,7 @@ export default function BreakevenCalculator({ letras, bonos, dolares }) {
       devaluacionImplicitaTotal,
       devaluacionAnualizada: anualizar(devaluacionImplicitaTotal, dias),
     }
-  }, [seleccionado, dolarSeleccionado, inflacionEsperada])
+  }, [seleccionado, dolarSeleccionado])
 
   if (!seleccionado || !dolarSeleccionado) return null
 
@@ -68,7 +61,7 @@ export default function BreakevenCalculator({ letras, bonos, dolares }) {
         Evaluación del tipo de cambio implícito de indiferencia frente a instrumentos en moneda local.
       </p>
 
-      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className="text-xs font-medium text-slate-500">Instrumento</label>
           <select
@@ -76,24 +69,11 @@ export default function BreakevenCalculator({ letras, bonos, dolares }) {
             onChange={(e) => setSelectedId(e.target.value)}
             className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           >
-            <optgroup label="Letras (LECAPs)">
-              {opciones
-                .filter((o) => o.tipo === 'letra')
-                .map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.ticker} · vto. {formatDate(o.data.fechaVencimiento)}
-                  </option>
-                ))}
-            </optgroup>
-            <optgroup label="Boncer (CER)">
-              {opciones
-                .filter((o) => o.tipo === 'boncer')
-                .map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.ticker} · vto. {formatDate(o.data.fechaVencimiento)}
-                  </option>
-                ))}
-            </optgroup>
+            {opciones.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.ticker} · vto. {formatDate(o.data.fechaVencimiento)}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -111,23 +91,6 @@ export default function BreakevenCalculator({ letras, bonos, dolares }) {
             ))}
           </select>
         </div>
-
-        {seleccionado.tipo === 'boncer' && (
-          <div>
-            <label className="text-xs font-medium text-slate-500">Inflación anual esperada</label>
-            <div className="mt-1 flex items-center gap-2">
-              <input
-                type="number"
-                min="0"
-                max="200"
-                value={inflacionEsperada}
-                onChange={(e) => setInflacionEsperada(Number(e.target.value))}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-              />
-              <span className="text-sm text-slate-500">%</span>
-            </div>
-          </div>
-        )}
       </div>
 
       {resultado && (
@@ -159,12 +122,6 @@ export default function BreakevenCalculator({ letras, bonos, dolares }) {
             ) ofrece mayor rendimiento efectivo. Por encima de dicho valor, el posicionamiento en moneda
             extranjera resulta superior.
           </p>
-          {seleccionado.tipo === 'boncer' && (
-            <p className="mt-2 text-xs text-slate-400">
-              El retorno de Boncer depende de la inflación futura (CER): el resultado usa el supuesto de
-              inflación esperada que definiste arriba, no un dato en vivo.
-            </p>
-          )}
         </>
       )}
     </Card>

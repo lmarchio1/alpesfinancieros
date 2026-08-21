@@ -12,18 +12,6 @@ export function retornoLetra(letra) {
   return { retornoTotal, dias }
 }
 
-// Bono CER: la TIR publicada es real (por encima del CER). Para pasarla a
-// retorno nominal en pesos hay que asumir una inflación esperada, ya que el
-// capital se ajusta por CER hasta el vencimiento.
-export function retornoBoncerNominal(bono, inflacionAnualEsperada) {
-  const dias = diasHasta(bono.fechaVencimiento)
-  const anios = dias / 365
-  const factorCer = Math.pow(1 + inflacionAnualEsperada, anios)
-  const factorReal = Math.pow(1 + bono.tirPorcentaje / 100, anios)
-  const retornoTotal = factorCer * factorReal - 1
-  return { retornoTotal, dias }
-}
-
 // Dólar al que hay que llegar al vencimiento para que ambas estrategias
 // (quedarse en el instrumento en pesos vs. dolarizarse hoy) empaten.
 export function calcularBreakeven({ retornoTotal, dolarSpot }) {
