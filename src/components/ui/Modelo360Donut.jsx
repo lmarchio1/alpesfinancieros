@@ -2,7 +2,7 @@ const SEGMENTOS = [
   { from: '#f3d78a', to: '#dba61f' }, // dorado
   { from: '#dba61f', to: '#b8622f' }, // dorado hacia cobre
   { from: '#b8622f', to: '#9a2e2e' }, // cobre hacia rojo
-  { from: '#9a2e2e', to: '#6b1220' }, // rojo hacia bordó
+  { from: '#c14a56', to: '#6b1220' }, // rojo hacia bordó
 ]
 
 const R = 72

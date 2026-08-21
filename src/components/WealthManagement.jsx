@@ -92,8 +92,8 @@ const MODELO_360 = [
   },
   {
     icon: 'scale',
-    color: 'bg-[#fdf6e3] text-[#dba61f] group-hover:bg-[#dba61f] group-hover:text-white',
-    border: 'border-l-[#dba61f]',
+    color: 'bg-[#fbe8d9] text-[#b8622f] group-hover:bg-[#b8622f] group-hover:text-white',
+    border: 'border-l-[#b8622f]',
     title: 'Planificación Sucesoria',
     description:
       'Asesoramiento integral en la transmisión ordenada del patrimonio, garantizando la protección del legado familiar.',
