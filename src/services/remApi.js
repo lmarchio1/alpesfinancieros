@@ -23,3 +23,23 @@ export async function fetchExpectativaInflacionREM() {
     publicacionUrl: proximos12Meses.publicacionUrl,
   }
 }
+
+// Mediana de pronósticos de tipo de cambio nominal ($/USD) del REM, mes a mes,
+// panel completo de participantes ("todos"), última encuesta publicada.
+export async function fetchDolarEsperadoREM() {
+  const res = await fetch(URL)
+  if (!res.ok) throw new Error('No se pudo obtener el REM del BCRA')
+  const registros = await res.json()
+
+  const mensual = registros
+    .filter((r) => r.muestra === 'todos' && r.indicador === 'Tipo de cambio nominal' && r.periodoTipo === 'mensual')
+    .sort((a, b) => new Date(a.periodoDesde) - new Date(b.periodoDesde))
+
+  if (mensual.length === 0) return null
+
+  return {
+    informe: mensual[0].informe,
+    meses: mensual.map((r) => ({ periodoDesde: r.periodoDesde, mediana: r.mediana })),
+    publicacionUrl: mensual[0].publicacionUrl,
+  }
+}

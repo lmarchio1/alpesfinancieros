@@ -7,6 +7,7 @@ import Card from '../ui/Card'
 import RiesgoPaisCard from './RiesgoPaisCard'
 import ReservasCard from './ReservasCard'
 import TasasReferenciaCard from './TasasReferenciaCard'
+import DolarEsperadoCard from './DolarEsperadoCard'
 import BreakevenCalculator from './BreakevenCalculator'
 import RiesgoPaisSensitivity from './RiesgoPaisSensitivity'
 import BondsUniverse from './BondsUniverse'
@@ -96,6 +97,7 @@ export default function BonosTab() {
 
         {modelosAbierto && (
           <div className="mt-6 space-y-6">
+            <DolarEsperadoCard />
             <BreakevenCalculator letras={rentaFija.data.letras} dolares={dolares.data} />
             <RiesgoPaisSensitivity
               riesgoPais={rentaFija.data.riesgoPais}
