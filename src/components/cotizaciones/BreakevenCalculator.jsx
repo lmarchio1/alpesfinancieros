@@ -26,7 +26,7 @@ export default function BreakevenCalculator({ letras, dolares }) {
   )
 
   const [selectedId, setSelectedId] = useState(opciones[0]?.id)
-  const [dolarTipo, setDolarTipo] = useState('blue')
+  const [dolarTipo, setDolarTipo] = useState('oficial')
 
   const seleccionado = opciones.find((o) => o.id === selectedId) ?? opciones[0]
   const dolarSeleccionado = dolares.find((d) => d.casa === dolarTipo) ?? dolares[0]
