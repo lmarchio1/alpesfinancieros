@@ -5,35 +5,47 @@ const HIST_BASE_URL = 'https://api.argentinadatos.com/v1/cotizaciones'
 
 const CASAS = ['oficial', 'blue', 'bolsa', 'contadoconliqui', 'mayorista', 'cripto', 'tarjeta']
 
-// MEP implícito via AL30/AL30D (bono en pesos vs. su variante en dólares, 48hs):
-// contrastado contra el cierre de referencia de Ámbito Financiero, coincidió
-// exacto ($1.535,08 los dos), mientras que dolarapi.com venía mostrando un
-// valor con diferencias de hasta $20. Compra = vender el bono en pesos y
-// comprarlo en dólares (AL30 bid / AL30D ask); venta = al revés (AL30 ask /
-// AL30D bid) — mismo criterio bid/ask que usa el resto del sitio.
-async function fetchDolarMepImplicito() {
+// MEP y CCL implícitos vía AL30: se compra el bono en pesos localmente y se
+// vende en su variante en dólares — AL30D (48hs, liquida en el país) para
+// MEP, AL30C (liquida en cuentas de EE.UU.) para CCL. Contrastado contra el
+// cierre de referencia de Ámbito Financiero: MEP coincidió exacto
+// ($1.535,08 los dos), CCL quedó a 0,11% de diferencia, mientras que
+// dolarapi.com venía mostrando un MEP con diferencias de hasta $20. Compra =
+// vender el bono en pesos y comprarlo en dólares (AL30 bid / variante ask);
+// venta = al revés (AL30 ask / variante bid) — mismo criterio bid/ask que
+// usa el resto del sitio.
+async function fetchDolaresImplicitos() {
   try {
     const bonds = await fetchArgBonds()
     const porSimbolo = new Map(bonds.map((b) => [b.symbol, b]))
     const al30 = porSimbolo.get('AL30')
     const al30d = porSimbolo.get('AL30D')
-    if (!al30?.px_bid || !al30?.px_ask || !al30d?.px_bid || !al30d?.px_ask) return null
-    return {
-      compra: al30.px_bid / al30d.px_ask,
-      venta: al30.px_ask / al30d.px_bid,
+    const al30c = porSimbolo.get('AL30C')
+
+    const implicito = (variante) => {
+      if (!al30?.px_bid || !al30?.px_ask || !variante?.px_bid || !variante?.px_ask) return null
+      return {
+        compra: al30.px_bid / variante.px_ask,
+        venta: al30.px_ask / variante.px_bid,
+      }
     }
+
+    return { mep: implicito(al30d), ccl: implicito(al30c) }
   } catch {
-    return null
+    return { mep: null, ccl: null }
   }
 }
 
 export async function fetchDolares() {
-  const [res, mep] = await Promise.all([fetch(`${BASE_URL}/dolares`), fetchDolarMepImplicito()])
+  const [res, implicitos] = await Promise.all([fetch(`${BASE_URL}/dolares`), fetchDolaresImplicitos()])
   if (!res.ok) throw new Error('No se pudo obtener la cotización del dólar')
   const data = await res.json()
 
-  if (!mep) return data
-  return data.map((d) => (d.casa === 'bolsa' ? { ...d, compra: mep.compra, venta: mep.venta } : d))
+  return data.map((d) => {
+    if (d.casa === 'bolsa' && implicitos.mep) return { ...d, ...implicitos.mep }
+    if (d.casa === 'contadoconliqui' && implicitos.ccl) return { ...d, ...implicitos.ccl }
+    return d
+  })
 }
 
 function dateParts(date) {
