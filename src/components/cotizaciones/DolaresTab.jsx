@@ -191,7 +191,14 @@ export default function DolaresTab() {
                       </svg>
                     </div>
                   )}
-                  <h3 className="font-semibold text-slate-900">{NOMBRE_OVERRIDE[d.casa] ?? d.nombre}</h3>
+                  <div>
+                    <h3 className="font-semibold text-slate-900">{NOMBRE_OVERRIDE[d.casa] ?? d.nombre}</h3>
+                    {(d.casa === 'bolsa' || d.casa === 'contadoconliqui') && (
+                      <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                        Estimado (AL30)
+                      </p>
+                    )}
+                  </div>
                 </div>
                 {brecha !== null ? (
                   <span className="whitespace-nowrap rounded-full border border-[#CBD5E1] bg-[#F1F5F9] px-2.5 py-0.5 text-xs font-medium text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.05)]">
