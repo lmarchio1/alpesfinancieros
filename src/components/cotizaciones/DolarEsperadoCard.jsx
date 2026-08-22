@@ -19,7 +19,24 @@ export default function DolarEsperadoCard() {
       .catch(() => setRem(null))
   }, [])
 
-  if (!rem) return null
+  if (!rem) {
+    return (
+      <Card className="!bg-[#E9EEE7] p-6">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 shrink-0 animate-pulse rounded-lg bg-white/70" />
+          <div className="space-y-2">
+            <div className="h-4 w-40 animate-pulse rounded bg-white/70" />
+            <div className="h-3 w-72 animate-pulse rounded bg-white/70" />
+          </div>
+        </div>
+        <div className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-16 animate-pulse rounded-xl bg-white/70" />
+          ))}
+        </div>
+      </Card>
+    )
+  }
 
   return (
     <Card className="group !bg-[#E9EEE7] p-6 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70">
