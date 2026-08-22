@@ -8,26 +8,36 @@ async function fetchJson(url) {
   return res.json()
 }
 
-// @latest siempre resuelve a la publicación más nueva disponible -confirmado
-// en vivo-, pero el navegador la cachea 7 días (Cache-Control: max-age=604800)
-// sin importar que el contenido cambie a diario. Un cache-buster único por
-// pedido (Date.now(), no una franja horaria) fuerza SIEMPRE una request de
-// red nueva: tanto en el poll automático como en un click manual de
-// "Actualizar" -antes el buster cambiaba una vez por hora, así que tocar
-// "Actualizar" dentro de la misma hora pegaba contra la misma URL cacheada y
-// no traía nada nuevo, aunque la fuente ya hubiera publicado el dato-.
-// (La alternativa de pedir la fecha exacta en la URL, @YYYY-MM-DD, evita ese
-// cache pero puede tardar horas en propagarse recién empezado el día -esa
-// ruta quedaba en 404 mientras @latest ya tenía el dato nuevo-, así que
-// @latest + cache-busting es la fuente primaria para "hoy".)
+// @latest resuelve a la publicación más nueva -confirmado en vivo-, pero
+// jsdelivr la sirve desde su CDN de borde con Cache-Control: s-maxage=43200
+// (12hs) e IGNORA POR COMPLETO el query string para decidir qué devolver
+// -confirmado pidiendo la misma URL con dos cache-busters distintos: llegó
+// el mismo header Age en los dos, o sea la misma respuesta cacheada-. Ningún
+// truco de cache-busting del lado del cliente puede evitar ese caché de
+// borde, así que @latest no sirve como fuente primaria para "hoy".
+//
+// En cambio, la URL con fecha exacta (@YYYY-MM-DD) apunta a una versión
+// específica e inmutable del paquete, que jsdelivr cachea de forma estable
+// y correcta una vez publicada. Por eso ahora se pide esa primero, y solo
+// se cae a @latest si la fecha de hoy todavía no se publicó (404).
+function fetchUsdRatesFecha(fecha) {
+  return fetchJson(`${BASE_URL}@${fecha}/v1/currencies/usd.json`)
+}
+
 function fetchUsdRatesLatest(cacheBuster) {
   return fetchJson(`${BASE_URL}@latest/v1/currencies/usd.json?_=${cacheBuster}`)
 }
 
-// Para "ayer" sí conviene la fecha exacta en la URL: es una fecha que ya pasó
-// por completo, por lo que su publicación ya está estable y disponible.
-function fetchUsdRatesFecha(fecha) {
-  return fetchJson(`${BASE_URL}@${fecha}/v1/currencies/usd.json`)
+function fechaArgentinaHoy() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
+}
+
+async function fetchUsdRatesHoy() {
+  try {
+    return await fetchUsdRatesFecha(fechaArgentinaHoy())
+  } catch {
+    return fetchUsdRatesLatest(Date.now())
+  }
 }
 
 function diaAnterior(fechaIso) {
@@ -37,7 +47,7 @@ function diaAnterior(fechaIso) {
 }
 
 export async function fetchOtrasMonedas() {
-  const hoy = await fetchUsdRatesLatest(Date.now())
+  const hoy = await fetchUsdRatesHoy()
 
   let ayer = null
   try {
