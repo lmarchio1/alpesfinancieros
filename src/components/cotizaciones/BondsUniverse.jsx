@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
+import FlashPrice from '../ui/FlashPrice'
 
 // timeZone: 'UTC' evita que una fecha sin hora (ej. "2029-07-09") se corra un día
 // para atrás al mostrarla en un huso horario negativo como Argentina (UTC-3).
@@ -49,7 +50,9 @@ function TablaUsd({ bonos }) {
           <tr key={b.ticker} className={ROW_CLASS} style={rowDelay(i)}>
             <td className={TICKER_CLASS}>{b.ticker}</td>
             <td className="px-5 py-3 text-slate-500">{b.ley}</td>
-            <td className="px-5 py-3 text-right font-semibold text-slate-900">USD {b.precio.toFixed(2)}</td>
+            <td className="px-5 py-3 text-right">
+              <FlashPrice value={b.precio} formatted={`USD ${b.precio.toFixed(2)}`} className="font-semibold" />
+            </td>
             <td className="px-5 py-3 text-right">
               <VarBadge value={b.variacionPorcentaje} />
             </td>
@@ -78,7 +81,9 @@ function TablaLetras({ letras }) {
           <tr key={l.ticker} className={ROW_CLASS} style={rowDelay(i)}>
             <td className={TICKER_CLASS}>{l.ticker}</td>
             <td className="px-5 py-3 text-slate-500">ARG</td>
-            <td className="px-5 py-3 text-right font-semibold text-slate-900">{formatArs(l.precioActual)}</td>
+            <td className="px-5 py-3 text-right">
+              <FlashPrice value={l.precioActual} formatted={formatArs(l.precioActual)} className="font-semibold" />
+            </td>
             <td className="px-5 py-3 text-right">
               <VarBadge value={l.variacionPorcentaje} />
             </td>
@@ -107,7 +112,9 @@ function TablaDuales({ bonos }) {
           <tr key={b.ticker} className={ROW_CLASS} style={rowDelay(i)}>
             <td className={TICKER_CLASS}>{b.ticker}</td>
             <td className="px-5 py-3 text-slate-500">ARG</td>
-            <td className="px-5 py-3 text-right font-semibold text-slate-900">{formatArs(b.precio)}</td>
+            <td className="px-5 py-3 text-right">
+              <FlashPrice value={b.precio} formatted={formatArs(b.precio)} className="font-semibold" />
+            </td>
             <td className="px-5 py-3 text-right">
               <VarBadge value={b.variacionPorcentaje} />
             </td>
