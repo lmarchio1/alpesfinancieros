@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Card from '../ui/Card'
+import DayChangeBadge from '../ui/DayChangeBadge'
 import { fetchTasasReferencia } from '../../services/bcraApi'
 
 export default function TasasReferenciaCard() {
@@ -30,7 +31,10 @@ export default function TasasReferenciaCard() {
         {tasas.badlar && (
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">BADLAR</p>
-            <p className="mt-0.5 text-2xl font-bold text-slate-900">{tasas.badlar.valor.toFixed(2)}%</p>
+            <div className="mt-0.5 flex items-baseline gap-2">
+              <p className="text-2xl font-bold text-slate-900">{tasas.badlar.valor.toFixed(2)}%</p>
+              <DayChangeBadge current={tasas.badlar.valor} previous={tasas.badlar.valorAnterior} />
+            </div>
             <p className="mt-1 text-xs text-slate-400">
               Tasa promedio para depósitos a plazo fijo mayoristas en bancos privados (estrato
               superior a $1M, plazo 30-35 días).
@@ -40,7 +44,10 @@ export default function TasasReferenciaCard() {
         {tasas.tamar && (
           <div className={tasas.badlar ? 'border-t border-slate-100 pt-5' : ''}>
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">TAMAR</p>
-            <p className="mt-0.5 text-2xl font-bold text-slate-900">{tasas.tamar.valor.toFixed(2)}%</p>
+            <div className="mt-0.5 flex items-baseline gap-2">
+              <p className="text-2xl font-bold text-slate-900">{tasas.tamar.valor.toFixed(2)}%</p>
+              <DayChangeBadge current={tasas.tamar.valor} previous={tasas.tamar.valorAnterior} />
+            </div>
             <p className="mt-1 text-xs text-slate-400">
               Tasa de referencia del BCRA para depósitos del segmento corporativo e institucional
               (operaciones desde $1.000M).

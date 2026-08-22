@@ -5,6 +5,7 @@ import { fetchTasaPlazoFijo30Dias, fetchInflacionMensual } from '../../services/
 import { valorActualizado, factorAcumulado, mesesEnRango, inflacionInteranual } from '../../utils/inflacionMath'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
+import DayChangeBadge from '../ui/DayChangeBadge'
 import MonthPicker from '../ui/MonthPicker'
 
 const formatArs = (value) =>
@@ -149,7 +150,10 @@ export default function InflacionTab() {
               </div>
               <p className="text-sm text-slate-500">Plazo fijo a 30 días (BCRA)</p>
             </div>
-            <p className="mt-3 text-3xl font-bold text-slate-900">{plazoFijo.valor.toFixed(2)}%</p>
+            <div className="mt-3 flex items-baseline gap-2">
+              <p className="text-3xl font-bold text-slate-900">{plazoFijo.valor.toFixed(2)}%</p>
+              <DayChangeBadge current={plazoFijo.valor} previous={plazoFijo.valorAnterior} />
+            </div>
             <p className="mt-1 text-xs text-slate-400">
               Tasa nominal anual de referencia del sistema financiero para colocaciones a 30 días.
             </p>

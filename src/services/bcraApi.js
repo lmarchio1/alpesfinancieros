@@ -58,10 +58,11 @@ export async function fetchBandaCambiaria() {
 
 export async function fetchTasaPlazoFijo30Dias() {
   const hoy = fechaArgentinaHoy()
-  const desde = haceNDias(hoy, 7)
-  const dato = await fetchUltimoValor(ID_PLAZO_FIJO_30D, desde, hoy)
-  if (!dato) return null
-  return { valor: dato.valor, fecha: dato.fecha }
+  const desde = haceNDias(hoy, 10)
+  const serie = await fetchSerie(ID_PLAZO_FIJO_30D, desde, hoy)
+  const actual = serie[0]
+  if (!actual) return null
+  return { valor: actual.valor, fecha: actual.fecha, valorAnterior: serie[1]?.valor ?? null }
 }
 
 export async function fetchReservasInternacionales() {
@@ -82,13 +83,15 @@ export async function fetchInflacionMensual() {
 
 export async function fetchTasasReferencia() {
   const hoy = fechaArgentinaHoy()
-  const desde = haceNDias(hoy, 7)
-  const [badlar, tamar] = await Promise.all([
-    fetchUltimoValor(ID_BADLAR, desde, hoy),
-    fetchUltimoValor(ID_TAMAR, desde, hoy),
+  const desde = haceNDias(hoy, 10)
+  const [badlarSerie, tamarSerie] = await Promise.all([
+    fetchSerie(ID_BADLAR, desde, hoy),
+    fetchSerie(ID_TAMAR, desde, hoy),
   ])
+  const badlar = badlarSerie[0]
+  const tamar = tamarSerie[0]
   return {
-    badlar: badlar ? { valor: badlar.valor, fecha: badlar.fecha } : null,
-    tamar: tamar ? { valor: tamar.valor, fecha: tamar.fecha } : null,
+    badlar: badlar ? { valor: badlar.valor, fecha: badlar.fecha, valorAnterior: badlarSerie[1]?.valor ?? null } : null,
+    tamar: tamar ? { valor: tamar.valor, fecha: tamar.fecha, valorAnterior: tamarSerie[1]?.valor ?? null } : null,
   }
 }
