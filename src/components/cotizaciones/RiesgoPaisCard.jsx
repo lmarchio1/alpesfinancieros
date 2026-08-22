@@ -23,13 +23,16 @@ export default function RiesgoPaisCard({ riesgoPais }) {
 
   return (
     <Card className="group border-t-4 border-orange-500 p-6 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-orange-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-orange-600 group-hover:text-white">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 12h4l2 6 4-16 2 10 2-4h4" />
-          </svg>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-orange-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-orange-600 group-hover:text-white">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 12h4l2 6 4-16 2 10 2-4h4" />
+            </svg>
+          </div>
+          <p className="font-semibold text-slate-900">Riesgo país (EMBI+ Argentina)</p>
         </div>
-        <p className="font-semibold text-slate-900">Riesgo país (EMBI+ Argentina)</p>
+        <span className="shrink-0 text-[11px] font-medium text-[#94A3B8]">Al cierre: {formatFecha(riesgoPais.fecha)}</span>
       </div>
 
       <div className="mt-3 flex items-baseline gap-2">
@@ -39,7 +42,6 @@ export default function RiesgoPaisCard({ riesgoPais }) {
       <p className="mt-1 text-xs text-slate-400">
         Diferencial de rendimiento de la deuda soberana frente a los bonos del Tesoro de EE. UU.
       </p>
-      <p className="mt-2 text-[11px] text-[#94A3B8]">Al cierre: {formatFecha(riesgoPais.fecha)}</p>
     </Card>
   )
 }
