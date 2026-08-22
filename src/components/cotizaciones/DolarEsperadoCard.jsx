@@ -22,25 +22,49 @@ export default function DolarEsperadoCard() {
   if (!rem) return null
 
   return (
-    <Card className="p-6">
-      <h3 className="font-semibold text-slate-900">Dólar Esperado (REM)</h3>
-      <p className="mt-1 text-sm text-slate-500">
-        Mediana de pronósticos de bancos y consultoras relevados por el BCRA para el tipo de cambio
-        nominal, mes a mes.
-      </p>
-
-      <div className="mt-5 flex gap-3 overflow-x-auto pb-2">
-        {rem.meses.map((m) => (
-          <div key={m.periodoDesde} className="min-w-[92px] shrink-0 rounded-xl bg-slate-100 p-3 text-center">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              {formatMesCorto(m.periodoDesde)}
-            </p>
-            <p className="mt-1 text-lg font-bold text-slate-900">{formatArs(m.mediana)}</p>
-          </div>
-        ))}
+    <Card className="group !bg-emerald-50 p-6 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-emerald-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+            <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 6v12M15 9.5c0-1.5-1.5-2.5-3-2.5s-3 1-3 2.5c0 3 6 1.5 6 4.5 0 1.5-1.5 2.5-3 2.5s-3-1-3-2.5"
+            />
+          </svg>
+        </div>
+        <div>
+          <h3 className="font-semibold text-slate-900">Dólar Esperado (REM)</h3>
+          <p className="text-sm text-slate-500">
+            Mediana de pronósticos de bancos y consultoras relevados por el BCRA para el tipo de
+            cambio nominal, mes a mes.
+          </p>
+        </div>
       </div>
 
-      <p className="mt-4 text-xs text-slate-400">
+      <div className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-6">
+        {rem.meses.map((m, i) => {
+          const anterior = rem.meses[i - 1]
+          const momPct = anterior ? (m.mediana / anterior.mediana - 1) * 100 : null
+          return (
+            <div key={m.periodoDesde} className="rounded-xl bg-white p-3 text-center">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                {formatMesCorto(m.periodoDesde)}
+              </p>
+              <p className="mt-1 text-lg font-bold text-slate-900">{formatArs(m.mediana)}</p>
+              {momPct !== null && (
+                <p className="mt-0.5 text-xs font-medium text-emerald-600">
+                  {momPct >= 0 ? '+' : ''}
+                  {momPct.toFixed(2)}%
+                </p>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      <p className="mt-4 text-xs text-slate-500">
         Relevamiento de Expectativas de Mercado (REM), informe {rem.informe}. Refleja la opinión de un
         panel de analistas, no un precio de mercado negociable ni una proyección propia.
       </p>
