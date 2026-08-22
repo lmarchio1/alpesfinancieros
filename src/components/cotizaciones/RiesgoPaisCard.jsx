@@ -23,7 +23,7 @@ export default function RiesgoPaisCard({ riesgoPais }) {
 
   return (
     <Card className="group border-t-4 border-orange-500 p-6 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-orange-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-orange-600 group-hover:text-white">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
@@ -32,7 +32,9 @@ export default function RiesgoPaisCard({ riesgoPais }) {
           </div>
           <p className="font-semibold text-slate-900">Riesgo país (EMBI+ Argentina)</p>
         </div>
-        <span className="shrink-0 text-[11px] font-medium text-[#94A3B8]">Al cierre: {formatFecha(riesgoPais.fecha)}</span>
+        <span className="shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-500">
+          Al cierre: {formatFecha(riesgoPais.fecha)}
+        </span>
       </div>
 
       <div className="mt-3 flex items-baseline gap-2">
