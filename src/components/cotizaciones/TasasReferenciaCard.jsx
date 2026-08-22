@@ -26,7 +26,7 @@ export default function TasasReferenciaCard() {
         <p className="font-semibold text-slate-900">Tasas de referencia (BCRA)</p>
       </div>
 
-      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+      <div className="mt-5 space-y-5">
         {tasas.badlar && (
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">BADLAR</p>
@@ -38,7 +38,7 @@ export default function TasasReferenciaCard() {
           </div>
         )}
         {tasas.tamar && (
-          <div>
+          <div className={tasas.badlar ? 'border-t border-slate-100 pt-5' : ''}>
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">TAMAR</p>
             <p className="mt-0.5 text-2xl font-bold text-slate-900">{tasas.tamar.valor.toFixed(2)}%</p>
             <p className="mt-1 text-xs text-slate-400">
