@@ -53,11 +53,25 @@ export default function BreakevenCalculator({ letras, dolares }) {
   const vencimiento = seleccionado.data.fechaVencimiento
 
   return (
-    <Card className="p-6">
-      <h3 className="font-semibold text-slate-900">Análisis de Breakeven Cambiario</h3>
-      <p className="mt-1 text-sm text-slate-500">
-        Evaluación del tipo de cambio implícito de indiferencia frente a instrumentos en moneda local.
-      </p>
+    <Card className="group p-6 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-brand-600 group-hover:text-white">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+            <rect x="5" y="3" width="14" height="18" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M8 7h8M8 11h.01M12 11h.01M16 11h.01M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01M16 17h.01"
+            />
+          </svg>
+        </div>
+        <div>
+          <h3 className="font-semibold text-slate-900">Análisis de Breakeven Cambiario</h3>
+          <p className="text-sm text-slate-500">
+            Evaluación del tipo de cambio implícito de indiferencia frente a instrumentos en moneda local.
+          </p>
+        </div>
+      </div>
 
       <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
