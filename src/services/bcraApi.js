@@ -16,6 +16,9 @@ const ID_PLAZO_FIJO_30D = 12
 const ID_BADLAR = 7
 const ID_TAMAR = 136
 
+// Reservas internacionales brutas del BCRA (saldo diario, en millones de USD).
+const ID_RESERVAS = 1
+
 function fechaArgentinaHoy() {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
 }
@@ -48,6 +51,14 @@ export async function fetchTasaPlazoFijo30Dias() {
   const hoy = fechaArgentinaHoy()
   const desde = haceNDias(hoy, 7)
   const dato = await fetchUltimoValor(ID_PLAZO_FIJO_30D, desde, hoy)
+  if (!dato) return null
+  return { valor: dato.valor, fecha: dato.fecha }
+}
+
+export async function fetchReservasInternacionales() {
+  const hoy = fechaArgentinaHoy()
+  const desde = haceNDias(hoy, 7)
+  const dato = await fetchUltimoValor(ID_RESERVAS, desde, hoy)
   if (!dato) return null
   return { valor: dato.valor, fecha: dato.fecha }
 }
