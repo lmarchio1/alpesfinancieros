@@ -3,6 +3,13 @@ import Card from '../ui/Card'
 import DayChangeBadge from '../ui/DayChangeBadge'
 import { fetchTasasReferencia } from '../../services/bcraApi'
 
+const formatFecha = (fechaIso) => {
+  const d = new Date(fechaIso)
+  const dia = String(d.getUTCDate()).padStart(2, '0')
+  const mes = String(d.getUTCMonth() + 1).padStart(2, '0')
+  return `${dia}/${mes}/${d.getUTCFullYear()}`
+}
+
 export default function TasasReferenciaCard() {
   const [tasas, setTasas] = useState(null)
 
@@ -30,7 +37,12 @@ export default function TasasReferenciaCard() {
       <div className="mt-5 space-y-5">
         {tasas.badlar && (
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">BADLAR</p>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">BADLAR</p>
+              <span className="shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-500">
+                Al cierre: {formatFecha(tasas.badlar.fecha)}
+              </span>
+            </div>
             <div className="mt-0.5 flex items-baseline gap-2">
               <p className="text-2xl font-bold text-slate-900">{tasas.badlar.valor.toFixed(2)}%</p>
               <DayChangeBadge current={tasas.badlar.valor} previous={tasas.badlar.valorAnterior} />
@@ -43,7 +55,12 @@ export default function TasasReferenciaCard() {
         )}
         {tasas.tamar && (
           <div className={tasas.badlar ? 'border-t border-slate-100 pt-5' : ''}>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">TAMAR</p>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">TAMAR</p>
+              <span className="shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-500">
+                Al cierre: {formatFecha(tasas.tamar.fecha)}
+              </span>
+            </div>
             <div className="mt-0.5 flex items-baseline gap-2">
               <p className="text-2xl font-bold text-slate-900">{tasas.tamar.valor.toFixed(2)}%</p>
               <DayChangeBadge current={tasas.tamar.valor} previous={tasas.tamar.valorAnterior} />

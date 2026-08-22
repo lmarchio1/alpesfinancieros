@@ -16,6 +16,13 @@ const formatMes = (yearMonth) => {
   return new Date(y, m - 1, 1).toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })
 }
 
+const formatFecha = (fechaIso) => {
+  const d = new Date(fechaIso)
+  const dia = String(d.getUTCDate()).padStart(2, '0')
+  const mes = String(d.getUTCMonth() + 1).padStart(2, '0')
+  return `${dia}/${mes}/${d.getUTCFullYear()}`
+}
+
 function mesActual() {
   const now = new Date()
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
@@ -142,13 +149,18 @@ export default function InflacionTab() {
 
         {plazoFijo && (
           <Card className="group border-t-4 border-emerald-500 p-6 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v5l3 3M12 3a9 9 0 100 18 9 9 0 000-18z" />
-                </svg>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v5l3 3M12 3a9 9 0 100 18 9 9 0 000-18z" />
+                  </svg>
+                </div>
+                <p className="text-sm text-slate-500">Plazo fijo a 30 días (BCRA)</p>
               </div>
-              <p className="text-sm text-slate-500">Plazo fijo a 30 días (BCRA)</p>
+              <span className="shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-500">
+                Al cierre: {formatFecha(plazoFijo.fecha)}
+              </span>
             </div>
             <div className="mt-3 flex items-baseline gap-2">
               <p className="text-3xl font-bold text-slate-900">{plazoFijo.valor.toFixed(2)}%</p>
