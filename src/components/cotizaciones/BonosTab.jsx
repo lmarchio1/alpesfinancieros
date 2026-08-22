@@ -45,11 +45,12 @@ export default function BonosTab() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
-        <RiesgoPaisCard riesgoPais={rentaFija.data.riesgoPais} />
+        <div className="space-y-4">
+          <RiesgoPaisCard riesgoPais={rentaFija.data.riesgoPais} />
+          <ReservasCard />
+        </div>
         <TasasReferenciaCard />
       </div>
-
-      <ReservasCard />
 
       <BondsUniverse
         globales={universo.data.globales}
