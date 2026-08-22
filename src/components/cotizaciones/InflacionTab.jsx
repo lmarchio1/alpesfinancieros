@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { usePolling } from '../../hooks/usePolling'
-import { fetchInflacionMensual } from '../../services/inflacionApi'
 import { fetchExpectativaInflacionREM } from '../../services/remApi'
-import { fetchTasaPlazoFijo30Dias } from '../../services/bcraApi'
+import { fetchTasaPlazoFijo30Dias, fetchInflacionMensual } from '../../services/bcraApi'
 import { valorActualizado, factorAcumulado, mesesEnRango, inflacionInteranual } from '../../utils/inflacionMath'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
@@ -96,7 +95,7 @@ export default function InflacionTab() {
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <Badge variant="positive">● En vivo · argentinadatos.com (INDEC)</Badge>
+        <Badge variant="positive">● En vivo · BCRA (INDEC)</Badge>
         <div className="flex items-center gap-3 rounded-full bg-slate-900/60 px-3 py-1.5 text-xs text-slate-200 shadow-sm backdrop-blur-sm">
           {updatedAt && <span>Actualizado {updatedAt.toLocaleTimeString('es-AR')}</span>}
           <button type="button" onClick={refresh} className="font-semibold text-brand-300 hover:text-white hover:underline">

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Card from '../ui/Card'
+import DayChangeBadge from '../ui/DayChangeBadge'
 import { fetchReservasInternacionales } from '../../services/bcraApi'
 
 const formatMillones = (valor) => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 }).format(valor)
@@ -26,7 +27,10 @@ export default function ReservasCard() {
         <p className="font-semibold text-slate-900">Reservas brutas (BCRA)</p>
       </div>
 
-      <p className="mt-3 text-2xl font-bold text-slate-900">USD {formatMillones(reservas.valor)} M</p>
+      <div className="mt-3 flex items-baseline gap-2">
+        <p className="text-2xl font-bold text-slate-900">USD {formatMillones(reservas.valor)} M</p>
+        <DayChangeBadge current={reservas.valor} previous={reservas.valorAnterior} />
+      </div>
       <p className="mt-1 text-xs text-slate-400">Reservas Internacionales del BCRA expresada en millones de USD.</p>
     </Card>
   )

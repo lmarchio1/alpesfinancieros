@@ -19,6 +19,9 @@ const ID_TAMAR = 136
 // Reservas internacionales brutas del BCRA (saldo diario, en millones de USD).
 const ID_RESERVAS = 1
 
+// Inflación mensual (IPC - INDEC), republicada por el BCRA como variable propia.
+const ID_INFLACION_MENSUAL = 27
+
 function fechaArgentinaHoy() {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
 }
@@ -29,11 +32,17 @@ function haceNDias(fechaIso, n) {
   return d.toISOString().slice(0, 10)
 }
 
-async function fetchUltimoValor(idVariable, desde, hasta) {
+async function fetchSerie(idVariable, desde, hasta) {
   const res = await fetch(`${BASE_URL}/${idVariable}?desde=${desde}&hasta=${hasta}`)
-  if (!res.ok) throw new Error('No se pudo obtener la banda cambiaria')
+  if (!res.ok) throw new Error('No se pudo obtener la información del BCRA')
   const json = await res.json()
-  return json.results?.[0]?.detalle?.[0] ?? null
+  // La API devuelve el detalle ordenado del más reciente al más antiguo.
+  return json.results?.[0]?.detalle ?? []
+}
+
+async function fetchUltimoValor(idVariable, desde, hasta) {
+  const serie = await fetchSerie(idVariable, desde, hasta)
+  return serie[0] ?? null
 }
 
 export async function fetchBandaCambiaria() {
@@ -57,10 +66,18 @@ export async function fetchTasaPlazoFijo30Dias() {
 
 export async function fetchReservasInternacionales() {
   const hoy = fechaArgentinaHoy()
-  const desde = haceNDias(hoy, 7)
-  const dato = await fetchUltimoValor(ID_RESERVAS, desde, hoy)
-  if (!dato) return null
-  return { valor: dato.valor, fecha: dato.fecha }
+  const desde = haceNDias(hoy, 10)
+  const serie = await fetchSerie(ID_RESERVAS, desde, hoy)
+  const actual = serie[0]
+  if (!actual) return null
+  return { valor: actual.valor, fecha: actual.fecha, valorAnterior: serie[1]?.valor ?? null }
+}
+
+// Serie mensual de inflación (IPC - INDEC), [{ fecha, valor: %mensual }] ascendente.
+export async function fetchInflacionMensual() {
+  const hoy = fechaArgentinaHoy()
+  const serie = await fetchSerie(ID_INFLACION_MENSUAL, '2015-01-01', hoy)
+  return serie.slice().reverse()
 }
 
 export async function fetchTasasReferencia() {
