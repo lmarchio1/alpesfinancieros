@@ -5,6 +5,7 @@ import { retornoLetra, calcularBreakeven, anualizar } from '../../utils/bondMath
 const formatArs = (value) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(value)
 const formatPct = (value) => `${(value * 100).toFixed(1)}%`
+const formatPctSigned = (value) => `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`
 // timeZone: 'UTC' evita que una fecha sin hora se corra un día para atrás al
 // mostrarla en un huso horario negativo como Argentina (UTC-3).
 const formatDate = (value) => new Date(value).toLocaleDateString('es-AR', { timeZone: 'UTC' })
@@ -43,14 +44,20 @@ export default function BreakevenCalculator({ letras, dolares }) {
     // breakeven resultante es el TC vendedor máximo al que se pueden
     // recomprar los dólares al vencimiento sin perder en términos de USD.
     const dolarSpot = dolarSeleccionado.compra
+    const dolarVentaHoy = dolarSeleccionado.venta
     const { dolarBreakeven } = calcularBreakeven({ retornoTotal, dolarSpot })
+    // Cuánto tiene que devaluarse el dólar vendedor de hoy para llegar al
+    // breakeven: si es negativa, el carry ya perdió incluso sin devaluación.
+    const devaluacionImplicita = ((dolarBreakeven - dolarVentaHoy) / dolarVentaHoy) * 100
 
     return {
       dias,
       retornoTotal,
       retornoAnualizado: anualizar(retornoTotal, dias),
       dolarSpot,
+      dolarVentaHoy,
       dolarBreakeven,
+      devaluacionImplicita,
     }
   }, [seleccionado, dolarSeleccionado])
 
@@ -120,12 +127,25 @@ export default function BreakevenCalculator({ letras, dolares }) {
               <p className="text-xs text-slate-400">{formatPct(resultado.retornoAnualizado)} anualizado</p>
             </div>
             <div className="rounded-xl bg-brand-700 p-4">
-              <p className="text-xs text-white/70">TC comprador {DOLAR_LABELS[dolarTipo]} hoy</p>
+              <p className="text-xs text-white/70">Dólar comprador ({DOLAR_LABELS[dolarTipo]})</p>
               <p className="text-xl font-bold text-white">{formatArs(resultado.dolarSpot)}</p>
+            </div>
+            <div className="rounded-xl bg-violet-600 p-4">
+              <p className="text-xs text-white/70">Dólar vendedor ({DOLAR_LABELS[dolarTipo]})</p>
+              <p className="text-xl font-bold text-white">{formatArs(resultado.dolarVentaHoy)}</p>
             </div>
             <div className="rounded-xl bg-orange-400 p-4">
               <p className="text-xs text-slate-900/70">Dólar breakeven (TC vendedor)</p>
               <p className="text-xl font-bold text-slate-900">{formatArs(resultado.dolarBreakeven)}</p>
+            </div>
+            <div className="rounded-xl bg-slate-100 p-4">
+              <p className="text-xs text-slate-500">Devaluación implícita</p>
+              <p
+                className={`text-xl font-bold ${resultado.devaluacionImplicita >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}
+              >
+                {formatPctSigned(resultado.devaluacionImplicita)}
+              </p>
+              <p className="text-xs text-slate-400">vs. dólar vendedor de hoy</p>
             </div>
           </div>
 
