@@ -11,32 +11,37 @@ const formatDate = (value) => new Date(value).toLocaleDateString('es-AR', { time
 
 const DOLAR_LABELS = {
   oficial: 'Oficial',
-  blue: 'Blue',
-  bolsa: 'MEP (bolsa)',
+  bolsa: 'MEP',
   contadoconliqui: 'CCL',
-  mayorista: 'Mayorista',
-  cripto: 'Cripto',
-  tarjeta: 'Tarjeta',
 }
+
+const CASAS_HABILITADAS = ['oficial', 'bolsa', 'contadoconliqui']
 
 export default function BreakevenCalculator({ letras, dolares }) {
   const opciones = useMemo(
     () => letras.map((l) => ({ id: `letra-${l.ticker}`, ticker: l.ticker, data: l })),
     [letras],
   )
+  const dolaresHabilitados = useMemo(
+    () => dolares.filter((d) => CASAS_HABILITADAS.includes(d.casa)),
+    [dolares],
+  )
 
   const [selectedId, setSelectedId] = useState(opciones[0]?.id)
   const [dolarTipo, setDolarTipo] = useState('oficial')
 
   const seleccionado = opciones.find((o) => o.id === selectedId) ?? opciones[0]
-  const dolarSeleccionado = dolares.find((d) => d.casa === dolarTipo) ?? dolares[0]
+  const dolarSeleccionado = dolaresHabilitados.find((d) => d.casa === dolarTipo) ?? dolaresHabilitados[0]
 
   const resultado = useMemo(() => {
     if (!seleccionado || !dolarSeleccionado) return null
 
     const { retornoTotal, dias } = retornoLetra(seleccionado.data)
 
-    const dolarSpot = dolarSeleccionado.venta
+    // Para entrar al carry se venden los USD al TC comprador de la casa. El
+    // breakeven resultante es el TC vendedor máximo al que se pueden
+    // recomprar los dólares al vencimiento sin perder en términos de USD.
+    const dolarSpot = dolarSeleccionado.compra
     const { dolarBreakeven } = calcularBreakeven({ retornoTotal, dolarSpot })
 
     return {
@@ -96,7 +101,7 @@ export default function BreakevenCalculator({ letras, dolares }) {
             onChange={(e) => setDolarTipo(e.target.value)}
             className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           >
-            {dolares.map((d) => (
+            {dolaresHabilitados.map((d) => (
               <option key={d.casa} value={d.casa}>
                 {DOLAR_LABELS[d.casa] ?? d.nombre}
               </option>
@@ -114,20 +119,21 @@ export default function BreakevenCalculator({ letras, dolares }) {
               <p className="text-xs text-slate-400">{formatPct(resultado.retornoAnualizado)} anualizado</p>
             </div>
             <div className="rounded-xl bg-brand-700 p-4">
-              <p className="text-xs text-white/70">Dólar {DOLAR_LABELS[dolarTipo]} hoy</p>
+              <p className="text-xs text-white/70">TC comprador {DOLAR_LABELS[dolarTipo]} hoy</p>
               <p className="text-xl font-bold text-white">{formatArs(resultado.dolarSpot)}</p>
             </div>
             <div className="rounded-xl bg-orange-400 p-4">
-              <p className="text-xs text-slate-900/70">Dólar breakeven al vencimiento</p>
+              <p className="text-xs text-slate-900/70">Dólar breakeven (TC vendedor)</p>
               <p className="text-xl font-bold text-slate-900">{formatArs(resultado.dolarBreakeven)}</p>
             </div>
           </div>
 
           <p className="mt-5 rounded-lg bg-brand-50 p-4 text-sm text-slate-700">
-            Para cotizaciones de dólar {DOLAR_LABELS[dolarTipo].toLowerCase()} por debajo de{' '}
-            <strong>{formatArs(resultado.dolarBreakeven)}</strong>, el instrumento en pesos ({seleccionado.ticker}
-            ) ofrece mayor rendimiento efectivo. Por encima de dicho valor, el posicionamiento en moneda
-            extranjera resulta superior.
+            Vendiendo los USD hoy al TC comprador {DOLAR_LABELS[dolarTipo].toLowerCase()} e invirtiendo en{' '}
+            {seleccionado.ticker}, para cotizaciones de dólar vendedor por debajo de{' '}
+            <strong>{formatArs(resultado.dolarBreakeven)}</strong> al vencimiento, el instrumento en pesos ofrece
+            mayor rendimiento efectivo. Por encima de dicho valor, el posicionamiento en moneda extranjera
+            resulta superior.
           </p>
         </>
       )}
