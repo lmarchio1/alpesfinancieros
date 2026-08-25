@@ -131,17 +131,24 @@ export default function BreakevenCalculator({ letras, dolares }) {
         <>
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="rounded-xl bg-slate-100 p-4">
-              <p className="text-xs text-slate-500">Retorno en pesos ({resultado.dias} días)</p>
-              <p className="text-xl font-bold text-slate-900">{formatPct(resultado.retornoTotal)}</p>
-              <p className="text-xs text-slate-400">{formatPct(resultado.retornoAnualizado)} anualizado</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-slate-500">Retorno ({resultado.dias} días)</p>
+                  <p className="text-xl font-bold text-slate-900">{formatPct(resultado.retornoTotal)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500">TEA anualizada</p>
+                  <p className="text-xl font-bold text-slate-900">{formatPct(resultado.retornoAnualizado)}</p>
+                </div>
+              </div>
             </div>
             <div className="grid grid-cols-2 overflow-hidden rounded-xl">
               <div className="bg-brand-700 p-4">
-                <p className="text-xs text-white/70">Compra ({DOLAR_LABELS[dolarTipo]})</p>
+                <p className="text-xs text-white/70">TC comprador ({DOLAR_LABELS[dolarTipo]})</p>
                 <p className="text-xl font-bold text-white">{formatArs(resultado.dolarSpot)}</p>
               </div>
               <div className="bg-emerald-800 p-4">
-                <p className="text-xs text-white/70">Venta ({DOLAR_LABELS[dolarTipo]})</p>
+                <p className="text-xs text-white/70">TC vendedor ({DOLAR_LABELS[dolarTipo]})</p>
                 <p className="text-xl font-bold text-white">{formatArs(resultado.dolarVentaHoy)}</p>
               </div>
             </div>
@@ -156,7 +163,7 @@ export default function BreakevenCalculator({ letras, dolares }) {
               >
                 {formatPctSigned(resultado.devaluacionImplicita)}
               </p>
-              <p className="text-xs text-slate-400">vs. dólar vendedor de hoy</p>
+              <p className="text-xl font-semibold text-slate-600">vs TC Vendedor {DOLAR_LABELS[dolarTipo]} de hoy</p>
             </div>
           </div>
 
