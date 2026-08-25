@@ -13,9 +13,10 @@ const DOLAR_LABELS = {
   oficial: 'Oficial',
   bolsa: 'MEP',
   contadoconliqui: 'CCL',
+  cripto: 'Cripto',
 }
 
-const CASAS_HABILITADAS = ['oficial', 'bolsa', 'contadoconliqui']
+const CASAS_HABILITADAS = ['oficial', 'bolsa', 'contadoconliqui', 'cripto']
 
 export default function BreakevenCalculator({ letras, dolares }) {
   const opciones = useMemo(
