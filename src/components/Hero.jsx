@@ -27,8 +27,9 @@ export default function Hero() {
             className="mt-6 animate-fade-up text-lg leading-relaxed text-slate-200 motion-reduce:animate-none"
             style={{ animationDelay: '120ms' }}
           >
-            Multi-Family Office independiente dedicado a proteger y potenciar el patrimonio
-            familiar y corporativo mediante estrategias a medida y análisis global.
+            Multi-Family Office independiente orientado a preservar y optimizar el patrimonio
+            familiar y corporativo a través de una planificación fiscal eficiente, una
+            administración integral de tesorería y una amplia perspectiva global y local.
           </p>
           <div
             className="mt-8 flex animate-fade-up flex-wrap gap-4 motion-reduce:animate-none"
