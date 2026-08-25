@@ -15,11 +15,11 @@ const formatUsd = (value, decimales = 2) =>
   }).format(value)
 
 const MONEDAS_INFO = {
-  EUR: { nombre: 'Euro', simbolo: '€', unidad: 1, decimalesUsd: 4, decimalesInverso: 4, border: 'border-indigo-500', icon: 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white' },
-  GBP: { nombre: 'Libra esterlina', simbolo: '£', unidad: 1, decimalesUsd: 4, decimalesInverso: 4, border: 'border-rose-500', icon: 'bg-rose-50 text-rose-600 group-hover:bg-rose-600 group-hover:text-white' },
-  BRL: { nombre: 'Real brasileño', simbolo: 'R$', unidad: 1, decimalesUsd: 4, decimalesInverso: 4, border: 'border-emerald-500', icon: 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white' },
-  CLP: { nombre: 'Peso chileno', simbolo: 'CLP', unidad: 1000, decimalesUsd: 2, decimalesInverso: 0, border: 'border-sky-500', icon: 'bg-sky-50 text-sky-600 group-hover:bg-sky-600 group-hover:text-white' },
-  COP: { nombre: 'Peso colombiano', simbolo: 'COP', unidad: 1000, decimalesUsd: 2, decimalesInverso: 0, border: 'border-amber-500', icon: 'bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white' },
+  EUR: { nombre: 'Euro', simbolo: '€', unidad: 1, decimalesUsd: 4, decimalesInverso: 4, icon: 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white' },
+  GBP: { nombre: 'Libra esterlina', simbolo: '£', unidad: 1, decimalesUsd: 4, decimalesInverso: 4, icon: 'bg-rose-50 text-rose-600 group-hover:bg-rose-600 group-hover:text-white' },
+  BRL: { nombre: 'Real brasileño', simbolo: 'R$', unidad: 1, decimalesUsd: 4, decimalesInverso: 4, icon: 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white' },
+  CLP: { nombre: 'Peso chileno', simbolo: 'CLP', unidad: 1000, decimalesUsd: 2, decimalesInverso: 0, icon: 'bg-sky-50 text-sky-600 group-hover:bg-sky-600 group-hover:text-white' },
+  COP: { nombre: 'Peso colombiano', simbolo: 'COP', unidad: 1000, decimalesUsd: 2, decimalesInverso: 0, icon: 'bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white' },
 }
 
 const formatFecha = (fechaIso) =>
@@ -108,10 +108,12 @@ export default function OtrasMonedasTab() {
           const ars = m.ars * info.unidad
           const usd = m.usd * info.unidad
           const etiqueta = info.unidad === 1 ? '1 ' + m.codigo : `${info.unidad.toLocaleString('es-AR')} ${m.codigo}`
+          const pct = inverso ? m.variacionPctInverso : m.variacionPct
+          const trendBorder = pct === null ? '!border-t-slate-200' : pct >= 0 ? '!border-t-emerald-500' : '!border-t-rose-500'
           return (
             <Card
               key={m.codigo}
-              className={`group animate-fade-up border-t-4 p-5 shadow-md shadow-slate-200/70 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-2 hover:scale-[1.015] hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)] motion-reduce:transition-none motion-reduce:animate-none ${info.border}`}
+              className={`group animate-fade-up border-t-4 p-5 shadow-md shadow-slate-200/70 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-2 hover:scale-[1.015] hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)] motion-reduce:transition-none motion-reduce:animate-none ${trendBorder}`}
               style={{ animationDelay: `${i * 80}ms` }}
             >
               <div className="flex items-start justify-between gap-2">
@@ -124,16 +126,12 @@ export default function OtrasMonedasTab() {
                     <p className="text-xs text-slate-400">{inverso ? `US$ → ${m.codigo}` : `Cada ${etiqueta}`}</p>
                   </div>
                 </div>
-                {(() => {
-                  const pct = inverso ? m.variacionPctInverso : m.variacionPct
-                  if (pct === null) return null
-                  return (
-                    <Badge variant={pct >= 0 ? 'positive' : 'negative'}>
-                      {pct >= 0 ? '+' : ''}
-                      {pct.toFixed(2)}%
-                    </Badge>
-                  )
-                })()}
+                {pct !== null && (
+                  <Badge variant={pct >= 0 ? 'positive' : 'negative'}>
+                    {pct >= 0 ? '+' : ''}
+                    {pct.toFixed(2)}%
+                  </Badge>
+                )}
               </div>
               {inverso ? (
                 <div className="mt-4">

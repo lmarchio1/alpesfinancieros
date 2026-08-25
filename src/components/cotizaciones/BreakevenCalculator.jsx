@@ -161,14 +161,11 @@ export default function BreakevenCalculator({ letras, dolares }) {
             </div>
             <div className="rounded-xl bg-slate-100 p-4">
               <p className="text-xs text-slate-500">Devaluación implícita</p>
-              <div className="flex flex-wrap items-baseline gap-x-2">
-                <p
-                  className={`text-xl font-bold ${resultado.devaluacionImplicita >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}
-                >
-                  {formatPctSigned(resultado.devaluacionImplicita)}
-                </p>
-                <p className="text-sm font-semibold text-slate-900">{formatArs(resultado.dolarVentaHoy)}</p>
-              </div>
+              <p
+                className={`text-xl font-bold ${resultado.devaluacionImplicita >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}
+              >
+                {formatPctSigned(resultado.devaluacionImplicita)}
+              </p>
               <p className="mt-1 text-xs text-slate-400">vs TC Vendedor {DOLAR_LABELS[dolarTipo]} de hoy</p>
             </div>
           </div>
