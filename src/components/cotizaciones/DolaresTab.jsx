@@ -44,6 +44,7 @@ const CASA_ICON = {
 }
 
 const NOMBRE_OVERRIDE = {
+  bolsa: 'MEP',
   contadoconliqui: 'CCL',
 }
 
