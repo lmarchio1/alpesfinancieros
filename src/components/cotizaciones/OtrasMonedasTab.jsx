@@ -30,6 +30,14 @@ const formatFecha = (fechaIso) =>
     timeZone: 'UTC',
   })
 
+// La fuente publica el archivo con la fecha de publicación, pero el
+// contenido es el cierre del día hábil anterior a esa fecha.
+const fechaCierre = (fechaIso) => {
+  const d = new Date(`${fechaIso}T00:00:00Z`)
+  d.setUTCDate(d.getUTCDate() - 1)
+  return d.toISOString().slice(0, 10)
+}
+
 export default function OtrasMonedasTab() {
   const fetcher = useCallback(() => fetchOtrasMonedas(), [])
   const { data, error, loading, refresh } = usePolling(fetcher, { intervalMs: 60 * 60 * 1000 })
@@ -87,7 +95,7 @@ export default function OtrasMonedasTab() {
           <Badge variant="info">Actualización diaria</Badge>
         </div>
         <div className="flex items-center gap-3 rounded-full bg-slate-900/60 px-3 py-1.5 text-xs text-slate-200 shadow-sm backdrop-blur-sm">
-          {data.fecha && <span>Cotización del {formatFecha(data.fecha)}</span>}
+          {data.fecha && <span>Cierre del {formatFecha(fechaCierre(data.fecha))}</span>}
           <button type="button" onClick={refresh} className="font-semibold text-brand-300 hover:text-white hover:underline">
             Actualizar
           </button>
