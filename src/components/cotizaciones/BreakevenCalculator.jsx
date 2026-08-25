@@ -17,6 +17,15 @@ const DOLAR_LABELS = {
   cripto: 'Cripto',
 }
 
+// Para usar dentro de una oración: los acrónimos (MEP, CCL) no deben
+// pasarse a minúscula, a diferencia de "oficial" y "cripto".
+const DOLAR_LABELS_PROSA = {
+  oficial: 'oficial',
+  bolsa: 'MEP',
+  contadoconliqui: 'CCL',
+  cripto: 'cripto',
+}
+
 const CASAS_HABILITADAS = ['oficial', 'bolsa', 'contadoconliqui', 'cripto']
 
 export default function BreakevenCalculator({ letras, dolares }) {
@@ -120,19 +129,21 @@ export default function BreakevenCalculator({ letras, dolares }) {
 
       {resultado && (
         <>
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="rounded-xl bg-slate-100 p-4">
               <p className="text-xs text-slate-500">Retorno en pesos ({resultado.dias} días)</p>
               <p className="text-xl font-bold text-slate-900">{formatPct(resultado.retornoTotal)}</p>
               <p className="text-xs text-slate-400">{formatPct(resultado.retornoAnualizado)} anualizado</p>
             </div>
-            <div className="rounded-xl bg-brand-700 p-4">
-              <p className="text-xs text-white/70">Dólar comprador ({DOLAR_LABELS[dolarTipo]})</p>
-              <p className="text-xl font-bold text-white">{formatArs(resultado.dolarSpot)}</p>
-            </div>
-            <div className="rounded-xl bg-violet-600 p-4">
-              <p className="text-xs text-white/70">Dólar vendedor ({DOLAR_LABELS[dolarTipo]})</p>
-              <p className="text-xl font-bold text-white">{formatArs(resultado.dolarVentaHoy)}</p>
+            <div className="grid grid-cols-2 overflow-hidden rounded-xl">
+              <div className="bg-brand-700 p-4">
+                <p className="text-xs text-white/70">Compra ({DOLAR_LABELS[dolarTipo]})</p>
+                <p className="text-xl font-bold text-white">{formatArs(resultado.dolarSpot)}</p>
+              </div>
+              <div className="bg-emerald-800 p-4">
+                <p className="text-xs text-white/70">Venta ({DOLAR_LABELS[dolarTipo]})</p>
+                <p className="text-xl font-bold text-white">{formatArs(resultado.dolarVentaHoy)}</p>
+              </div>
             </div>
             <div className="rounded-xl bg-orange-400 p-4">
               <p className="text-xs text-slate-900/70">Dólar breakeven (TC vendedor)</p>
@@ -150,7 +161,7 @@ export default function BreakevenCalculator({ letras, dolares }) {
           </div>
 
           <p className="mt-5 rounded-lg bg-brand-50 p-4 text-sm text-slate-700">
-            Vendiendo los USD hoy al TC comprador {DOLAR_LABELS[dolarTipo].toLowerCase()} e invirtiendo en{' '}
+            Vendiendo los USD hoy al TC comprador {DOLAR_LABELS_PROSA[dolarTipo]} e invirtiendo en{' '}
             {seleccionado.ticker}, para cotizaciones de dólar vendedor por debajo de{' '}
             <strong>{formatArs(resultado.dolarBreakeven)}</strong> al vencimiento, el instrumento en pesos ofrece
             mayor rendimiento efectivo. Por encima de dicho valor, el posicionamiento en moneda extranjera
