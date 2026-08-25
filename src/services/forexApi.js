@@ -61,13 +61,20 @@ export async function fetchOtrasMonedas() {
     const clave = codigo.toLowerCase()
     const usdPorUnidad = 1 / hoy.usd[clave]
     const usdPorUnidadAyer = ayer?.usd?.[clave] ? 1 / ayer.usd[clave] : null
+    const porUsd = hoy.usd[clave]
+    const porUsdAyer = ayer?.usd?.[clave] ?? null
 
     return {
       codigo,
       usd: usdPorUnidad,
       ars: usdPorUnidad * arsPorUsd,
-      porUsd: hoy.usd[clave],
+      porUsd,
+      // Variación de la moneda contra el dólar (ej. cuánto se movió el EUR).
       variacionPct: usdPorUnidadAyer ? ((usdPorUnidad - usdPorUnidadAyer) / usdPorUnidadAyer) * 100 : null,
+      // Variación inversa (cuánto se movió el USD medido en esa moneda): no es
+      // simplemente el signo opuesto de variacionPct, es la variación propia
+      // de porUsd, para que la vista "US$ → Moneda" muestre el signo correcto.
+      variacionPctInverso: porUsdAyer ? ((porUsd - porUsdAyer) / porUsdAyer) * 100 : null,
     }
   })
 

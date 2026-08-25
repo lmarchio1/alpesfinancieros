@@ -124,12 +124,16 @@ export default function OtrasMonedasTab() {
                     <p className="text-xs text-slate-400">{inverso ? `US$ → ${m.codigo}` : `Cada ${etiqueta}`}</p>
                   </div>
                 </div>
-                {m.variacionPct !== null && (
-                  <Badge variant={m.variacionPct >= 0 ? 'positive' : 'negative'}>
-                    {m.variacionPct >= 0 ? '+' : ''}
-                    {m.variacionPct.toFixed(2)}%
-                  </Badge>
-                )}
+                {(() => {
+                  const pct = inverso ? m.variacionPctInverso : m.variacionPct
+                  if (pct === null) return null
+                  return (
+                    <Badge variant={pct >= 0 ? 'positive' : 'negative'}>
+                      {pct >= 0 ? '+' : ''}
+                      {pct.toFixed(2)}%
+                    </Badge>
+                  )
+                })()}
               </div>
               {inverso ? (
                 <div className="mt-4">
