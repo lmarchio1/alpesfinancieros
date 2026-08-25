@@ -22,7 +22,7 @@ export default function RiesgoPaisCard({ riesgoPais }) {
   }, [])
 
   return (
-    <Card className="group border-t-4 border-orange-500 p-6 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70">
+    <Card className="group border-t-4 !border-t-orange-500 p-6 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-orange-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-orange-600 group-hover:text-white">
