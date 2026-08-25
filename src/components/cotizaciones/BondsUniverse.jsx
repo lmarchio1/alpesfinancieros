@@ -130,7 +130,7 @@ export default function BondsUniverse({ globales, bonares, duales, letras }) {
   const [grupo, setGrupo] = useState('globales')
 
   return (
-    <Card className="group/card overflow-hidden border-t-4 !border-t-brand-600">
+    <Card className="group/card overflow-hidden border-t-4 !border-t-brand-200 transition-colors duration-300 hover:!border-t-brand-600">
       <div className="flex flex-wrap items-center justify-between gap-3 p-6 pb-0">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition-all duration-300 ease-out group-hover/card:scale-110 group-hover/card:bg-brand-600 group-hover/card:text-white">

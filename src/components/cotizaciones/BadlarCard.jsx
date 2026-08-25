@@ -21,7 +21,7 @@ export default function BadlarCard() {
   if (!badlar) return null
 
   return (
-    <Card className="group border-t-4 !border-t-violet-800 p-6 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70">
+    <Card className="group border-t-4 !border-t-violet-200 p-6 hover:!border-t-violet-800 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-violet-100 text-violet-800 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-violet-800 group-hover:text-white">
