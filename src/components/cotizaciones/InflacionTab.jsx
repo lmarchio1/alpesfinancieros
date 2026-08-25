@@ -162,12 +162,27 @@ export default function InflacionTab() {
                 Al cierre: {formatFecha(plazoFijo.fecha)}
               </span>
             </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <p className="text-3xl font-bold text-slate-900">{plazoFijo.valor.toFixed(2)}%</p>
-              <DayChangeBadge current={plazoFijo.valor} previous={plazoFijo.valorAnterior} />
+            <div className="mt-3 grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">TNA</p>
+                <div className="mt-0.5 flex items-baseline gap-2">
+                  <p className="text-2xl font-bold text-slate-900">{plazoFijo.valor.toFixed(2)}%</p>
+                  <DayChangeBadge current={plazoFijo.valor} previous={plazoFijo.valorAnterior} />
+                </div>
+              </div>
+              {plazoFijo.tea !== null && (
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">TEA</p>
+                  <div className="mt-0.5 flex items-baseline gap-2">
+                    <p className="text-2xl font-bold text-slate-900">{plazoFijo.tea.toFixed(2)}%</p>
+                    <DayChangeBadge current={plazoFijo.tea} previous={plazoFijo.teaAnterior} />
+                  </div>
+                </div>
+              )}
             </div>
-            <p className="mt-1 text-xs text-slate-400">
-              Tasa nominal anual de referencia del sistema financiero para colocaciones a 30 días.
+            <p className="mt-2 text-xs text-slate-400">
+              Tasa pasiva de referencia del sistema financiero para colocaciones a 30 días en plazos
+              fijos.
             </p>
           </Card>
         )}

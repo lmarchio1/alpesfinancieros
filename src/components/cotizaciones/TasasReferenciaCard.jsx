@@ -43,11 +43,25 @@ export default function TasasReferenciaCard() {
                 Al cierre: {formatFecha(tasas.badlar.fecha)}
               </span>
             </div>
-            <div className="mt-0.5 flex items-baseline gap-2">
-              <p className="text-2xl font-bold text-slate-900">{tasas.badlar.valor.toFixed(2)}%</p>
-              <DayChangeBadge current={tasas.badlar.valor} previous={tasas.badlar.valorAnterior} />
+            <div className="mt-1 grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">TNA</p>
+                <div className="mt-0.5 flex items-baseline gap-2">
+                  <p className="text-2xl font-bold text-slate-900">{tasas.badlar.valor.toFixed(2)}%</p>
+                  <DayChangeBadge current={tasas.badlar.valor} previous={tasas.badlar.valorAnterior} />
+                </div>
+              </div>
+              {tasas.badlar.tea !== null && (
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">TEA</p>
+                  <div className="mt-0.5 flex items-baseline gap-2">
+                    <p className="text-2xl font-bold text-slate-900">{tasas.badlar.tea.toFixed(2)}%</p>
+                    <DayChangeBadge current={tasas.badlar.tea} previous={tasas.badlar.teaAnterior} />
+                  </div>
+                </div>
+              )}
             </div>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-2 text-xs text-slate-400">
               Tasa promedio para depósitos a plazo fijo mayoristas en bancos privados (estrato
               superior a $1M, plazo 30-35 días).
             </p>
@@ -61,11 +75,25 @@ export default function TasasReferenciaCard() {
                 Al cierre: {formatFecha(tasas.tamar.fecha)}
               </span>
             </div>
-            <div className="mt-0.5 flex items-baseline gap-2">
-              <p className="text-2xl font-bold text-slate-900">{tasas.tamar.valor.toFixed(2)}%</p>
-              <DayChangeBadge current={tasas.tamar.valor} previous={tasas.tamar.valorAnterior} />
+            <div className="mt-1 grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">TNA</p>
+                <div className="mt-0.5 flex items-baseline gap-2">
+                  <p className="text-2xl font-bold text-slate-900">{tasas.tamar.valor.toFixed(2)}%</p>
+                  <DayChangeBadge current={tasas.tamar.valor} previous={tasas.tamar.valorAnterior} />
+                </div>
+              </div>
+              {tasas.tamar.tea !== null && (
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">TEA</p>
+                  <div className="mt-0.5 flex items-baseline gap-2">
+                    <p className="text-2xl font-bold text-slate-900">{tasas.tamar.tea.toFixed(2)}%</p>
+                    <DayChangeBadge current={tasas.tamar.tea} previous={tasas.tamar.teaAnterior} />
+                  </div>
+                </div>
+              )}
             </div>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-2 text-xs text-slate-400">
               Tasa de referencia del BCRA para depósitos del segmento corporativo e institucional
               (operaciones desde $1.000M).
             </p>
