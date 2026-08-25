@@ -21,7 +21,7 @@ export default function DolarEsperadoCard() {
 
   if (!rem) {
     return (
-      <Card className="border-t-4 !border-t-emerald-600 !bg-[#E9EEE7] p-6">
+      <Card className="!bg-[#E9EEE7] p-6">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 shrink-0 animate-pulse rounded-lg bg-white/70" />
           <div className="space-y-2">
@@ -39,7 +39,7 @@ export default function DolarEsperadoCard() {
   }
 
   return (
-    <Card className="group border-t-4 !border-t-emerald-600 !bg-[#E9EEE7] p-6 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70">
+    <Card className="group !bg-[#E9EEE7] p-6 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70">
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-emerald-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
