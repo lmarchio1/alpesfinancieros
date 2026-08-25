@@ -103,35 +103,38 @@ export async function fetchInflacionMensual() {
   return serie.slice().reverse()
 }
 
-export async function fetchTasasReferencia() {
+export async function fetchBadlar() {
   const hoy = fechaArgentinaHoy()
   const desde = haceNDias(hoy, 10)
-  const [badlarSerie, badlarTeaSerie, tamarSerie, tamarTeaSerie] = await Promise.all([
+  const [serie, teaSerie] = await Promise.all([
     fetchSerie(ID_BADLAR, desde, hoy),
     fetchSerie(ID_BADLAR_TEA, desde, hoy),
+  ])
+  const actual = serie[0]
+  if (!actual) return null
+  return {
+    valor: actual.valor,
+    fecha: actual.fecha,
+    valorAnterior: serie[1]?.valor ?? null,
+    tea: teaSerie[0]?.valor ?? null,
+    teaAnterior: teaSerie[1]?.valor ?? null,
+  }
+}
+
+export async function fetchTamar() {
+  const hoy = fechaArgentinaHoy()
+  const desde = haceNDias(hoy, 10)
+  const [serie, teaSerie] = await Promise.all([
     fetchSerie(ID_TAMAR, desde, hoy),
     fetchSerie(ID_TAMAR_TEA, desde, hoy),
   ])
-  const badlar = badlarSerie[0]
-  const tamar = tamarSerie[0]
+  const actual = serie[0]
+  if (!actual) return null
   return {
-    badlar: badlar
-      ? {
-          valor: badlar.valor,
-          fecha: badlar.fecha,
-          valorAnterior: badlarSerie[1]?.valor ?? null,
-          tea: badlarTeaSerie[0]?.valor ?? null,
-          teaAnterior: badlarTeaSerie[1]?.valor ?? null,
-        }
-      : null,
-    tamar: tamar
-      ? {
-          valor: tamar.valor,
-          fecha: tamar.fecha,
-          valorAnterior: tamarSerie[1]?.valor ?? null,
-          tea: tamarTeaSerie[0]?.valor ?? null,
-          teaAnterior: tamarTeaSerie[1]?.valor ?? null,
-        }
-      : null,
+    valor: actual.valor,
+    fecha: actual.fecha,
+    valorAnterior: serie[1]?.valor ?? null,
+    tea: teaSerie[0]?.valor ?? null,
+    teaAnterior: teaSerie[1]?.valor ?? null,
   }
 }

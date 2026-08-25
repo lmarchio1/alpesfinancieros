@@ -6,7 +6,8 @@ import { fetchUniversoBonos } from '../../services/bondsLiveApi'
 import Card from '../ui/Card'
 import RiesgoPaisCard from './RiesgoPaisCard'
 import ReservasCard from './ReservasCard'
-import TasasReferenciaCard from './TasasReferenciaCard'
+import BadlarCard from './BadlarCard'
+import TamarCard from './TamarCard'
 import DolarEsperadoCard from './DolarEsperadoCard'
 import BreakevenCalculator from './BreakevenCalculator'
 import RiesgoPaisSensitivity from './RiesgoPaisSensitivity'
@@ -45,12 +46,11 @@ export default function BonosTab() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
-        <div className="space-y-4">
-          <RiesgoPaisCard riesgoPais={rentaFija.data.riesgoPais} />
-          <ReservasCard />
-        </div>
-        <TasasReferenciaCard />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <RiesgoPaisCard riesgoPais={rentaFija.data.riesgoPais} />
+        <BadlarCard />
+        <ReservasCard />
+        <TamarCard />
       </div>
 
       <BondsUniverse
