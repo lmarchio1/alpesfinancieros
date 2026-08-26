@@ -155,7 +155,7 @@ export default function InflacionTab() {
             </p>
           </Card>
         ) : (
-          <div className="h-[122px] animate-pulse rounded-2xl bg-slate-100" />
+          <div className="h-[193px] animate-pulse rounded-2xl bg-slate-100 sm:h-[223px]" />
         )}
 
         {plazoFijo ? (
@@ -200,7 +200,7 @@ export default function InflacionTab() {
             </p>
           </Card>
         ) : (
-          <div className="h-[168px] animate-pulse rounded-2xl bg-slate-100" />
+          <div className="h-[235px] animate-pulse rounded-2xl bg-slate-100 sm:h-[223px]" />
         )}
       </div>
 

@@ -61,8 +61,8 @@ export default function BonosTab() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <RiesgoPaisCard riesgoPais={rentaFija.data.riesgoPais} />
-        <BadlarCard />
         <ReservasCard />
+        <BadlarCard />
         <TamarCard />
       </div>
 

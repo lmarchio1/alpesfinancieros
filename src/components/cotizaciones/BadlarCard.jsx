@@ -24,7 +24,7 @@ export default function BadlarCard() {
   return (
     <Card
       className="group animate-fade-up border-t-4 !border-t-violet-200 p-6 hover:!border-t-violet-800 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70"
-      style={{ animationDelay: '80ms' }}
+      style={{ animationDelay: '160ms' }}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
