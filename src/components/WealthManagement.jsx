@@ -65,7 +65,7 @@ const ITEMS = [
     icon: 'compass',
     title: 'Visión global y diversificación',
     description:
-      'Análisis integral y permanente de los mercados locales e internacionales, para orientar una adecuada asignación de activos, optimizando el patrimonio y mitigando los riesgos.',
+      'Análisis permanente de las variables económicas y financieras a escala global y nacional, para orientar una adecuada recomendación de activos, optimizando la eficiencia fiscal y alineándose con sus métricas de crecimiento y límites de riesgo definidos.',
   },
   {
     icon: 'users',
