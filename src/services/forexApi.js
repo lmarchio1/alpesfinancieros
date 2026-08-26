@@ -1,6 +1,10 @@
 const BASE_URL = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api'
 
 const MONEDAS = ['EUR', 'GBP', 'BRL', 'CLP', 'COP', 'UYU']
+// La misma API expone metales preciosos como si fueran "monedas" (XAU =
+// onza de oro, etc.), así que se resuelven con el mismo fetch de usd.json,
+// sin ningún llamado ni dependencia extra.
+const METALES = ['XAU', 'XAG', 'XPT']
 
 async function fetchJson(url) {
   const res = await fetch(url)
@@ -78,5 +82,18 @@ export async function fetchOtrasMonedas() {
     }
   })
 
-  return { cotizaciones, fecha: hoy.date }
+  const metales = METALES.map((codigo) => {
+    const clave = codigo.toLowerCase()
+    const usdPorOnza = 1 / hoy.usd[clave]
+    const usdPorOnzaAyer = ayer?.usd?.[clave] ? 1 / ayer.usd[clave] : null
+
+    return {
+      codigo,
+      usd: usdPorOnza,
+      ars: usdPorOnza * arsPorUsd,
+      variacionPct: usdPorOnzaAyer ? ((usdPorOnza - usdPorOnzaAyer) / usdPorOnzaAyer) * 100 : null,
+    }
+  })
+
+  return { cotizaciones, metales, fecha: hoy.date }
 }

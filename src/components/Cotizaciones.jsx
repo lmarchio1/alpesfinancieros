@@ -10,7 +10,7 @@ const TOGGLES = [
   { id: 'dolares', label: 'Tipos de Cambio' },
   { id: 'bonos', label: 'Renta Fija' },
   { id: 'inflacion', label: 'Inflación' },
-  { id: 'monedas', label: 'Divisas Globales' },
+  { id: 'monedas', label: 'Divisas y Metales' },
 ]
 
 const TOOLKIT_TAGS = [

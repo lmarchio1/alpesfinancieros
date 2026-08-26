@@ -23,6 +23,15 @@ const MONEDAS_INFO = {
   UYU: { nombre: 'Peso Uruguayo', simbolo: '$U', unidad: 1, decimalesUsd: 4, decimalesInverso: 2, icon: 'bg-teal-50 text-teal-600 group-hover:bg-teal-600 group-hover:text-white' },
 }
 
+const METALES_INFO = {
+  XAU: { nombre: 'Oro', simbolo: 'Au', icon: 'bg-amber-50 text-amber-700 group-hover:bg-amber-700 group-hover:text-white' },
+  XAG: { nombre: 'Plata', simbolo: 'Ag', icon: 'bg-slate-100 text-slate-500 group-hover:bg-slate-500 group-hover:text-white' },
+  XPT: { nombre: 'Platino', simbolo: 'Pt', icon: 'bg-cyan-50 text-cyan-700 group-hover:bg-cyan-700 group-hover:text-white' },
+}
+
+const formatArsEntero = (value) =>
+  new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(value)
+
 const formatFecha = (fechaIso) =>
   new Date(`${fechaIso}T00:00:00Z`).toLocaleDateString('es-AR', {
     day: '2-digit',
@@ -105,6 +114,11 @@ export default function OtrasMonedasTab() {
         </div>
       </div>
 
+      <div className="mb-4 flex items-center gap-2">
+        <div className="h-1.5 w-1.5 rounded-full bg-brand-400" />
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-300">Divisas Globales</h3>
+      </div>
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {data.cotizaciones.map((m, i) => {
           const info = MONEDAS_INFO[m.codigo]
@@ -155,6 +169,54 @@ export default function OtrasMonedasTab() {
                   </div>
                 </div>
               )}
+            </Card>
+          )
+        })}
+      </div>
+
+      <div className="mb-4 mt-8 flex items-center gap-2">
+        <div className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-300">Metales</h3>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {data.metales.map((m, i) => {
+          const info = METALES_INFO[m.codigo]
+          const pct = m.variacionPct
+          const trendBorder = pct === null ? '!border-t-slate-200' : pct >= 0 ? '!border-t-emerald-700' : '!border-t-rose-700'
+          return (
+            <Card
+              key={m.codigo}
+              className={`group animate-fade-up border-t-4 p-5 shadow-md shadow-slate-200/70 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-2 hover:scale-[1.015] hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)] motion-reduce:transition-none motion-reduce:animate-none ${trendBorder}`}
+              style={{ animationDelay: `${i * 80}ms` }}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-3">
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-sm font-bold transition-all duration-300 ease-out group-hover:scale-110 ${info.icon}`}>
+                    {info.simbolo}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">{info.nombre}</p>
+                    <p className="text-xs text-slate-400">Precio por onza troy</p>
+                  </div>
+                </div>
+                {pct !== null && (
+                  <Badge variant={pct >= 0 ? 'positive' : 'negative'}>
+                    {pct >= 0 ? '+' : ''}
+                    {pct.toFixed(2)}%
+                  </Badge>
+                )}
+              </div>
+              <div className="mt-4 flex items-end justify-between">
+                <div>
+                  <p className="text-xs text-slate-500">En pesos</p>
+                  <p className="text-lg font-bold text-slate-900">{formatArsEntero(m.ars)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-slate-500">En dólares</p>
+                  <p className="text-lg font-bold text-slate-900">{formatUsd(m.usd, 2)}</p>
+                </div>
+              </div>
             </Card>
           )
         })}
