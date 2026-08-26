@@ -29,9 +29,6 @@ const METALES_INFO = {
   XPT: { nombre: 'Platino', simbolo: 'Pt', icon: 'bg-cyan-50 text-cyan-700 group-hover:bg-cyan-700 group-hover:text-white' },
 }
 
-const formatArsEntero = (value) =>
-  new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(value)
-
 const formatFecha = (fechaIso) =>
   new Date(`${fechaIso}T00:00:00Z`).toLocaleDateString('es-AR', {
     day: '2-digit',
@@ -82,6 +79,14 @@ export default function OtrasMonedasTab() {
 
   return (
     <div>
+      <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand-500/25 to-brand-400/10 px-4 py-2 ring-1 ring-inset ring-brand-400/40 backdrop-blur-sm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4 shrink-0 text-brand-300">
+          <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 12h18M12 3c2.2 2.4 3.5 5.5 3.5 9s-1.3 6.6-3.5 9c-2.2-2.4-3.5-5.5-3.5-9s1.3-6.6 3.5-9z" />
+        </svg>
+        <span className="text-sm font-bold uppercase tracking-wide text-brand-100">Divisas Globales</span>
+      </div>
+
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-3">
           <div className="inline-flex rounded-lg bg-slate-100 p-1 text-sm">
@@ -112,11 +117,6 @@ export default function OtrasMonedasTab() {
             Actualizar
           </button>
         </div>
-      </div>
-
-      <div className="mb-4 flex items-center gap-2">
-        <div className="h-1.5 w-1.5 rounded-full bg-brand-400" />
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-300">Divisas Globales</h3>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -174,9 +174,12 @@ export default function OtrasMonedasTab() {
         })}
       </div>
 
-      <div className="mb-4 mt-8 flex items-center gap-2">
-        <div className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-300">Metales</h3>
+      <div className="mb-5 mt-8 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500/25 to-amber-400/10 px-4 py-2 ring-1 ring-inset ring-amber-400/40 backdrop-blur-sm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4 shrink-0 text-amber-300">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 18h14l-2-9H7l-2 9z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l1.3-2h5.4l1.3 2" />
+        </svg>
+        <span className="text-sm font-bold uppercase tracking-wide text-amber-100">Metales</span>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -207,15 +210,9 @@ export default function OtrasMonedasTab() {
                   </Badge>
                 )}
               </div>
-              <div className="mt-4 flex items-end justify-between">
-                <div>
-                  <p className="text-xs text-slate-500">En pesos</p>
-                  <p className="text-lg font-bold text-slate-900">{formatArsEntero(m.ars)}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-slate-500">En dólares</p>
-                  <p className="text-lg font-bold text-slate-900">{formatUsd(m.usd, 2)}</p>
-                </div>
+              <div className="mt-4">
+                <p className="text-xs text-slate-500">En dólares</p>
+                <p className="text-2xl font-bold text-slate-900">{formatUsd(m.usd, 2)}</p>
               </div>
             </Card>
           )
