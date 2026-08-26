@@ -86,12 +86,17 @@ export default function OtrasMonedasTab() {
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="inline-flex rounded-lg bg-slate-100 p-1 text-sm">
+          <div className="relative grid grid-cols-2 rounded-full bg-slate-900/50 p-1 text-sm shadow-inner ring-1 ring-white/10 backdrop-blur-sm">
+            <span
+              aria-hidden="true"
+              className="absolute inset-y-1 left-1 w-[calc(50%-4px)] rounded-full bg-brand-600 shadow-md shadow-black/40 transition-transform duration-300 ease-out"
+              style={{ transform: inverso ? 'translateX(calc(100% + 8px))' : 'translateX(0)' }}
+            />
             <button
               type="button"
               onClick={() => setInverso(false)}
-              className={`rounded-md px-3 py-1 font-medium transition-colors ${
-                !inverso ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              className={`relative z-10 whitespace-nowrap rounded-full px-3 py-1.5 font-semibold transition-colors duration-300 ${
+                !inverso ? 'text-white' : 'text-slate-300 hover:text-white'
               }`}
             >
               Moneda → $
@@ -99,8 +104,8 @@ export default function OtrasMonedasTab() {
             <button
               type="button"
               onClick={() => setInverso(true)}
-              className={`rounded-md px-3 py-1 font-medium transition-colors ${
-                inverso ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              className={`relative z-10 whitespace-nowrap rounded-full px-3 py-1.5 font-semibold transition-colors duration-300 ${
+                inverso ? 'text-white' : 'text-slate-300 hover:text-white'
               }`}
             >
               US$ → Moneda
