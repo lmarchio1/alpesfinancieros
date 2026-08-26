@@ -109,7 +109,7 @@ export default function OtrasMonedasTab() {
           const usd = m.usd * info.unidad
           const etiqueta = info.unidad === 1 ? '1 ' + m.codigo : `${info.unidad.toLocaleString('es-AR')} ${m.codigo}`
           const pct = inverso ? m.variacionPctInverso : m.variacionPct
-          const trendBorder = pct === null ? '!border-t-slate-200' : pct >= 0 ? '!border-t-emerald-500' : '!border-t-rose-500'
+          const trendBorder = pct === null ? '!border-t-slate-200' : pct >= 0 ? '!border-t-emerald-700' : '!border-t-rose-700'
           return (
             <Card
               key={m.codigo}
