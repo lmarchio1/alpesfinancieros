@@ -172,10 +172,11 @@ export default function DolaresTab() {
         {data.map((d, i) => {
           // MEP y CCL se calculan hoy vía AL30 (ver fetchDolaresImplicitos), pero el
           // "ayer" que devuelve argentinadatos para esas dos casas viene de la
-          // metodología vieja de dolarapi. Comparar ambos mezclaría metodologías
-          // distintas y mostraría una "variación" que no es un movimiento real.
+          // metodología vieja de dolarapi. En vez de comparar contra eso -mezclaría
+          // metodologías distintas- se compara contra la referencia de apertura del
+          // día (primer valor AL30 visto hoy, ver referenciaDiaria en dolaresApi.js).
           const esImplicito = d.casa === 'bolsa' || d.casa === 'contadoconliqui'
-          const ayerVenta = esImplicito ? null : ayer?.[d.casa]?.venta
+          const ayerVenta = esImplicito ? d.ventaApertura : ayer?.[d.casa]?.venta
           const trend = typeof ayerVenta === 'number' ? Math.sign(d.venta - ayerVenta) : 0
           const trendBorder =
             trend > 0 ? '!border-t-emerald-700' : trend < 0 ? '!border-t-rose-700' : '!border-t-slate-200'
@@ -227,16 +228,20 @@ export default function DolaresTab() {
                 <div>
                   <p className="text-xs text-slate-500">Compra</p>
                   <FlashPrice value={d.compra} formatted={formatArs(d.compra)} className="text-lg font-bold" />
-                  {!esImplicito && (
-                    <DayChangeBadge current={d.compra} previous={ayer?.[d.casa]?.compra} className="mt-0.5" />
-                  )}
+                  <DayChangeBadge
+                    current={d.compra}
+                    previous={esImplicito ? d.compraApertura : ayer?.[d.casa]?.compra}
+                    className="mt-0.5"
+                  />
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-slate-500">Venta</p>
                   <FlashPrice value={d.venta} formatted={formatArs(d.venta)} className="text-lg font-bold" />
-                  {!esImplicito && (
-                    <DayChangeBadge current={d.venta} previous={ayer?.[d.casa]?.venta} className="mt-0.5 justify-end" />
-                  )}
+                  <DayChangeBadge
+                    current={d.venta}
+                    previous={esImplicito ? d.ventaApertura : ayer?.[d.casa]?.venta}
+                    className="mt-0.5 justify-end"
+                  />
                 </div>
               </div>
             </Card>
