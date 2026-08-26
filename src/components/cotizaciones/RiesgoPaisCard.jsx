@@ -24,7 +24,7 @@ export default function RiesgoPaisCard({ riesgoPais }) {
 
   return (
     <Card
-      className="group animate-fade-up border-t-4 !border-t-orange-200 p-6 hover:!border-t-orange-500 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70"
+      className="group animate-fade-up border-t-4 !border-t-orange-200 p-6 hover:!border-t-orange-500 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-2 hover:scale-[1.015] hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)]"
       style={{ animationDelay: '0ms' }}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
