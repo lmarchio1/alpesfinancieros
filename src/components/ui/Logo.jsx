@@ -1,4 +1,5 @@
 import alpesIcon from '../../assets/alpes-icon.png'
+import alpesIconDark from '../../assets/alpes-icon-dark.png'
 
 export default function Logo({
   variant = 'dark',
@@ -8,13 +9,17 @@ export default function Logo({
   gap = 'gap-2.5',
 }) {
   const alpesColor = variant === 'light' ? 'text-white' : 'text-alpesNavy'
+  // El ícono metálico "dark mode" está pensado para fondos oscuros (footer);
+  // sobre fondo claro (header) se ven feos sus bordes, así que ahí se sigue
+  // usando el ícono plano de siempre.
+  const icon = variant === 'light' ? alpesIconDark : alpesIcon
 
   return (
     <div className={`flex items-center ${gap}`}>
-      <img src={alpesIcon} alt="" className={iconClassName} />
+      <img src={icon} alt="" className={iconClassName} />
       <div className="leading-none">
         <p className={`font-extrabold tracking-wide ${nameClassName} ${alpesColor}`}>ALPES</p>
-        <p className={`mt-1 font-semibold tracking-[0.16em] text-alpesBronze ${taglineClassName}`}>
+        <p className={`mt-1 font-semibold tracking-[0.16em] text-[#d48b5e] ${taglineClassName}`}>
           ESTADOS FINANCIEROS
         </p>
       </div>
