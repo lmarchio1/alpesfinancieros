@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Card from '../ui/Card'
 import DayChangeBadge from '../ui/DayChangeBadge'
 import { fetchBadlar } from '../../services/bcraApi'
+import { fetchConReintento } from '../../utils/fetchRetry'
 
 const formatFecha = (fechaIso) => {
   const d = new Date(fechaIso)
@@ -13,7 +14,7 @@ const formatFecha = (fechaIso) => {
 export default function BadlarCard() {
   const [badlar, setBadlar] = useState(null)
   useEffect(() => {
-    fetchBadlar()
+    fetchConReintento(fetchBadlar)
       .then(setBadlar)
       .catch(() => setBadlar(null))
   }, [])

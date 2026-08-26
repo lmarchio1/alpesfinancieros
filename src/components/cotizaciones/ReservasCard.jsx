@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Card from '../ui/Card'
 import DayChangeBadge from '../ui/DayChangeBadge'
 import { fetchReservasInternacionales } from '../../services/bcraApi'
+import { fetchConReintento } from '../../utils/fetchRetry'
 
 const formatMillones = (valor) => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 }).format(valor)
 
@@ -15,7 +16,7 @@ const formatFecha = (fechaIso) => {
 export default function ReservasCard() {
   const [reservas, setReservas] = useState(null)
   useEffect(() => {
-    fetchReservasInternacionales()
+    fetchConReintento(fetchReservasInternacionales)
       .then(setReservas)
       .catch(() => setReservas(null))
   }, [])

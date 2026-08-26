@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import Card from '../ui/Card'
 import { fetchDolarEsperadoREM } from '../../services/remApi'
+import { fetchConReintento } from '../../utils/fetchRetry'
 
 const formatArs = (value) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(value)
@@ -14,7 +15,7 @@ const formatMesCorto = (periodoDesde) => {
 export default function DolarEsperadoCard() {
   const [rem, setRem] = useState(null)
   useEffect(() => {
-    fetchDolarEsperadoREM()
+    fetchConReintento(fetchDolarEsperadoREM)
       .then(setRem)
       .catch(() => setRem(null))
   }, [])

@@ -26,8 +26,12 @@ export default function BonosTab() {
 
   const loading = rentaFija.loading || dolares.loading || universo.loading
   const error = rentaFija.error || dolares.error || universo.error
+  const hasData = Boolean(rentaFija.data && dolares.data && universo.data)
 
-  if (loading) {
+  // Si ya se cargó bien una vez, un error transitorio en una actualización en
+  // segundo plano no debe hacer desaparecer el contenido: se sigue mostrando
+  // lo último bueno en vez de reemplazarlo por la pantalla de error.
+  if (!hasData && loading) {
     return (
       <div className="space-y-6">
         <div className="h-20 animate-pulse rounded-2xl bg-slate-100" />
@@ -36,11 +40,20 @@ export default function BonosTab() {
     )
   }
 
-  if (error) {
+  if (!hasData && error) {
     return (
       <Card className="p-6 text-center">
         <p className="text-sm text-rose-600">{error}</p>
       </Card>
+    )
+  }
+
+  if (!hasData) {
+    return (
+      <div className="space-y-6">
+        <div className="h-20 animate-pulse rounded-2xl bg-slate-100" />
+        <div className="h-72 animate-pulse rounded-2xl bg-slate-100" />
+      </div>
     )
   }
 

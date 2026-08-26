@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Card from '../ui/Card'
 import DayChangeBadge from '../ui/DayChangeBadge'
 import { fetchTamar } from '../../services/bcraApi'
+import { fetchConReintento } from '../../utils/fetchRetry'
 
 const formatFecha = (fechaIso) => {
   const d = new Date(fechaIso)
@@ -13,7 +14,7 @@ const formatFecha = (fechaIso) => {
 export default function TamarCard() {
   const [tamar, setTamar] = useState(null)
   useEffect(() => {
-    fetchTamar()
+    fetchConReintento(fetchTamar)
       .then(setTamar)
       .catch(() => setTamar(null))
   }, [])

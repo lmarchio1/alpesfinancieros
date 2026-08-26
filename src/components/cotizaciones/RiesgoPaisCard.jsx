@@ -3,6 +3,7 @@ import Card from '../ui/Card'
 import DayChangeBadge from '../ui/DayChangeBadge'
 import { useCountUp } from '../../hooks/useCountUp'
 import { fetchRiesgoPaisAnterior } from '../../services/rentaFijaApi'
+import { fetchConReintento } from '../../utils/fetchRetry'
 
 const formatFecha = (fechaIso) => {
   const d = new Date(fechaIso)
@@ -16,7 +17,7 @@ export default function RiesgoPaisCard({ riesgoPais }) {
 
   const [anterior, setAnterior] = useState(null)
   useEffect(() => {
-    fetchRiesgoPaisAnterior()
+    fetchConReintento(fetchRiesgoPaisAnterior)
       .then(setAnterior)
       .catch(() => setAnterior(null))
   }, [])

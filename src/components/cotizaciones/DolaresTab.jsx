@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { usePolling } from '../../hooks/usePolling'
 import { fetchDolares, fetchDolaresAyer } from '../../services/dolaresApi'
 import { fetchBandaCambiaria } from '../../services/bcraApi'
+import { fetchConReintento } from '../../utils/fetchRetry'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
 import FlashPrice from '../ui/FlashPrice'
@@ -54,14 +55,14 @@ export default function DolaresTab() {
 
   const [ayer, setAyer] = useState(null)
   useEffect(() => {
-    fetchDolaresAyer()
+    fetchConReintento(fetchDolaresAyer)
       .then(setAyer)
       .catch(() => setAyer(null))
   }, [])
 
   const [banda, setBanda] = useState(null)
   useEffect(() => {
-    fetchBandaCambiaria()
+    fetchConReintento(fetchBandaCambiaria)
       .then(setBanda)
       .catch(() => setBanda(null))
   }, [])
@@ -79,7 +80,9 @@ export default function DolaresTab() {
     return ((banda.techo - mayorista.venta) / mayorista.venta) * 100
   }, [banda, mayorista])
 
-  if (loading) {
+  // Si ya se cargó bien una vez, un error transitorio en una actualización en
+  // segundo plano no debe hacer desaparecer el contenido.
+  if (!data && loading) {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
@@ -89,7 +92,7 @@ export default function DolaresTab() {
     )
   }
 
-  if (error) {
+  if (!data && error) {
     return (
       <Card className="p-6 text-center">
         <p className="text-sm text-rose-600">{error}</p>

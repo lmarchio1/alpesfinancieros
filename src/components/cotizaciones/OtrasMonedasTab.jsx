@@ -43,7 +43,9 @@ export default function OtrasMonedasTab() {
   const { data, error, loading, refresh } = usePolling(fetcher, { intervalMs: 60 * 60 * 1000 })
   const [inverso, setInverso] = useState(false)
 
-  if (loading) {
+  // Si ya se cargó bien una vez, un error transitorio en una actualización en
+  // segundo plano no debe hacer desaparecer el contenido.
+  if (!data && loading) {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 5 }).map((_, i) => (
@@ -53,7 +55,7 @@ export default function OtrasMonedasTab() {
     )
   }
 
-  if (error) {
+  if (!data && error) {
     return (
       <Card className="p-6 text-center">
         <p className="text-sm text-rose-600">{error}</p>

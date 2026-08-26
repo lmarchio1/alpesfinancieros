@@ -3,6 +3,7 @@ import { usePolling } from '../../hooks/usePolling'
 import { fetchExpectativaInflacionREM } from '../../services/remApi'
 import { fetchTasaPlazoFijo30Dias, fetchInflacionMensual } from '../../services/bcraApi'
 import { valorActualizado, factorAcumulado, mesesEnRango, inflacionInteranual } from '../../utils/inflacionMath'
+import { fetchConReintento } from '../../utils/fetchRetry'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
 import DayChangeBadge from '../ui/DayChangeBadge'
@@ -64,19 +65,21 @@ export default function InflacionTab() {
 
   const [rem, setRem] = useState(null)
   useEffect(() => {
-    fetchExpectativaInflacionREM()
+    fetchConReintento(fetchExpectativaInflacionREM)
       .then(setRem)
       .catch(() => setRem(null))
   }, [])
 
   const [plazoFijo, setPlazoFijo] = useState(null)
   useEffect(() => {
-    fetchTasaPlazoFijo30Dias()
+    fetchConReintento(fetchTasaPlazoFijo30Dias)
       .then(setPlazoFijo)
       .catch(() => setPlazoFijo(null))
   }, [])
 
-  if (loading) {
+  // Si ya se cargó bien una vez, un error transitorio en una actualización en
+  // segundo plano no debe hacer desaparecer el contenido.
+  if (!data && loading) {
     return (
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="h-40 animate-pulse rounded-2xl bg-slate-100" />
@@ -85,7 +88,7 @@ export default function InflacionTab() {
     )
   }
 
-  if (error) {
+  if (!data && error) {
     return (
       <Card className="p-6 text-center">
         <p className="text-sm text-rose-600">{error}</p>
