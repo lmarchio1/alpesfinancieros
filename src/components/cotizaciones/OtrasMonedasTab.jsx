@@ -6,13 +6,10 @@ import Badge from '../ui/Badge'
 
 const formatArs = (value) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(value)
+// "USD 1,862.98" en vez del símbolo "$" (que se confunde con el "$" de
+// pesos que ya aparece arriba, en la misma tarjeta).
 const formatUsd = (value, decimales = 2) =>
-  new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: decimales,
-    maximumFractionDigits: decimales,
-  }).format(value)
+  `USD ${value.toLocaleString('en-US', { minimumFractionDigits: decimales, maximumFractionDigits: decimales })}`
 
 const MONEDAS_INFO = {
   EUR: { nombre: 'Euro', simbolo: '€', unidad: 1, decimalesUsd: 4, decimalesInverso: 4, icon: 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white' },
@@ -79,12 +76,12 @@ export default function OtrasMonedasTab() {
 
   return (
     <div>
-      <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand-500/25 to-brand-400/10 px-4 py-2 ring-1 ring-inset ring-brand-400/40 backdrop-blur-sm">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4 shrink-0 text-brand-300">
+      <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-brand-600 px-4 py-2 shadow-md shadow-black/30">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4 shrink-0 text-white">
           <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 12h18M12 3c2.2 2.4 3.5 5.5 3.5 9s-1.3 6.6-3.5 9c-2.2-2.4-3.5-5.5-3.5-9s1.3-6.6 3.5-9z" />
         </svg>
-        <span className="text-sm font-bold uppercase tracking-wide text-brand-100">Divisas Globales</span>
+        <span className="text-sm font-bold uppercase tracking-wide text-white">Divisas Globales</span>
       </div>
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
@@ -174,12 +171,12 @@ export default function OtrasMonedasTab() {
         })}
       </div>
 
-      <div className="mb-5 mt-8 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500/25 to-amber-400/10 px-4 py-2 ring-1 ring-inset ring-amber-400/40 backdrop-blur-sm">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4 shrink-0 text-amber-300">
+      <div className="mb-5 mt-8 inline-flex items-center gap-2 rounded-full bg-[#dba61f] px-4 py-2 shadow-md shadow-black/30">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4 shrink-0 text-slate-900">
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 18h14l-2-9H7l-2 9z" />
           <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l1.3-2h5.4l1.3 2" />
         </svg>
-        <span className="text-sm font-bold uppercase tracking-wide text-amber-100">Metales</span>
+        <span className="text-sm font-bold uppercase tracking-wide text-slate-900">Metales</span>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
