@@ -42,7 +42,13 @@ export default {
       },
       animation: {
         'spin-slow': 'spin-slow 80s linear infinite',
-        'fade-up': 'fade-up 0.8s ease-out both',
+        // "backwards" (no "both"): mantiene oculto durante el animation-delay
+        // del stagger, pero al terminar suelta la propiedad transform en vez
+        // de dejarla "trabada" en su valor final -si quedara trabada, le
+        // gana al transform que debería aplicar el :hover (levantar +
+        // agrandar) en cualquier tarjeta que tenga la animación de entrada
+        // en el mismo elemento que el hover.
+        'fade-up': 'fade-up 0.8s ease-out backwards',
         pop: 'pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both',
       },
     },
