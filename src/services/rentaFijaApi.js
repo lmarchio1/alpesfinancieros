@@ -1,6 +1,11 @@
 import { fetchArgNotes } from './data912Api'
 
 const BASE_URL = 'https://api.argentinadatos.com/v1/finanzas'
+const RIESGO_ANTERIOR_KEY = 'alpes_riesgo_pais_anterior'
+
+function fechaArgentinaHoy() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
+}
 
 // La URL "pelada" de esta API la pide tantísima gente que el cache de Cloudflare
 // la sirve stale por más tiempo del que indica su propio Cache-Control: max-age=60
@@ -42,10 +47,30 @@ export async function fetchRentaFija() {
 }
 
 // Valor de riesgo país del día hábil anterior, para comparar contra el último dato.
-// Este endpoint no tiene una versión liviana por fecha: trae toda la serie histórica,
-// así que solo conviene pedirlo una vez (no en cada poll).
+// Este endpoint no tiene una versión liviana por fecha: trae toda la serie histórica
+// completa (~7.700 registros desde 1999, ~400KB) sin importar los parámetros que se le
+// manden. Como además se le suma un cache-buster a propósito (ver comentario de
+// getJson), se estaba volviendo a descargar entera cada vez que se abría la pestaña de
+// Renta Fija, no solo la primera vez. Se guarda en localStorage y se pide una sola vez
+// por día -el valor de "ayer" no cambia en lo que dura el día de hoy-.
 export async function fetchRiesgoPaisAnterior() {
+  const hoy = fechaArgentinaHoy()
+  try {
+    const cache = JSON.parse(localStorage.getItem(RIESGO_ANTERIOR_KEY) || '{}')
+    if (cache.fecha === hoy && cache.valor) return cache.valor
+  } catch {
+    // localStorage puede no estar disponible, o el valor guardado puede ser inválido.
+  }
+
   const historico = await getJson('indices/riesgo-pais')
   if (!Array.isArray(historico) || historico.length < 2) return null
-  return historico[historico.length - 2]
+  const anterior = historico[historico.length - 2]
+
+  try {
+    localStorage.setItem(RIESGO_ANTERIOR_KEY, JSON.stringify({ fecha: hoy, valor: anterior }))
+  } catch {
+    // localStorage puede no estar disponible (modo privado, cuota llena).
+  }
+
+  return anterior
 }
