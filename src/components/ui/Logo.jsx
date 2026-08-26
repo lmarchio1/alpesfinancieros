@@ -13,13 +13,14 @@ export default function Logo({
   // sobre fondo claro (header) se ven feos sus bordes, así que ahí se sigue
   // usando el ícono plano de siempre.
   const icon = variant === 'light' ? alpesIconDark : alpesIcon
+  const taglineColor = variant === 'light' ? 'text-[#d48b5e]' : 'text-alpesBronze'
 
   return (
     <div className={`flex items-center ${gap}`}>
       <img src={icon} alt="" className={iconClassName} />
       <div className="leading-none">
         <p className={`font-extrabold tracking-wide ${nameClassName} ${alpesColor}`}>ALPES</p>
-        <p className={`mt-1 font-semibold tracking-[0.16em] text-[#d48b5e] ${taglineClassName}`}>
+        <p className={`mt-1 font-semibold tracking-[0.16em] ${taglineColor} ${taglineClassName}`}>
           ESTADOS FINANCIEROS
         </p>
       </div>
