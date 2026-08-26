@@ -210,7 +210,7 @@ export default function DolaresTab() {
                   </div>
                 </div>
                 {brecha !== null ? (
-                  <Badge variant={brecha >= 0 ? 'positive' : 'negative'}>
+                  <Badge variant="neutral">
                     Brecha {brecha >= 0 ? '+' : ''}
                     {brecha.toFixed(1)}%
                   </Badge>
