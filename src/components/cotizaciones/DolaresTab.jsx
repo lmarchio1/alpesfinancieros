@@ -210,7 +210,7 @@ export default function DolaresTab() {
                     )}
                     {d.casa === 'contadoconliqui' && (
                       <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
-                        Estimado (AL30C)
+                        Estimado (GD30C)
                       </p>
                     )}
                   </div>

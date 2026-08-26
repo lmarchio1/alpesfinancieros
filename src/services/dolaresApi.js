@@ -49,32 +49,34 @@ function referenciaDiaria(clave, valorActual) {
   return datos[clave]
 }
 
-// MEP y CCL implícitos vía AL30: se compra el bono en pesos localmente y se
-// vende en su variante en dólares — AL30D (48hs, liquida en el país) para
-// MEP, AL30C (liquida en cuentas de EE.UU.) para CCL. Contrastado contra el
-// cierre de referencia de Ámbito Financiero: MEP coincidió exacto
-// ($1.535,08 los dos), CCL quedó a 0,11% de diferencia, mientras que
-// dolarapi.com venía mostrando un MEP con diferencias de hasta $20. Compra =
-// vender el bono en pesos y comprarlo en dólares (AL30 bid / variante ask);
-// venta = al revés (AL30 ask / variante bid) — mismo criterio bid/ask que
-// usa el resto del sitio.
+// MEP vía AL30/AL30D y CCL vía GD30/GD30C: se compra el bono en pesos
+// localmente y se vende en su variante en dólares -AL30D liquida en el país
+// (MEP), GD30C liquida en cuentas de EE.UU. (CCL)-. Cada dólar usa su propia
+// familia de bono (no se mezcla AL30 con GD30C): MEP contrastado contra el
+// cierre de referencia de Ámbito Financiero coincidió exacto ($1.535,08 los
+// dos); para CCL se probó también AL30/AL30C y quedó más cerca de Ámbito,
+// pero se optó por GD30/GD30C de todos modos. Compra = vender el bono en
+// pesos y comprarlo en dólares (base bid / variante ask); venta = al revés
+// (base ask / variante bid) — mismo criterio bid/ask que usa el resto del
+// sitio.
 async function fetchDolaresImplicitos() {
   try {
     const bonds = await fetchArgBonds()
     const porSimbolo = new Map(bonds.map((b) => [b.symbol, b]))
     const al30 = porSimbolo.get('AL30')
     const al30d = porSimbolo.get('AL30D')
-    const al30c = porSimbolo.get('AL30C')
+    const gd30 = porSimbolo.get('GD30')
+    const gd30c = porSimbolo.get('GD30C')
 
-    const implicito = (variante) => {
-      if (!al30?.px_bid || !al30?.px_ask || !variante?.px_bid || !variante?.px_ask) return null
+    const implicito = (base, variante) => {
+      if (!base?.px_bid || !base?.px_ask || !variante?.px_bid || !variante?.px_ask) return null
       return {
-        compra: al30.px_bid / variante.px_ask,
-        venta: al30.px_ask / variante.px_bid,
+        compra: base.px_bid / variante.px_ask,
+        venta: base.px_ask / variante.px_bid,
       }
     }
 
-    return { mep: implicito(al30d), ccl: implicito(al30c) }
+    return { mep: implicito(al30, al30d), ccl: implicito(gd30, gd30c) }
   } catch {
     return { mep: null, ccl: null }
   }
