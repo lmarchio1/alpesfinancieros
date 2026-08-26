@@ -20,6 +20,7 @@ const MONEDAS_INFO = {
   BRL: { nombre: 'Real brasileño', simbolo: 'R$', unidad: 1, decimalesUsd: 4, decimalesInverso: 4, icon: 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white' },
   CLP: { nombre: 'Peso chileno', simbolo: 'CLP', unidad: 1000, decimalesUsd: 2, decimalesInverso: 0, icon: 'bg-sky-50 text-sky-600 group-hover:bg-sky-600 group-hover:text-white' },
   COP: { nombre: 'Peso colombiano', simbolo: 'COP', unidad: 1000, decimalesUsd: 2, decimalesInverso: 0, icon: 'bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white' },
+  UYU: { nombre: 'Peso uruguayo', simbolo: '$U', unidad: 1, decimalesUsd: 4, decimalesInverso: 2, icon: 'bg-teal-50 text-teal-600 group-hover:bg-teal-600 group-hover:text-white' },
 }
 
 const formatFecha = (fechaIso) =>

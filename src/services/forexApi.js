@@ -1,6 +1,6 @@
 const BASE_URL = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api'
 
-const MONEDAS = ['EUR', 'GBP', 'BRL', 'CLP', 'COP']
+const MONEDAS = ['EUR', 'GBP', 'BRL', 'CLP', 'COP', 'UYU']
 
 async function fetchJson(url) {
   const res = await fetch(url)
