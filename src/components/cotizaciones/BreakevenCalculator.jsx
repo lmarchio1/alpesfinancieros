@@ -146,11 +146,11 @@ export default function BreakevenCalculator({ letras, dolares }) {
             </div>
             <div className="grid grid-cols-2 overflow-hidden rounded-xl">
               <div className="bg-brand-700 p-4">
-                <p className="text-xs text-white/70">TC comprador ({DOLAR_LABELS[dolarTipo]})</p>
+                <p className="min-h-[2rem] text-xs text-white/70">TC comprador ({DOLAR_LABELS[dolarTipo]})</p>
                 <p className="text-xl font-bold text-white">{formatArs(resultado.dolarSpot)}</p>
               </div>
               <div className="bg-emerald-800 p-4">
-                <p className="text-xs text-white/70">TC vendedor ({DOLAR_LABELS[dolarTipo]})</p>
+                <p className="min-h-[2rem] text-xs text-white/70">TC vendedor ({DOLAR_LABELS[dolarTipo]})</p>
                 <p className="text-xl font-bold text-white">{formatArs(resultado.dolarVentaHoy)}</p>
               </div>
             </div>
