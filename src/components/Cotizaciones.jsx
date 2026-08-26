@@ -49,7 +49,7 @@ export default function Cotizaciones() {
         <SectionHeading
           variant="dark"
           eyebrow="Monitor de Mercado"
-          title="Inteligencia de Mercado"
+          title="Indicadores de Mercado"
           description="Monitoreo periódico y cotizaciones de referencia de tipos de cambio, títulos públicos, inflación e indicadores clave para la toma de decisiones estratégicas."
         />
 

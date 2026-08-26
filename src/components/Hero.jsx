@@ -45,7 +45,7 @@ export default function Hero() {
               href="#cotizaciones"
               className="rounded-lg bg-white/10 px-5 py-3 text-sm font-semibold text-white ring-1 ring-inset ring-white/20 backdrop-blur transition-colors hover:bg-white/20"
             >
-              Ver inteligencia de mercado
+              Ver indicadores de mercado
             </a>
           </div>
         </div>

@@ -5,7 +5,7 @@ import LinkedInIcon from './ui/LinkedInIcon'
 const NAV_LINKS = [
   { href: '#inicio', label: 'Inicio' },
   { href: '#gestion', label: 'Gestión Patrimonial' },
-  { href: '#cotizaciones', label: 'Inteligencia de Mercado' },
+  { href: '#cotizaciones', label: 'Indicadores de Mercado' },
 ]
 
 const LINKEDIN_URL = 'https://www.linkedin.com/company/alpes-estados-financieros/'
