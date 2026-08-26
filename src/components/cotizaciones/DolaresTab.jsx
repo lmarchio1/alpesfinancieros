@@ -170,7 +170,12 @@ export default function DolaresTab() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {data.map((d, i) => {
-          const ayerVenta = ayer?.[d.casa]?.venta
+          // MEP y CCL se calculan hoy vía AL30 (ver fetchDolaresImplicitos), pero el
+          // "ayer" que devuelve argentinadatos para esas dos casas viene de la
+          // metodología vieja de dolarapi. Comparar ambos mezclaría metodologías
+          // distintas y mostraría una "variación" que no es un movimiento real.
+          const esImplicito = d.casa === 'bolsa' || d.casa === 'contadoconliqui'
+          const ayerVenta = esImplicito ? null : ayer?.[d.casa]?.venta
           const trend = typeof ayerVenta === 'number' ? Math.sign(d.venta - ayerVenta) : 0
           const trendBorder =
             trend > 0 ? '!border-t-emerald-700' : trend < 0 ? '!border-t-rose-700' : '!border-t-slate-200'
@@ -222,12 +227,16 @@ export default function DolaresTab() {
                 <div>
                   <p className="text-xs text-slate-500">Compra</p>
                   <FlashPrice value={d.compra} formatted={formatArs(d.compra)} className="text-lg font-bold" />
-                  <DayChangeBadge current={d.compra} previous={ayer?.[d.casa]?.compra} className="mt-0.5" />
+                  {!esImplicito && (
+                    <DayChangeBadge current={d.compra} previous={ayer?.[d.casa]?.compra} className="mt-0.5" />
+                  )}
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-slate-500">Venta</p>
                   <FlashPrice value={d.venta} formatted={formatArs(d.venta)} className="text-lg font-bold" />
-                  <DayChangeBadge current={d.venta} previous={ayer?.[d.casa]?.venta} className="mt-0.5 justify-end" />
+                  {!esImplicito && (
+                    <DayChangeBadge current={d.venta} previous={ayer?.[d.casa]?.venta} className="mt-0.5 justify-end" />
+                  )}
                 </div>
               </div>
             </Card>
