@@ -59,7 +59,7 @@ const ITEMS = [
     icon: 'shield',
     title: 'Independencia y transparencia',
     description:
-      'La integridad rige cada decisión: actuamos con absoluta independencia, garantizando que nuestros objetivos estén siempre alineados con los de nuestros clientes.',
+      'La integridad rige cada decisión: actuamos con absoluta independencia, garantizando que nuestras recomendaciones estén siempre alineadas exclusivamente con sus objetivos.',
   },
   {
     icon: 'compass',
