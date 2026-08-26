@@ -117,7 +117,10 @@ export default function InflacionTab() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {interanual !== null && (
-          <Card className="group border-t-4 !border-t-brand-200 p-6 hover:!border-t-brand-500 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70">
+          <Card
+            className="group animate-fade-up border-t-4 !border-t-brand-200 p-6 hover:!border-t-brand-500 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70"
+            style={{ animationDelay: '0ms' }}
+          >
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-brand-600 group-hover:text-white">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
@@ -132,7 +135,10 @@ export default function InflacionTab() {
         )}
 
         {rem && (
-          <Card className="group border-t-4 !border-t-[#ecd7bb] p-6 hover:!border-t-[#c17a1e] transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70">
+          <Card
+            className="group animate-fade-up border-t-4 !border-t-[#ecd7bb] p-6 hover:!border-t-[#c17a1e] transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70"
+            style={{ animationDelay: '80ms' }}
+          >
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#fbeed6] text-[#c17a1e] transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-[#c17a1e] group-hover:text-white">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
@@ -151,7 +157,10 @@ export default function InflacionTab() {
         )}
 
         {plazoFijo && (
-          <Card className="group border-t-4 !border-t-emerald-200 p-6 hover:!border-t-emerald-500 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70">
+          <Card
+            className="group animate-fade-up border-t-4 !border-t-emerald-200 p-6 hover:!border-t-emerald-500 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70"
+            style={{ animationDelay: '160ms' }}
+          >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white">
@@ -192,7 +201,7 @@ export default function InflacionTab() {
       </div>
 
       <div className="mt-4">
-        <Card className="!bg-slate-50 p-6">
+        <Card className="animate-fade-up !bg-slate-50 p-6" style={{ animationDelay: '240ms' }}>
           <h3 className="font-semibold text-slate-900">Evolución del Poder Adquisitivo</h3>
           <p className="mt-1 text-sm text-slate-500">
             Seleccione un período para evaluar el impacto inflacionario acumulado y el valor

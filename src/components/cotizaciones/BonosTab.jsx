@@ -73,7 +73,7 @@ export default function BonosTab() {
         letras={rentaFija.data.letras}
       />
 
-      <div>
+      <div className="animate-fade-up" style={{ animationDelay: '400ms' }}>
         <button
           type="button"
           onClick={() => setModelosAbierto((v) => !v)}

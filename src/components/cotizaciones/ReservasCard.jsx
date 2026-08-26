@@ -24,7 +24,10 @@ export default function ReservasCard() {
   if (!reservas) return null
 
   return (
-    <Card className="group border-t-4 !border-t-[#f4e4bc] p-6 hover:!border-t-[#dba61f] transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70">
+    <Card
+      className="group animate-fade-up border-t-4 !border-t-[#f4e4bc] p-6 hover:!border-t-[#dba61f] transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70"
+      style={{ animationDelay: '160ms' }}
+    >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#fdf6e3] text-[#dba61f] transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-[#dba61f] group-hover:text-white">
