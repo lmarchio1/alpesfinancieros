@@ -12,21 +12,23 @@ const formatDate = (value) => new Date(value).toLocaleDateString('es-AR', { time
 
 const DOLAR_LABELS = {
   oficial: 'Oficial',
+  blue: 'Blue',
   bolsa: 'MEP',
   contadoconliqui: 'CCL',
   cripto: 'Cripto',
 }
 
 // Para usar dentro de una oración: los acrónimos (MEP, CCL) no deben
-// pasarse a minúscula, a diferencia de "oficial" y "cripto".
+// pasarse a minúscula, a diferencia de "oficial", "blue" y "cripto".
 const DOLAR_LABELS_PROSA = {
   oficial: 'oficial',
+  blue: 'blue',
   bolsa: 'MEP',
   contadoconliqui: 'CCL',
   cripto: 'cripto',
 }
 
-const CASAS_HABILITADAS = ['oficial', 'bolsa', 'contadoconliqui', 'cripto']
+const CASAS_HABILITADAS = ['oficial', 'blue', 'bolsa', 'contadoconliqui', 'cripto']
 
 export default function BreakevenCalculator({ letras, dolares }) {
   const opciones = useMemo(
