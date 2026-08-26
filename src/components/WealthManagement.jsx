@@ -77,7 +77,7 @@ const ITEMS = [
     icon: 'trending',
     title: 'Monitoreo e inteligencia de datos',
     description:
-      'Seguimiento continuo de variables macroeconómicas e indicadores clave de mercado, respaldando la toma de decisiones con análisis riguroso e información consolidada.',
+      'Seguimiento continuo de variables macroeconómicas e indicadores clave de mercado, respaldando la toma de decisiones con información consolidada y análisis riguroso.',
   },
 ]
 
