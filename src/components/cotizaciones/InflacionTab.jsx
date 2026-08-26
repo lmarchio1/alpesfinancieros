@@ -134,7 +134,7 @@ export default function InflacionTab() {
           </Card>
         )}
 
-        {rem && (
+        {rem ? (
           <Card
             className="group animate-fade-up border-t-4 !border-t-[#ecd7bb] p-6 hover:!border-t-[#c17a1e] transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70"
             style={{ animationDelay: '80ms' }}
@@ -154,9 +154,11 @@ export default function InflacionTab() {
               {rem.anioActual && ` · ${rem.anioActual.anio}: ${rem.anioActual.pct.toFixed(1)}%`}
             </p>
           </Card>
+        ) : (
+          <div className="h-[122px] animate-pulse rounded-2xl bg-slate-100" />
         )}
 
-        {plazoFijo && (
+        {plazoFijo ? (
           <Card
             className="group animate-fade-up border-t-4 !border-t-emerald-200 p-6 hover:!border-t-emerald-500 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/70"
             style={{ animationDelay: '160ms' }}
@@ -197,6 +199,8 @@ export default function InflacionTab() {
               fijos.
             </p>
           </Card>
+        ) : (
+          <div className="h-[168px] animate-pulse rounded-2xl bg-slate-100" />
         )}
       </div>
 
