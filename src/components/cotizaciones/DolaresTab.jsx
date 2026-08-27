@@ -179,7 +179,7 @@ export default function DolaresTab() {
           const ayerVenta = esImplicito ? d.ventaApertura : ayer?.[d.casa]?.venta
           const trend = typeof ayerVenta === 'number' ? Math.sign(d.venta - ayerVenta) : 0
           const trendBorder =
-            trend > 0 ? '!border-t-emerald-700' : trend < 0 ? '!border-t-rose-700' : '!border-t-slate-200'
+            trend > 0 ? '!border-t-emerald-600' : trend < 0 ? '!border-t-rose-600' : '!border-t-slate-200'
 
           const brecha =
             mayorista && d.casa !== 'mayorista' ? ((d.venta - mayorista.venta) / mayorista.venta) * 100 : null
