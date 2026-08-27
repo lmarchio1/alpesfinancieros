@@ -59,7 +59,15 @@ export default function ContactForm() {
   return (
     <section
       id="contacto"
-      className="relative flex min-h-[600px] items-center overflow-hidden bg-[#0b0704] py-20"
+      className="relative flex min-h-[600px] items-center overflow-hidden py-20"
+      style={{
+        // Debajo de la franja del toro (mobile) quedaba un negro plano. Este degradado
+        // -en píxeles, no en %, para no depender del alto total (variable según
+        // contenido)- lo continúa en navy de marca y lo funde de vuelta al negro cálido
+        // hacia el final, en vez de un color liso. En desktop la foto cubre toda la
+        // sección así que este fondo no llega a verse.
+        background: 'linear-gradient(180deg, #123a5c 0px, #123a5c 460px, #0b0704 1000px)',
+      }}
     >
       {/* En mobile la sección se estira mucho (form + datos + mapa apilados), y esa foto
           panorámica forzada a cubrir todo ese alto quedaba mostrando solo una tira
@@ -74,7 +82,7 @@ export default function ContactForm() {
       <div
         className="absolute inset-x-0 top-0 h-[460px] sm:hidden"
         style={{
-          background: 'linear-gradient(180deg, rgba(11,7,4,0.45) 0%, rgba(11,7,4,0.25) 40%, #0b0704 100%)',
+          background: 'linear-gradient(180deg, rgba(11,7,4,0.45) 0%, rgba(11,7,4,0.25) 40%, #123a5c 100%)',
         }}
       />
       <div

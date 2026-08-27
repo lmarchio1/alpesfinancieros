@@ -48,9 +48,11 @@ export default function Cotizaciones() {
       />
       {/* Al abrir una pestaña, la sección crece y el fondo (object-cover) se ve más
           "acercado" por el cambio de alto; se oscurece un poco más para que las
-          tarjetas de datos queden en primer plano y ese zoom se note menos. */}
+          tarjetas de datos queden en primer plano y ese zoom se note menos. Se usa el
+          navy de marca (mismo que brand-600) en vez de verde para no competir con el
+          borde verde de las tarjetas con variación positiva. */}
       <div
-        className={`absolute inset-0 bg-[#0d3324] transition-opacity duration-700 ease-out ${
+        className={`absolute inset-0 bg-brand-600 transition-opacity duration-700 ease-out ${
           abierto ? 'opacity-70 sm:opacity-55' : 'opacity-0'
         }`}
       />
