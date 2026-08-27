@@ -50,7 +50,7 @@ export default function Cotizaciones() {
           "acercado" por el cambio de alto; se oscurece un poco más para que las
           tarjetas de datos queden en primer plano y ese zoom se note menos. */}
       <div
-        className={`absolute inset-0 bg-[#040a06] transition-opacity duration-700 ease-out ${
+        className={`absolute inset-0 bg-[#0d3324] transition-opacity duration-700 ease-out ${
           abierto ? 'opacity-70 sm:opacity-55' : 'opacity-0'
         }`}
       />

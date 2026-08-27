@@ -61,13 +61,24 @@ export default function ContactForm() {
       id="contacto"
       className="relative flex min-h-[600px] items-center overflow-hidden bg-[#0b0704] py-20"
     >
+      {/* En mobile la sección se estira mucho (form + datos + mapa apilados), y esa foto
+          panorámica forzada a cubrir todo ese alto quedaba mostrando solo una tira
+          angosta de la cara del toro. En vez de eso, la foto ocupa una franja fija
+          arriba (se ve el toro casi completo) y el resto de la sección queda en el
+          color sólido de fondo, con un degradado que funde una cosa con la otra. */}
       <img
         src={toroWallStreet}
         alt="Toro de Wall Street"
-        className="absolute inset-0 h-full w-full object-cover object-[58%_18%] saturate-[1.35]"
+        className="absolute inset-x-0 top-0 h-[460px] w-full object-cover object-[55%_22%] saturate-[1.35] sm:inset-0 sm:h-full sm:object-[58%_18%]"
       />
       <div
-        className="absolute inset-0"
+        className="absolute inset-x-0 top-0 h-[460px] sm:hidden"
+        style={{
+          background: 'linear-gradient(180deg, rgba(11,7,4,0.45) 0%, rgba(11,7,4,0.25) 40%, #0b0704 100%)',
+        }}
+      />
+      <div
+        className="absolute inset-0 hidden sm:block"
         style={{
           background:
             'linear-gradient(180deg, rgba(11,7,4,0.78) 0%, rgba(11,7,4,0.48) 45%, rgba(11,7,4,0.85) 100%)',
