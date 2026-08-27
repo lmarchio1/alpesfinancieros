@@ -25,6 +25,9 @@ const GRUPOS = [
 
 function VarBadge({ value }) {
   if (typeof value !== 'number') return <span className="text-slate-400">—</span>
+  // Sin variación real (recién pasada la medianoche, antes de que el mercado vuelva a
+  // operar, ver obtenerAperturaDiaria) debe verse neutro, no "positivo" en verde.
+  if (Math.abs(value) < 0.005) return <Badge variant="neutral">0.00%</Badge>
   return (
     <Badge variant={value >= 0 ? 'positive' : 'negative'}>
       {value >= 0 ? '+' : ''}

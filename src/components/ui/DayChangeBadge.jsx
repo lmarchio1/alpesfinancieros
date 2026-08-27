@@ -11,7 +11,7 @@ export default function DayChangeBadge({ current, previous, className = '' }) {
   const isUp = diff > 0
   return (
     <span
-      className={`inline-flex items-center gap-0.5 text-xs font-semibold ${isUp ? 'text-emerald-600' : 'text-rose-600'} ${className}`}
+      className={`inline-flex items-center gap-0.5 text-xs font-semibold ${isUp ? 'text-emerald-700' : 'text-rose-700'} ${className}`}
     >
       {isUp ? '▲' : '▼'} {Math.abs(pct).toFixed(2)}%
     </span>

@@ -10,6 +10,17 @@ function fechaArgentinaHoy() {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
 }
 
+// Si la cotización todavía no se actualizó hoy (pasó la medianoche y el mercado
+// no volvió a operar), la variación no debería mostrar el cambio ya cerrado de
+// la rueda anterior como si fuera de hoy.
+export function esCotizacionDeHoy(fechaActualizacion) {
+  if (!fechaActualizacion) return false
+  const fecha = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(
+    new Date(fechaActualizacion)
+  )
+  return fecha === fechaArgentinaHoy()
+}
+
 // Apertura diaria de MEP/CCL, capturada una vez por día hábil por un GitHub
 // Action (ver .github/workflows/apertura-mep-ccl.yml) y guardada como JSON
 // estático: misma apertura para todos los visitantes, sin backend propio.
@@ -140,10 +151,18 @@ async function fetchCasaPreviousClose(casa, fromDate, maxDaysBack = 6) {
 }
 
 // Cotización de cierre del día hábil anterior, por casa, para comparar contra el precio en vivo.
-export async function fetchDolaresAyer() {
-  const now = new Date()
+// Se busca a partir de la fecha de "fechaActualizacion" de CADA casa (no del reloj del
+// visitante): pasada la medianoche el reloj ya marca un día nuevo, pero el precio en vivo
+// sigue siendo el cierre de ayer hasta que dolarapi actualice. Buscar "ayer" desde hoy en
+// ese momento se saltaba justo esa fecha (todavía sin cargar en el histórico) y terminaba
+// comparando contra un día más viejo -mostrando una variación falsa en vez de "sin cambios"-.
+export async function fetchDolaresAyer(precios) {
   const entries = await Promise.all(
-    CASAS.map(async (casa) => [casa, await fetchCasaPreviousClose(casa, now)])
+    CASAS.map(async (casa) => {
+      const fechaActualizacion = precios?.find((p) => p.casa === casa)?.fechaActualizacion
+      const fromDate = fechaActualizacion ? new Date(fechaActualizacion) : new Date()
+      return [casa, await fetchCasaPreviousClose(casa, fromDate)]
+    })
   )
   return Object.fromEntries(entries)
 }

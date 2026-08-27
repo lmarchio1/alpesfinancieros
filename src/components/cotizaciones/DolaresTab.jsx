@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { usePolling } from '../../hooks/usePolling'
-import { fetchDolares, fetchDolaresAyer } from '../../services/dolaresApi'
+import { fetchDolares, fetchDolaresAyer, esCotizacionDeHoy } from '../../services/dolaresApi'
 import { fetchBandaCambiaria } from '../../services/bcraApi'
 import { fetchConReintento } from '../../utils/fetchRetry'
 import Card from '../ui/Card'
@@ -55,10 +55,14 @@ export default function DolaresTab() {
 
   const [ayer, setAyer] = useState(null)
   useEffect(() => {
-    fetchConReintento(fetchDolaresAyer)
+    // Depende de "data" (para usar la fechaActualizacion real de cada casa, ver
+    // fetchDolaresAyer), pero solo se pide una vez -no en cada actualización del
+    // polling- gracias a Boolean(data) en las dependencias.
+    if (!data) return
+    fetchConReintento(() => fetchDolaresAyer(data))
       .then(setAyer)
       .catch(() => setAyer(null))
-  }, [])
+  }, [Boolean(data)])
 
   const [banda, setBanda] = useState(null)
   useEffect(() => {
@@ -176,10 +180,16 @@ export default function DolaresTab() {
           // metodologías distintas- se compara contra la referencia de apertura del
           // día (primer valor AL30 visto hoy, ver referenciaDiaria en dolaresApi.js).
           const esImplicito = d.casa === 'bolsa' || d.casa === 'contadoconliqui'
-          const ayerVenta = esImplicito ? d.ventaApertura : ayer?.[d.casa]?.venta
-          const trend = typeof ayerVenta === 'number' ? Math.sign(d.venta - ayerVenta) : 0
+          // Cripto opera las 24hs, así que siempre compara en vivo. El resto: si
+          // dolarapi todavía no actualizó la cotización de hoy (pasó la medianoche y
+          // el mercado no volvió a operar), no hay variación real que mostrar todavía
+          // -se sigue viendo el cierre de la rueda anterior, no un movimiento de hoy-.
+          const esDeHoy = d.casa === 'cripto' || esCotizacionDeHoy(d.fechaActualizacion)
+          const ayerVenta = !esDeHoy ? d.venta : esImplicito ? d.ventaApertura : ayer?.[d.casa]?.venta
+          const ayerCompra = !esDeHoy ? d.compra : esImplicito ? d.compraApertura : ayer?.[d.casa]?.compra
+          const trend = esDeHoy && typeof ayerVenta === 'number' ? Math.sign(d.venta - ayerVenta) : 0
           const trendBorder =
-            trend > 0 ? '!border-t-emerald-600' : trend < 0 ? '!border-t-rose-600' : '!border-t-slate-200'
+            trend > 0 ? '!border-t-emerald-700' : trend < 0 ? '!border-t-rose-700' : '!border-t-slate-200'
 
           const brecha =
             mayorista && d.casa !== 'mayorista' ? ((d.venta - mayorista.venta) / mayorista.venta) * 100 : null
@@ -228,20 +238,12 @@ export default function DolaresTab() {
                 <div>
                   <p className="text-xs text-slate-500">Compra</p>
                   <FlashPrice value={d.compra} formatted={formatArs(d.compra)} className="text-lg font-bold" />
-                  <DayChangeBadge
-                    current={d.compra}
-                    previous={esImplicito ? d.compraApertura : ayer?.[d.casa]?.compra}
-                    className="mt-0.5"
-                  />
+                  <DayChangeBadge current={d.compra} previous={ayerCompra} className="mt-0.5" />
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-slate-500">Venta</p>
                   <FlashPrice value={d.venta} formatted={formatArs(d.venta)} className="text-lg font-bold" />
-                  <DayChangeBadge
-                    current={d.venta}
-                    previous={esImplicito ? d.ventaApertura : ayer?.[d.casa]?.venta}
-                    className="mt-0.5 justify-end"
-                  />
+                  <DayChangeBadge current={d.venta} previous={ayerVenta} className="mt-0.5 justify-end" />
                 </div>
               </div>
             </Card>

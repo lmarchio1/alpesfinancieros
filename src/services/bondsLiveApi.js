@@ -1,5 +1,8 @@
 import { fetchArgBonds } from './data912Api'
 import { DUALES_META, MATURITY_BY_YEAR, BONARES_NUEVOS_META } from '../data/bondsReference'
+import { obtenerAperturaDiaria } from '../utils/aperturaDiaria'
+
+const APERTURA_KEY = 'alpes_apertura_mercado'
 
 // Globales y Bonares en dólar MEP (sufijo "D"): detecta automáticamente cualquier
 // ticker que matchee el prefijo de la familia y cuyo año de vencimiento esté en
@@ -63,10 +66,27 @@ export async function fetchUniversoBonos() {
   const bonares = [...mapearFamiliaPorAnio(['AL', 'AE'], 'ARG', porSimbolo), ...bonaresNuevos].sort(
     (a, b) => new Date(a.vencimiento) - new Date(b.vencimiento)
   )
+  const globales = mapearFamiliaPorAnio(['GD'], 'NY', porSimbolo)
+  const duales = mapearGrupo(DUALES_META, '', porSimbolo)
+
+  // data912 no da timestamp por especie y sigue devolviendo el % de la rueda anterior
+  // toda la madrugada, hasta que el mercado vuelve a operar. Se recalcula la variación
+  // contra el primer precio visto hoy en este navegador (ver obtenerAperturaDiaria) en
+  // vez de confiar en ese %: pasada la medianoche da 0% y solo vuelve a moverse cuando
+  // el precio efectivamente cambia.
+  const todos = [...globales, ...bonares, ...duales]
+  const aperturas = obtenerAperturaDiaria(APERTURA_KEY, new Map(todos.map((b) => [b.ticker, b.precio])))
+  const conVariacionDeHoy = (b) => {
+    const apertura = aperturas[b.ticker]
+    return {
+      ...b,
+      variacionPorcentaje: apertura > 0 ? ((b.precio - apertura) / apertura) * 100 : b.variacionPorcentaje,
+    }
+  }
 
   return {
-    globales: mapearFamiliaPorAnio(['GD'], 'NY', porSimbolo),
-    bonares,
-    duales: mapearGrupo(DUALES_META, '', porSimbolo),
+    globales: globales.map(conVariacionDeHoy),
+    bonares: bonares.map(conVariacionDeHoy),
+    duales: duales.map(conVariacionDeHoy),
   }
 }

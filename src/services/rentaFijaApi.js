@@ -1,7 +1,9 @@
 import { fetchArgNotes } from './data912Api'
+import { obtenerAperturaDiaria } from '../utils/aperturaDiaria'
 
 const BASE_URL = 'https://api.argentinadatos.com/v1/finanzas'
 const RIESGO_ANTERIOR_KEY = 'alpes_riesgo_pais_anterior'
+const APERTURA_KEY = 'alpes_apertura_mercado'
 
 function fechaArgentinaHoy() {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
@@ -30,14 +32,30 @@ export async function fetchRentaFija() {
   ])
 
   const precioPorTicker = new Map(notas.map((n) => [n.symbol, n.c]))
+  const pctChangePorTicker = new Map(notas.map((n) => [n.symbol, n.pct_change]))
+
+  // data912 no da timestamp por especie y sigue devolviendo el % de la rueda anterior
+  // toda la madrugada, hasta que el mercado vuelve a operar. Se recalcula la variación
+  // contra el primer precio visto hoy en este navegador (ver obtenerAperturaDiaria) en
+  // vez de confiar en ese %: pasada la medianoche da 0% y solo vuelve a moverse cuando
+  // el precio efectivamente cambia. Comparte la clave de localStorage con los bonos
+  // (bondsLiveApi.js) porque los tickers no se pisan entre sí.
+  const aperturas = obtenerAperturaDiaria(APERTURA_KEY, precioPorTicker)
 
   const letrasOrdenadas = letrasMeta
     .filter(noVencido)
-    .map((l) => ({
-      ...l,
-      precioActual: precioPorTicker.get(l.ticker),
-      variacionPorcentaje: notas.find((n) => n.symbol === l.ticker)?.pct_change,
-    }))
+    .map((l) => {
+      const precioActual = precioPorTicker.get(l.ticker)
+      const apertura = aperturas[l.ticker]
+      return {
+        ...l,
+        precioActual,
+        variacionPorcentaje:
+          apertura > 0 && typeof precioActual === 'number'
+            ? ((precioActual - apertura) / apertura) * 100
+            : pctChangePorTicker.get(l.ticker),
+      }
+    })
     // solo letras con precio de mercado en vivo: sin eso no hay retorno calculable
     .filter((l) => typeof l.precioActual === 'number' && l.precioActual > 0)
     .sort((a, b) => new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento))
