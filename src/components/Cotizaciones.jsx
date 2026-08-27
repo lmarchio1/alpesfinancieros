@@ -35,7 +35,9 @@ export default function Cotizaciones() {
         src={calculadoraMercado}
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 h-full w-full object-cover saturate-[1.7]"
+        className={`absolute inset-0 h-full w-full object-cover saturate-[1.7] transition-[filter] duration-700 ease-out ${
+          abierto ? 'blur-lg sm:blur-md' : 'blur-none'
+        }`}
       />
       <div
         className="absolute inset-0"
@@ -43,6 +45,14 @@ export default function Cotizaciones() {
           background:
             'linear-gradient(180deg, rgba(4,10,6,0.88) 0%, rgba(4,10,6,0.8) 20%, rgba(4,14,8,0.3) 48%, rgba(4,14,8,0.32) 68%, rgba(4,10,6,0.85) 100%)',
         }}
+      />
+      {/* Al abrir una pestaña, la sección crece y el fondo (object-cover) se ve más
+          "acercado" por el cambio de alto; se oscurece un poco más para que las
+          tarjetas de datos queden en primer plano y ese zoom se note menos. */}
+      <div
+        className={`absolute inset-0 bg-[#040a06] transition-opacity duration-700 ease-out ${
+          abierto ? 'opacity-70 sm:opacity-55' : 'opacity-0'
+        }`}
       />
 
       <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -64,7 +74,7 @@ export default function Cotizaciones() {
           ))}
         </div>
 
-        <div className="mb-8 inline-flex rounded-xl bg-slate-900/35 p-1 shadow-md ring-1 ring-white/10 backdrop-blur-md">
+        <div className="mb-8 inline-flex rounded-xl bg-slate-900/70 p-1 shadow-lg shadow-black/40 ring-1 ring-white/15 backdrop-blur-md">
           {TOGGLES.map((t) => (
             <button
               key={t.id}
