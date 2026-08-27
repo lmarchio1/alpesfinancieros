@@ -31,6 +31,7 @@ function mapearFamiliaPorAnio(prefijos, ley, porSimbolo) {
 
     resultado.push({
       ticker,
+      symbolLive: symbol, // símbolo real en data912 (con sufijo), para la apertura diaria
       ley,
       vencimiento: meta.vencimiento,
       duracionAnios: meta.duracionAnios,
@@ -45,10 +46,12 @@ function mapearFamiliaPorAnio(prefijos, ley, porSimbolo) {
 function mapearGrupo(meta, sufijo, porSimbolo) {
   return Object.entries(meta)
     .map(([ticker, info]) => {
-      const live = porSimbolo.get(`${ticker}${sufijo}`)
+      const symbol = `${ticker}${sufijo}`
+      const live = porSimbolo.get(symbol)
       if (!live || !live.c) return null
       return {
         ticker,
+        symbolLive: symbol,
         ...info,
         precio: live.c,
         variacionPorcentaje: live.pct_change,
@@ -71,13 +74,18 @@ export async function fetchUniversoBonos() {
 
   // data912 no da timestamp por especie y sigue devolviendo el % de la rueda anterior
   // toda la madrugada, hasta que el mercado vuelve a operar. Se recalcula la variación
-  // contra el primer precio visto hoy en este navegador (ver obtenerAperturaDiaria) en
-  // vez de confiar en ese %: pasada la medianoche da 0% y solo vuelve a moverse cuando
-  // el precio efectivamente cambia.
+  // contra la apertura de hoy (ver obtenerAperturaDiaria: capturada por un GitHub
+  // Action para todos los visitantes, con respaldo por navegador) en vez de confiar en
+  // ese %: pasada la medianoche da 0% y solo vuelve a moverse cuando el precio
+  // efectivamente cambia.
+  // Se usa symbolLive (el símbolo real de data912, con su sufijo) como clave, no
+  // "ticker": varios bonos comparten el mismo ticker mostrado para dos instrumentos
+  // distintos (ej. "GD30" a secas, en pesos, vs. "GD30D" -que se muestra como
+  // "GD30"-, en dólares), y son precios completamente distintos entre sí.
   const todos = [...globales, ...bonares, ...duales]
-  const aperturas = obtenerAperturaDiaria(APERTURA_KEY, new Map(todos.map((b) => [b.ticker, b.precio])))
-  const conVariacionDeHoy = (b) => {
-    const apertura = aperturas[b.ticker]
+  const aperturas = await obtenerAperturaDiaria(APERTURA_KEY, new Map(todos.map((b) => [b.symbolLive, b.precio])))
+  const conVariacionDeHoy = ({ symbolLive, ...b }) => {
+    const apertura = aperturas[symbolLive]
     return {
       ...b,
       variacionPorcentaje: apertura > 0 ? ((b.precio - apertura) / apertura) * 100 : b.variacionPorcentaje,

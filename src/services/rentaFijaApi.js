@@ -36,11 +36,12 @@ export async function fetchRentaFija() {
 
   // data912 no da timestamp por especie y sigue devolviendo el % de la rueda anterior
   // toda la madrugada, hasta que el mercado vuelve a operar. Se recalcula la variación
-  // contra el primer precio visto hoy en este navegador (ver obtenerAperturaDiaria) en
-  // vez de confiar en ese %: pasada la medianoche da 0% y solo vuelve a moverse cuando
-  // el precio efectivamente cambia. Comparte la clave de localStorage con los bonos
-  // (bondsLiveApi.js) porque los tickers no se pisan entre sí.
-  const aperturas = obtenerAperturaDiaria(APERTURA_KEY, precioPorTicker)
+  // contra la apertura de hoy (ver obtenerAperturaDiaria: capturada por un GitHub
+  // Action para todos los visitantes, con respaldo por navegador) en vez de confiar en
+  // ese %: pasada la medianoche da 0% y solo vuelve a moverse cuando el precio
+  // efectivamente cambia. Comparte la clave con los bonos (bondsLiveApi.js) porque los
+  // tickers no se pisan entre sí.
+  const aperturas = await obtenerAperturaDiaria(APERTURA_KEY, precioPorTicker)
 
   const letrasOrdenadas = letrasMeta
     .filter(noVencido)
