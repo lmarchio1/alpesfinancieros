@@ -66,7 +66,7 @@ export default function Cotizaciones() {
           un toque más oscuro- para que las tarjetas de datos queden en primer plano
           sin ese zoom ni el ruido de la foto. */}
       <div
-        className={`absolute inset-0 bg-[#b5b5b5] transition-opacity duration-700 ease-out ${
+        className={`absolute inset-0 bg-[#7a7f84] transition-opacity duration-700 ease-out ${
           abierto ? 'opacity-100' : 'opacity-0'
         }`}
       />
