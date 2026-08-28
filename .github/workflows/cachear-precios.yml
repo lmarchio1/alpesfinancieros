@@ -2,11 +2,14 @@ name: Cachear precios de bonos/letras
 
 on:
   schedule:
-    # Cada 10 minutos, todos los días. Es un techo de frescura más bajo que el
-    # polling en vivo del navegador (60s) a propósito: el objetivo es que la pestaña
-    # Renta Fija cargue más rápido al abrirla, no una frescura al segundo -y esos
-    # datos ya están aclarados como "de referencia" en el sitio-.
-    - cron: '*/10 * * * *'
+    # Cada 5 minutos (el mínimo que permite GitHub Actions), todos los días. Es un
+    # techo de frescura más bajo que el polling en vivo del navegador (60s) a
+    # propósito: el objetivo es que la pestaña Renta Fija cargue más rápido al
+    # abrirla, no una frescura al segundo -y esos datos ya están aclarados como "de
+    # referencia" en el sitio-. Actualizar más seguido no hace más lenta la carga
+    # para el visitante (siempre lee de Supabase igual de rápido); solo baja qué tan
+    # viejo puede llegar a estar el precio en el peor caso.
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:
