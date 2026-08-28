@@ -16,6 +16,15 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   process.exit(1)
 }
 
+// Diagnóstico temporal: nunca imprime la key completa, solo forma/largo, para
+// confirmar que el secret que llega acá es el que se espera.
+console.log(
+  'DEBUG url=%s keyPrefix=%s keyLen=%d',
+  SUPABASE_URL,
+  SUPABASE_SERVICE_ROLE_KEY.slice(0, 12),
+  SUPABASE_SERVICE_ROLE_KEY.length
+)
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 async function getJson(url) {
