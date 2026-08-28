@@ -129,7 +129,7 @@ function TablaDuales({ bonos }) {
   )
 }
 
-export default function BondsUniverse({ globales, bonares, duales, letras }) {
+export default function BondsUniverse({ globales, bonares, duales, letras, onActualizar }) {
   const [grupo, setGrupo] = useState('globales')
 
   return (
@@ -146,7 +146,17 @@ export default function BondsUniverse({ globales, bonares, duales, letras }) {
           </div>
           <h3 className="font-semibold text-slate-900">Renta Fija Soberana</h3>
         </div>
-        <Badge variant="positive">● En vivo · data912.com</Badge>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="positive">● En vivo</Badge>
+          <div className="flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs text-slate-500">
+            <span>Actualización cada 5 min</span>
+            {onActualizar && (
+              <button type="button" onClick={onActualizar} className="font-semibold text-brand-600 hover:underline">
+                Actualizar ahora
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-1 p-6 pb-4">

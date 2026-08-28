@@ -59,8 +59,8 @@ function mapearGrupo(meta, sufijo, porSimbolo) {
 }
 
 // Duales cotizan directo en pesos, sin sufijo.
-export async function fetchUniversoBonos() {
-  const bonds = await fetchArgBonds()
+export async function fetchUniversoBonos(forzar = false) {
+  const bonds = await fetchArgBonds(forzar)
   const porSimbolo = new Map(bonds.map((b) => [b.symbol, b]))
 
   const bonaresNuevos = mapearGrupo(BONARES_NUEVOS_META, 'D', porSimbolo)

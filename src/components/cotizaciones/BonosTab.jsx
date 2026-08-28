@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { usePolling } from '../../hooks/usePolling'
 import { fetchDolares } from '../../services/dolaresApi'
 import { fetchRentaFija } from '../../services/rentaFijaApi'
@@ -14,13 +14,26 @@ import RiesgoPaisSensitivity from './RiesgoPaisSensitivity'
 import BondsUniverse from './BondsUniverse'
 
 export default function BonosTab() {
-  const rentaFijaFetcher = useCallback(() => fetchRentaFija(), [])
+  // Los precios de bonos/letras se sirven desde una cache en Supabase (actualizada
+  // cada 5 min por un GitHub Action) para que la pestaña cargue más rápido. El botón
+  // "Actualizar ahora" fuerza puntualmente saltear esa cache y pedirle el dato
+  // directo a data912 -sin tocar el intervalo de 5 min para el resto de los
+  // visitantes-.
+  const forzarRef = useRef(false)
+  const rentaFijaFetcher = useCallback(() => fetchRentaFija(forzarRef.current), [])
   const dolaresFetcher = useCallback(() => fetchDolares(), [])
-  const universoFetcher = useCallback(() => fetchUniversoBonos(), [])
+  const universoFetcher = useCallback(() => fetchUniversoBonos(forzarRef.current), [])
 
   const rentaFija = usePolling(rentaFijaFetcher, { intervalMs: 120000 })
   const dolares = usePolling(dolaresFetcher, { intervalMs: 60000 })
   const universo = usePolling(universoFetcher, { intervalMs: 60000 })
+
+  const actualizarAhora = () => {
+    forzarRef.current = true
+    Promise.all([rentaFija.refresh(), universo.refresh()]).finally(() => {
+      forzarRef.current = false
+    })
+  }
 
   const [modelosAbierto, setModelosAbierto] = useState(false)
 
@@ -71,6 +84,7 @@ export default function BonosTab() {
         bonares={universo.data.bonares}
         duales={universo.data.duales}
         letras={rentaFija.data.letras}
+        onActualizar={actualizarAhora}
       />
 
       <div className="animate-fade-up" style={{ animationDelay: '400ms' }}>

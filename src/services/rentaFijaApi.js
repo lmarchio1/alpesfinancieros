@@ -18,11 +18,11 @@ function noVencido(instrumento) {
   return new Date(instrumento.fechaVencimiento) > new Date()
 }
 
-export async function fetchRentaFija() {
+export async function fetchRentaFija(forzar = false) {
   const [letrasMeta, riesgoPais, notas] = await Promise.all([
     getJson('letras'),
     getJson('indices/riesgo-pais/ultimo'),
-    fetchArgNotes(),
+    fetchArgNotes(forzar),
   ])
 
   const precioPorTicker = new Map(notas.map((n) => [n.symbol, n.c]))
