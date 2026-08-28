@@ -94,8 +94,9 @@ export default function OtrasMonedasTab() {
               type="button"
               onClick={() => setInverso(false)}
               className={`rounded-md px-3 py-1 font-medium transition-colors ${
-                !inverso ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                !inverso ? 'text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
               }`}
+              style={!inverso ? { background: 'linear-gradient(135deg, #f97316 0%, #c2410c 45%, #7c2d12 100%)' } : undefined}
             >
               Moneda → $
             </button>
@@ -103,8 +104,9 @@ export default function OtrasMonedasTab() {
               type="button"
               onClick={() => setInverso(true)}
               className={`rounded-md px-3 py-1 font-medium transition-colors ${
-                inverso ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                inverso ? 'text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
               }`}
+              style={inverso ? { background: 'linear-gradient(135deg, #f97316 0%, #c2410c 45%, #7c2d12 100%)' } : undefined}
             >
               US$ → Moneda
             </button>
