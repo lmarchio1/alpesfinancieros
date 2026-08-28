@@ -44,7 +44,7 @@ export default function TamarCard() {
 
       <div className="mt-3 grid grid-cols-2 gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">TNA</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">TNA</p>
           <div className="mt-0.5 flex items-baseline gap-2">
             <p className="text-2xl font-bold text-slate-900">{tamar.valor.toFixed(2)}%</p>
             <DayChangeBadge current={tamar.valor} previous={tamar.valorAnterior} />
@@ -52,7 +52,7 @@ export default function TamarCard() {
         </div>
         {tamar.tea !== null && (
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">TEA</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">TEA</p>
             <div className="mt-0.5 flex items-baseline gap-2">
               <p className="text-2xl font-bold text-slate-900">{tamar.tea.toFixed(2)}%</p>
               <DayChangeBadge current={tamar.tea} previous={tamar.teaAnterior} />
@@ -60,7 +60,7 @@ export default function TamarCard() {
           </div>
         )}
       </div>
-      <p className="mt-2 text-xs text-slate-400">
+      <p className="mt-2 text-xs text-slate-500">
         Tasa de referencia del BCRA para depósitos del segmento corporativo e institucional
         (operaciones desde $1.000M).
       </p>

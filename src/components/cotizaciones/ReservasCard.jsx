@@ -47,7 +47,7 @@ export default function ReservasCard() {
         <p className="text-2xl font-bold text-slate-900">USD {formatMillones(reservas.valor)} M</p>
         <DayChangeBadge current={reservas.valor} previous={reservas.valorAnterior} />
       </div>
-      <p className="mt-1 text-xs text-slate-400">Reservas Internacionales del BCRA expresada en millones de USD.</p>
+      <p className="mt-1 text-xs text-slate-500">Reservas Internacionales del BCRA expresada en millones de USD.</p>
     </Card>
   )
 }

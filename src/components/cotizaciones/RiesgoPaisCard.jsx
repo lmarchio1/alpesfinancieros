@@ -45,7 +45,7 @@ export default function RiesgoPaisCard({ riesgoPais }) {
         <p className="text-2xl font-bold text-slate-900">{animatedValor} pb</p>
         <DayChangeBadge current={riesgoPais.valor} previous={anterior?.valor} />
       </div>
-      <p className="mt-1 text-xs text-slate-400">
+      <p className="mt-1 text-xs text-slate-500">
         Diferencial de rendimiento de la deuda soberana frente a los bonos del Tesoro de EE. UU.
       </p>
     </Card>

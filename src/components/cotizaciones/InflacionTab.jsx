@@ -128,10 +128,10 @@ export default function InflacionTab() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 17l6-6 4 4 8-8M15 7h6v6" />
                   </svg>
                 </div>
-                <p className="text-sm text-slate-500">Inflación interanual</p>
+                <p className="font-semibold text-slate-900">Inflación interanual</p>
               </div>
               <p className="mt-3 text-3xl font-bold text-slate-900">{interanual.toFixed(2)}%</p>
-              <p className="mt-1 text-xs text-slate-400">Variación acumulada de los últimos 12 meses (Dato oficial INDEC).</p>
+              <p className="mt-1 text-xs text-slate-500">Variación acumulada de los últimos 12 meses (Dato oficial INDEC).</p>
             </Card>
           ) : (
             <div className="h-[122px] animate-pulse rounded-2xl bg-slate-100 sm:h-[223px]" />
@@ -148,10 +148,10 @@ export default function InflacionTab() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 9l-2 6-6 2 2-6 6-2z" />
                   </svg>
                 </div>
-                <p className="text-sm text-slate-500">Inflación esperada (REM · BCRA)</p>
+                <p className="font-semibold text-slate-900">Inflación esperada (REM · BCRA)</p>
               </div>
               <p className="mt-3 text-3xl font-bold text-slate-900">{rem.proximos12MesesPct.toFixed(2)}%</p>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-slate-500">
                 Mediana proyectada a 12 meses según el Relevamiento de Expectativas de Mercado.
                 {rem.anioActual && ` · ${rem.anioActual.anio}: ${rem.anioActual.pct.toFixed(1)}%`}
               </p>
@@ -164,41 +164,41 @@ export default function InflacionTab() {
         <div className="animate-fade-up" style={{ animationDelay: '160ms' }}>
           {plazoFijo ? (
             <Card className="group h-full border-t-4 !border-t-[#7fa88a] p-6 hover:!border-t-emerald-500 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-2 hover:scale-[1.015] hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)]">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v5l3 3M12 3a9 9 0 100 18 9 9 0 000-18z" />
-                    </svg>
-                  </div>
-                  <p className="text-sm text-slate-500">Plazo fijo a 30 días (BCRA)</p>
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v5l3 3M12 3a9 9 0 100 18 9 9 0 000-18z" />
+                  </svg>
                 </div>
-                <span className="shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-500">
-                  Al cierre: {formatFecha(plazoFijo.fecha)}
-                </span>
+                <p className="font-semibold text-slate-900">Plazo fijo a 30 días (BCRA)</p>
               </div>
               <div className="mt-3 grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">TNA</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">TNA</p>
                   <div className="mt-0.5 flex items-baseline gap-2">
-                    <p className="text-2xl font-bold text-slate-900">{plazoFijo.valor.toFixed(2)}%</p>
+                    <p className="text-3xl font-bold text-slate-900">{plazoFijo.valor.toFixed(2)}%</p>
                     <DayChangeBadge current={plazoFijo.valor} previous={plazoFijo.valorAnterior} />
                   </div>
                 </div>
                 {plazoFijo.tea !== null && (
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">TEA</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">TEA</p>
                     <div className="mt-0.5 flex items-baseline gap-2">
-                      <p className="text-2xl font-bold text-slate-900">{plazoFijo.tea.toFixed(2)}%</p>
+                      <p className="text-3xl font-bold text-slate-900">{plazoFijo.tea.toFixed(2)}%</p>
                       <DayChangeBadge current={plazoFijo.tea} previous={plazoFijo.teaAnterior} />
                     </div>
                   </div>
                 )}
               </div>
-              <p className="mt-2 text-xs text-slate-400">
-                Tasa pasiva de referencia del sistema financiero para colocaciones a 30 días en plazos
-                fijos.
-              </p>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs text-slate-500">
+                  Tasa pasiva de referencia del sistema financiero para colocaciones a 30 días en
+                  plazos fijos.
+                </p>
+                <span className="shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-600">
+                  Al cierre: {formatFecha(plazoFijo.fecha)}
+                </span>
+              </div>
             </Card>
           ) : (
             <div className="h-[235px] animate-pulse rounded-2xl bg-slate-100 sm:h-[223px]" />
