@@ -62,13 +62,19 @@ export default function Cotizaciones() {
       />
       {/* Al abrir una pestaña, la sección crece y el fondo (object-cover) se ve más
           "acercado" por el cambio de alto. En vez de mostrar la foto recortada
-          (borrosa o no), se reemplaza por un gris liso -mismo tono metálico de antes,
-          un toque más oscuro- para que las tarjetas de datos queden en primer plano
-          sin ese zoom ni el ruido de la foto. */}
+          (borrosa o no), se reemplaza por un gris liso para que las tarjetas de datos
+          queden en primer plano sin ese zoom ni el ruido de la foto. Un degradado
+          radial (más claro arriba, oscureciendo hacia los bordes) en vez de un color
+          plano, para que tenga algo de profundidad en vez de leerse como un bloque de
+          color sin más. */}
       <div
-        className={`absolute inset-0 bg-[#7a7f84] transition-opacity duration-700 ease-out ${
+        className={`absolute inset-0 transition-opacity duration-700 ease-out ${
           abierto ? 'opacity-100' : 'opacity-0'
         }`}
+        style={{
+          background:
+            'radial-gradient(120% 90% at 50% 0%, #94999e 0%, #7a7f84 45%, #55585c 100%)',
+        }}
       />
 
       <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
