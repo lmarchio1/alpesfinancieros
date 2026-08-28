@@ -3,7 +3,18 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
+// createClient tira una excepción sincrónica si falta la URL/key -pasó en producción:
+// un build sin esas variables de entorno tumbaba TODA la página, no solo la sección que
+// necesita Supabase-. Envuelto en try/catch para que, en el peor caso, se pierdan las
+// comparaciones que dependen de Supabase pero el resto del sitio siga funcionando.
+export const supabase = (() => {
+  try {
+    return createClient(supabaseUrl, supabaseKey)
+  } catch (err) {
+    console.error('No se pudo inicializar el cliente de Supabase:', err.message)
+    return null
+  }
+})()
 
 function fechaArgentinaHoy() {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
@@ -22,6 +33,7 @@ function fechaArgentinaAyer() {
 // entren -a diferencia del respaldo por localStorage que se usaba antes, que podía
 // quedar distinto entre navegadores según el momento en que cada uno cargó la página-.
 export async function fetchCierresDeAyer(instrumentos) {
+  if (!supabase) return {}
   const { data, error } = await supabase
     .from('cierres_diarios')
     .select('instrumento, valor')
@@ -40,6 +52,7 @@ const CACHE_MAX_ANTIGUEDAD_MS = 30 * 60 * 1000 // 30 minutos
 // Action dejó de correr, o Supabase no responde), devuelve null: el que llama cae al
 // fetch directo de siempre.
 export async function fetchPreciosCache(fuente) {
+  if (!supabase) return null
   try {
     const { data, error } = await supabase
       .from('precios_cache')
