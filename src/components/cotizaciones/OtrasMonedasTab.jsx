@@ -140,7 +140,7 @@ export default function OtrasMonedasTab() {
                   </div>
                   <div>
                     <p className="font-semibold text-slate-900">{info.nombre}</p>
-                    <p className="text-xs text-slate-400">{inverso ? `US$ → ${m.codigo}` : `Cada ${etiqueta}`}</p>
+                    <p className="text-xs text-slate-500">{inverso ? `US$ → ${m.codigo}` : `Cada ${etiqueta}`}</p>
                   </div>
                 </div>
                 {pct !== null && (
@@ -200,7 +200,7 @@ export default function OtrasMonedasTab() {
                   </div>
                   <div>
                     <p className="font-semibold text-slate-900">{info.nombre}</p>
-                    <p className="text-xs text-slate-400">Precio por onza troy</p>
+                    <p className="text-xs text-slate-500">Precio por onza troy</p>
                   </div>
                 </div>
                 {pct !== null && (

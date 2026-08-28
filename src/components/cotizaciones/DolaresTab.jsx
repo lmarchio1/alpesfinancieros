@@ -202,12 +202,12 @@ export default function DolaresTab() {
                   <div>
                     <h3 className="font-semibold text-slate-900">{NOMBRE_OVERRIDE[d.casa] ?? d.nombre}</h3>
                     {d.casa === 'bolsa' && (
-                      <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                      <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">
                         Estimado (AL30D)
                       </p>
                     )}
                     {d.casa === 'contadoconliqui' && (
-                      <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                      <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">
                         Estimado{d.fuente ? ` (${d.fuente})` : ''}
                       </p>
                     )}
