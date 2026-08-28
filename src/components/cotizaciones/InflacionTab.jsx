@@ -35,7 +35,10 @@ function eneroAnioActual() {
 
 export default function InflacionTab() {
   const fetcher = useCallback(() => fetchInflacionMensual(), [])
-  const { data, error, loading, updatedAt, refresh } = usePolling(fetcher, { intervalMs: 30 * 60 * 1000 })
+  const { data, error, loading, updatedAt, refresh } = usePolling(fetcher, {
+    intervalMs: 30 * 60 * 1000,
+    persistKey: 'inflacion',
+  })
 
   const [monto, setMonto] = useState('100000')
   const montoNumerico = monto === '' ? 0 : Number(monto)

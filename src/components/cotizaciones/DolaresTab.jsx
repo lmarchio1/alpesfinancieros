@@ -51,7 +51,7 @@ const NOMBRE_OVERRIDE = {
 
 export default function DolaresTab() {
   const fetcher = useCallback(() => fetchDolares(), [])
-  const { data, error, loading, updatedAt, refresh } = usePolling(fetcher, { intervalMs: 60000 })
+  const { data, error, loading, updatedAt, refresh } = usePolling(fetcher, { intervalMs: 60000, persistKey: 'dolares' })
 
   const [cierres, setCierres] = useState(null)
   useEffect(() => {

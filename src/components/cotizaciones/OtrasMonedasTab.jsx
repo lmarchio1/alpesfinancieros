@@ -44,7 +44,10 @@ const fechaCierre = (fechaIso) => {
 
 export default function OtrasMonedasTab() {
   const fetcher = useCallback(() => fetchOtrasMonedas(), [])
-  const { data, error, loading, refresh } = usePolling(fetcher, { intervalMs: 60 * 60 * 1000 })
+  const { data, error, loading, refresh } = usePolling(fetcher, {
+    intervalMs: 60 * 60 * 1000,
+    persistKey: 'divisas_metales',
+  })
   const [inverso, setInverso] = useState(false)
 
   // Si ya se cargó bien una vez, un error transitorio en una actualización en

@@ -24,9 +24,10 @@ export default function BonosTab() {
   const dolaresFetcher = useCallback(() => fetchDolares(), [])
   const universoFetcher = useCallback(() => fetchUniversoBonos(forzarRef.current), [])
 
-  const rentaFija = usePolling(rentaFijaFetcher, { intervalMs: 120000 })
-  const dolares = usePolling(dolaresFetcher, { intervalMs: 60000 })
-  const universo = usePolling(universoFetcher, { intervalMs: 60000 })
+  const rentaFija = usePolling(rentaFijaFetcher, { intervalMs: 120000, persistKey: 'renta_fija' })
+  // Mismo persistKey que DolaresTab.jsx: es el mismo fetchDolares(), comparten cache.
+  const dolares = usePolling(dolaresFetcher, { intervalMs: 60000, persistKey: 'dolares' })
+  const universo = usePolling(universoFetcher, { intervalMs: 60000, persistKey: 'universo_bonos' })
 
   const actualizarAhora = () => {
     forzarRef.current = true
