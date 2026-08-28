@@ -1,63 +1,19 @@
 import { fetchArgBonds } from './data912Api'
+import { fetchCierresDeAyer } from './supabaseClient'
 
 const BASE_URL = 'https://dolarapi.com/v1'
-const HIST_BASE_URL = 'https://api.argentinadatos.com/v1/cotizaciones'
-const REF_DIARIA_KEY = 'alpes_ref_diaria_mep_ccl'
 
-const CASAS = ['oficial', 'blue', 'bolsa', 'contadoconliqui', 'mayorista', 'cripto', 'tarjeta']
-
-function fechaArgentinaHoy() {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
-}
-
-// Si la cotización todavía no se actualizó hoy (pasó la medianoche y el mercado
-// no volvió a operar), la variación no debería mostrar el cambio ya cerrado de
-// la rueda anterior como si fuera de hoy.
-export function esCotizacionDeHoy(fechaActualizacion) {
-  if (!fechaActualizacion) return false
-  const fecha = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(
-    new Date(fechaActualizacion)
-  )
-  return fecha === fechaArgentinaHoy()
-}
-
-// Apertura diaria de MEP/CCL, capturada una vez por día hábil por un GitHub
-// Action (ver .github/workflows/apertura-mep-ccl.yml) y guardada como JSON
-// estático: misma apertura para todos los visitantes, sin backend propio.
-async function fetchAperturaCentral() {
-  try {
-    const res = await fetch(`/apertura-mep-ccl.json?_=${Date.now()}`)
-    if (!res.ok) return null
-    const data = await res.json()
-    return data.fecha === fechaArgentinaHoy() ? data : null
-  } catch {
-    return null
-  }
-}
-
-// Respaldo si el archivo de apertura central todavía no se actualizó hoy
-// (temprano a la mañana antes de que corra el Action, o si llegara a
-// fallar): se usa como referencia el primer valor AL30 visto hoy en este
-// navegador. Se guarda en localStorage y se reinicia solo al cambiar la fecha.
-function referenciaDiaria(clave, valorActual) {
-  if (typeof valorActual !== 'number' || typeof localStorage === 'undefined') return valorActual
-  const hoy = fechaArgentinaHoy()
-  let datos
-  try {
-    datos = JSON.parse(localStorage.getItem(REF_DIARIA_KEY) || '{}')
-  } catch {
-    datos = {}
-  }
-  if (datos.fecha !== hoy) datos = { fecha: hoy }
-  if (typeof datos[clave] !== 'number') {
-    datos[clave] = valorActual
-    try {
-      localStorage.setItem(REF_DIARIA_KEY, JSON.stringify(datos))
-    } catch {
-      // localStorage puede no estar disponible (modo privado, cuota llena).
-    }
-  }
-  return datos[clave]
+// Instrumento en cierres_diarios (Supabase) por cada "casa" que devuelve dolarapi.
+// bolsa/contadoconliqui son MEP/CCL calculados por nosotros (fetchDolaresImplicitos),
+// no por dolarapi, así que usan su propio nombre en la tabla.
+const INSTRUMENTO_POR_CASA = {
+  oficial: 'oficial',
+  blue: 'blue',
+  bolsa: 'mep',
+  contadoconliqui: 'ccl',
+  mayorista: 'mayorista',
+  cripto: 'cripto',
+  tarjeta: 'tarjeta',
 }
 
 // MEP vía AL30/AL30D y CCL vía GD30/GD30C: se compra el bono en pesos
@@ -94,75 +50,31 @@ async function fetchDolaresImplicitos() {
 }
 
 export async function fetchDolares() {
-  const [res, implicitos, apertura] = await Promise.all([
-    fetch(`${BASE_URL}/dolares`),
-    fetchDolaresImplicitos(),
-    fetchAperturaCentral(),
-  ])
+  const [res, implicitos] = await Promise.all([fetch(`${BASE_URL}/dolares`), fetchDolaresImplicitos()])
   if (!res.ok) throw new Error('No se pudo obtener la cotización del dólar')
   const data = await res.json()
 
   return data.map((d) => {
-    if (d.casa === 'bolsa' && implicitos.mep) {
-      return {
-        ...d,
-        ...implicitos.mep,
-        compraApertura: apertura?.mep?.compra ?? referenciaDiaria('mep_compra', implicitos.mep.compra),
-        ventaApertura: apertura?.mep?.venta ?? referenciaDiaria('mep_venta', implicitos.mep.venta),
-      }
-    }
-    if (d.casa === 'contadoconliqui' && implicitos.ccl) {
-      return {
-        ...d,
-        ...implicitos.ccl,
-        compraApertura: apertura?.ccl?.compra ?? referenciaDiaria('ccl_compra', implicitos.ccl.compra),
-        ventaApertura: apertura?.ccl?.venta ?? referenciaDiaria('ccl_venta', implicitos.ccl.venta),
-      }
-    }
+    if (d.casa === 'bolsa' && implicitos.mep) return { ...d, ...implicitos.mep }
+    if (d.casa === 'contadoconliqui' && implicitos.ccl) return { ...d, ...implicitos.ccl }
     return d
   })
 }
 
-function dateParts(date) {
-  return {
-    yyyy: date.getFullYear(),
-    mm: String(date.getMonth() + 1).padStart(2, '0'),
-    dd: String(date.getDate()).padStart(2, '0'),
-  }
-}
+// Cierre de cada casa a las 00hs de ayer (ver cierre-diario.yml), para comparar contra
+// el precio en vivo. Reemplaza la búsqueda día-por-día contra argentinadatos.com (hasta
+// 1.3s medidos en esta sesión) y la apertura por localStorage de MEP/CCL: ahora es una
+// sola lectura a Supabase, igual para todos los visitantes sin importar el dispositivo
+// o el momento en que entren -antes esa diferencia de timing era justo la causa de que
+// PC y celular mostraran variaciones distintas-.
+export async function fetchCierresDolares() {
+  const instrumentos = Object.values(INSTRUMENTO_POR_CASA).flatMap((i) => [`${i}_compra`, `${i}_venta`])
+  const cierres = await fetchCierresDeAyer(instrumentos)
 
-async function fetchCasaOnDate(casa, date) {
-  const { yyyy, mm, dd } = dateParts(date)
-  const res = await fetch(`${HIST_BASE_URL}/dolares/${casa}/${yyyy}/${mm}/${dd}`)
-  if (!res.ok) return null
-  return res.json()
-}
-
-// Busca hacia atrás hasta encontrar el último día hábil con cotización (por si el día
-// anterior fue feriado o todavía no está cargado).
-async function fetchCasaPreviousClose(casa, fromDate, maxDaysBack = 6) {
-  for (let i = 1; i <= maxDaysBack; i++) {
-    const d = new Date(fromDate)
-    d.setDate(d.getDate() - i)
-    const data = await fetchCasaOnDate(casa, d)
-    if (data) return data
-  }
-  return null
-}
-
-// Cotización de cierre del día hábil anterior, por casa, para comparar contra el precio en vivo.
-// Se busca a partir de la fecha de "fechaActualizacion" de CADA casa (no del reloj del
-// visitante): pasada la medianoche el reloj ya marca un día nuevo, pero el precio en vivo
-// sigue siendo el cierre de ayer hasta que dolarapi actualice. Buscar "ayer" desde hoy en
-// ese momento se saltaba justo esa fecha (todavía sin cargar en el histórico) y terminaba
-// comparando contra un día más viejo -mostrando una variación falsa en vez de "sin cambios"-.
-export async function fetchDolaresAyer(precios) {
-  const entries = await Promise.all(
-    CASAS.map(async (casa) => {
-      const fechaActualizacion = precios?.find((p) => p.casa === casa)?.fechaActualizacion
-      const fromDate = fechaActualizacion ? new Date(fechaActualizacion) : new Date()
-      return [casa, await fetchCasaPreviousClose(casa, fromDate)]
-    })
+  return Object.fromEntries(
+    Object.entries(INSTRUMENTO_POR_CASA).map(([casa, instrumento]) => [
+      casa,
+      { compra: cierres[`${instrumento}_compra`], venta: cierres[`${instrumento}_venta`] },
+    ])
   )
-  return Object.fromEntries(entries)
 }

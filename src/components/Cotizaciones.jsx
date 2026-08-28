@@ -1,10 +1,24 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import SectionHeading from './ui/SectionHeading'
-import DolaresTab from './cotizaciones/DolaresTab'
-import BonosTab from './cotizaciones/BonosTab'
-import InflacionTab from './cotizaciones/InflacionTab'
-import OtrasMonedasTab from './cotizaciones/OtrasMonedasTab'
 import calculadoraMercado from '../assets/calculadora-mercado.webp'
+
+// Carga diferida: estas 4 pestañas (y su dependencia de Supabase) solo se descargan
+// cuando el visitante realmente toca el botón, en vez de sumarse al bundle principal
+// que se carga siempre, aunque nunca se abra ninguna pestaña.
+const DolaresTab = lazy(() => import('./cotizaciones/DolaresTab'))
+const BonosTab = lazy(() => import('./cotizaciones/BonosTab'))
+const InflacionTab = lazy(() => import('./cotizaciones/InflacionTab'))
+const OtrasMonedasTab = lazy(() => import('./cotizaciones/OtrasMonedasTab'))
+
+function TabSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="h-32 animate-pulse rounded-2xl bg-slate-100" />
+      ))}
+    </div>
+  )
+}
 
 const TOGGLES = [
   { id: 'dolares', label: 'Tipos de Cambio' },
@@ -52,7 +66,7 @@ export default function Cotizaciones() {
           grisáceo metálico -en vez de un color de marca- para no competir con el
           borde verde/rojo de las tarjetas con variación. */}
       <div
-        className={`absolute inset-0 bg-slate-300 transition-opacity duration-700 ease-out ${
+        className={`absolute inset-0 bg-[#c0c0c0] transition-opacity duration-700 ease-out ${
           abierto ? 'opacity-70 sm:opacity-55' : 'opacity-0'
         }`}
       />
@@ -94,22 +108,24 @@ export default function Cotizaciones() {
           ))}
         </div>
 
-        {abierto === 'dolares' && (
-          <div className="mb-10">
-            <DolaresTab />
-          </div>
-        )}
-        {abierto === 'bonos' && (
-          <div className="mb-10">
-            <BonosTab />
-          </div>
-        )}
-        {abierto === 'inflacion' && (
-          <div className="mb-10">
-            <InflacionTab />
-          </div>
-        )}
-        {abierto === 'monedas' && <OtrasMonedasTab />}
+        <Suspense fallback={<TabSkeleton />}>
+          {abierto === 'dolares' && (
+            <div className="mb-10">
+              <DolaresTab />
+            </div>
+          )}
+          {abierto === 'bonos' && (
+            <div className="mb-10">
+              <BonosTab />
+            </div>
+          )}
+          {abierto === 'inflacion' && (
+            <div className="mb-10">
+              <InflacionTab />
+            </div>
+          )}
+          {abierto === 'monedas' && <OtrasMonedasTab />}
+        </Suspense>
       </div>
     </section>
   )

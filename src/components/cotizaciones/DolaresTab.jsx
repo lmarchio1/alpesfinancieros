@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { usePolling } from '../../hooks/usePolling'
-import { fetchDolares, fetchDolaresAyer, esCotizacionDeHoy } from '../../services/dolaresApi'
+import { fetchDolares, fetchCierresDolares } from '../../services/dolaresApi'
 import { fetchBandaCambiaria } from '../../services/bcraApi'
 import { fetchConReintento } from '../../utils/fetchRetry'
 import Card from '../ui/Card'
@@ -53,16 +53,12 @@ export default function DolaresTab() {
   const fetcher = useCallback(() => fetchDolares(), [])
   const { data, error, loading, updatedAt, refresh } = usePolling(fetcher, { intervalMs: 60000 })
 
-  const [ayer, setAyer] = useState(null)
+  const [cierres, setCierres] = useState(null)
   useEffect(() => {
-    // Depende de "data" (para usar la fechaActualizacion real de cada casa, ver
-    // fetchDolaresAyer), pero solo se pide una vez -no en cada actualización del
-    // polling- gracias a Boolean(data) en las dependencias.
-    if (!data) return
-    fetchConReintento(() => fetchDolaresAyer(data))
-      .then(setAyer)
-      .catch(() => setAyer(null))
-  }, [Boolean(data)])
+    fetchConReintento(fetchCierresDolares)
+      .then(setCierres)
+      .catch(() => setCierres(null))
+  }, [])
 
   const [banda, setBanda] = useState(null)
   useEffect(() => {
@@ -174,20 +170,12 @@ export default function DolaresTab() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {data.map((d, i) => {
-          // MEP y CCL se calculan hoy vía AL30 (ver fetchDolaresImplicitos), pero el
-          // "ayer" que devuelve argentinadatos para esas dos casas viene de la
-          // metodología vieja de dolarapi. En vez de comparar contra eso -mezclaría
-          // metodologías distintas- se compara contra la referencia de apertura del
-          // día (primer valor AL30 visto hoy, ver referenciaDiaria en dolaresApi.js).
-          const esImplicito = d.casa === 'bolsa' || d.casa === 'contadoconliqui'
-          // Cripto opera las 24hs, así que siempre compara en vivo. El resto: si
-          // dolarapi todavía no actualizó la cotización de hoy (pasó la medianoche y
-          // el mercado no volvió a operar), no hay variación real que mostrar todavía
-          // -se sigue viendo el cierre de la rueda anterior, no un movimiento de hoy-.
-          const esDeHoy = d.casa === 'cripto' || esCotizacionDeHoy(d.fechaActualizacion)
-          const ayerVenta = !esDeHoy ? d.venta : esImplicito ? d.ventaApertura : ayer?.[d.casa]?.venta
-          const ayerCompra = !esDeHoy ? d.compra : esImplicito ? d.compraApertura : ayer?.[d.casa]?.compra
-          const trend = esDeHoy && typeof ayerVenta === 'number' ? Math.sign(d.venta - ayerVenta) : 0
+          // Todas las casas (incluidas cripto y MEP/CCL) comparan igual: el precio en
+          // vivo contra el cierre de ayer guardado a las 00hs (ver fetchCierresDolares
+          // en dolaresApi.js), sin casos especiales por casa.
+          const ayerVenta = cierres?.[d.casa]?.venta
+          const ayerCompra = cierres?.[d.casa]?.compra
+          const trend = typeof ayerVenta === 'number' ? Math.sign(d.venta - ayerVenta) : 0
           const trendBorder =
             trend > 0 ? '!border-t-emerald-700' : trend < 0 ? '!border-t-rose-700' : '!border-t-slate-200'
 

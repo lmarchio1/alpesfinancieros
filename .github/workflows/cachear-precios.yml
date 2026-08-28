@@ -1,0 +1,24 @@
+name: Cachear precios de bonos/letras
+
+on:
+  schedule:
+    # Cada 10 minutos, todos los días. Es un techo de frescura más bajo que el
+    # polling en vivo del navegador (60s) a propósito: el objetivo es que la pestaña
+    # Renta Fija cargue más rápido al abrirla, no una frescura al segundo -y esos
+    # datos ya están aclarados como "de referencia" en el sitio-.
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  cachear:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install @supabase/supabase-js
+      - run: node scripts/cachear-precios.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

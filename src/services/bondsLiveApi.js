@@ -1,8 +1,6 @@
 import { fetchArgBonds } from './data912Api'
 import { DUALES_META, MATURITY_BY_YEAR, BONARES_NUEVOS_META } from '../data/bondsReference'
-import { obtenerAperturaDiaria } from '../utils/aperturaDiaria'
-
-const APERTURA_KEY = 'alpes_apertura_mercado'
+import { fetchCierresDeAyer } from './supabaseClient'
 
 // Globales y Bonares en dólar MEP (sufijo "D"): detecta automáticamente cualquier
 // ticker que matchee el prefijo de la familia y cuyo año de vencimiento esté en
@@ -73,22 +71,25 @@ export async function fetchUniversoBonos() {
   const duales = mapearGrupo(DUALES_META, '', porSimbolo)
 
   // data912 no da timestamp por especie y sigue devolviendo el % de la rueda anterior
-  // toda la madrugada, hasta que el mercado vuelve a operar. Se recalcula la variación
-  // contra la apertura de hoy (ver obtenerAperturaDiaria: capturada por un GitHub
-  // Action para todos los visitantes, con respaldo por navegador) en vez de confiar en
-  // ese %: pasada la medianoche da 0% y solo vuelve a moverse cuando el precio
-  // efectivamente cambia.
+  // toda la madrugada, hasta que el mercado vuelve a operar -confirmado en vivo: a las
+  // 00:14 mostraba +0.40% para GD30D con el precio sin cambios desde el cierre de
+  // ayer-. El cierre de ayer (capturado a las 00hs, ver cierre-diario.yml) se usa solo
+  // como testigo: mientras el precio en vivo sea igual a ese cierre, no hubo
+  // movimiento real todavía y se muestra 0%. En cuanto el precio se mueva, se confía
+  // en el pct_change que da data912 tal cual -una vez que el mercado opera, ese campo
+  // sí refleja el cambio real, no hace falta recalcularlo-.
   // Se usa symbolLive (el símbolo real de data912, con su sufijo) como clave, no
   // "ticker": varios bonos comparten el mismo ticker mostrado para dos instrumentos
   // distintos (ej. "GD30" a secas, en pesos, vs. "GD30D" -que se muestra como
   // "GD30"-, en dólares), y son precios completamente distintos entre sí.
   const todos = [...globales, ...bonares, ...duales]
-  const aperturas = await obtenerAperturaDiaria(APERTURA_KEY, new Map(todos.map((b) => [b.symbolLive, b.precio])))
+  const cierres = await fetchCierresDeAyer(todos.map((b) => b.symbolLive))
   const conVariacionDeHoy = ({ symbolLive, ...b }) => {
-    const apertura = aperturas[symbolLive]
+    const cierre = cierres[symbolLive]
+    const sinMovimiento = typeof cierre === 'number' && Math.abs(b.precio - cierre) < 0.005
     return {
       ...b,
-      variacionPorcentaje: apertura > 0 ? ((b.precio - apertura) / apertura) * 100 : b.variacionPorcentaje,
+      variacionPorcentaje: sinMovimiento ? 0 : b.variacionPorcentaje,
     }
   }
 

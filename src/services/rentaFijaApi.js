@@ -1,13 +1,7 @@
 import { fetchArgNotes } from './data912Api'
-import { obtenerAperturaDiaria } from '../utils/aperturaDiaria'
+import { fetchCierresDeAyer } from './supabaseClient'
 
 const BASE_URL = 'https://api.argentinadatos.com/v1/finanzas'
-const RIESGO_ANTERIOR_KEY = 'alpes_riesgo_pais_anterior'
-const APERTURA_KEY = 'alpes_apertura_mercado'
-
-function fechaArgentinaHoy() {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
-}
 
 // La URL "pelada" de esta API la pide tantísima gente que el cache de Cloudflare
 // la sirve stale por más tiempo del que indica su propio Cache-Control: max-age=60
@@ -35,26 +29,23 @@ export async function fetchRentaFija() {
   const pctChangePorTicker = new Map(notas.map((n) => [n.symbol, n.pct_change]))
 
   // data912 no da timestamp por especie y sigue devolviendo el % de la rueda anterior
-  // toda la madrugada, hasta que el mercado vuelve a operar. Se recalcula la variación
-  // contra la apertura de hoy (ver obtenerAperturaDiaria: capturada por un GitHub
-  // Action para todos los visitantes, con respaldo por navegador) en vez de confiar en
-  // ese %: pasada la medianoche da 0% y solo vuelve a moverse cuando el precio
-  // efectivamente cambia. Comparte la clave con los bonos (bondsLiveApi.js) porque los
-  // tickers no se pisan entre sí.
-  const aperturas = await obtenerAperturaDiaria(APERTURA_KEY, precioPorTicker)
+  // toda la madrugada, hasta que el mercado vuelve a operar. El cierre de ayer
+  // (capturado a las 00hs, ver cierre-diario.yml) se usa solo como testigo: mientras
+  // el precio en vivo sea igual a ese cierre, se muestra 0%; en cuanto se mueva, se
+  // confía en el pct_change que da data912 tal cual.
+  const cierres = await fetchCierresDeAyer([...precioPorTicker.keys()])
 
   const letrasOrdenadas = letrasMeta
     .filter(noVencido)
     .map((l) => {
       const precioActual = precioPorTicker.get(l.ticker)
-      const apertura = aperturas[l.ticker]
+      const cierre = cierres[l.ticker]
+      const sinMovimiento =
+        typeof cierre === 'number' && typeof precioActual === 'number' && Math.abs(precioActual - cierre) < 0.005
       return {
         ...l,
         precioActual,
-        variacionPorcentaje:
-          apertura > 0 && typeof precioActual === 'number'
-            ? ((precioActual - apertura) / apertura) * 100
-            : pctChangePorTicker.get(l.ticker),
+        variacionPorcentaje: sinMovimiento ? 0 : pctChangePorTicker.get(l.ticker),
       }
     })
     // solo letras con precio de mercado en vivo: sin eso no hay retorno calculable
@@ -65,31 +56,12 @@ export async function fetchRentaFija() {
   return { letras: letrasOrdenadas, riesgoPais }
 }
 
-// Valor de riesgo país del día hábil anterior, para comparar contra el último dato.
-// Este endpoint no tiene una versión liviana por fecha: trae toda la serie histórica
-// completa (~7.700 registros desde 1999, ~400KB) sin importar los parámetros que se le
-// manden. Como además se le suma un cache-buster a propósito (ver comentario de
-// getJson), se estaba volviendo a descargar entera cada vez que se abría la pestaña de
-// Renta Fija, no solo la primera vez. Se guarda en localStorage y se pide una sola vez
-// por día -el valor de "ayer" no cambia en lo que dura el día de hoy-.
+// Valor de riesgo país del cierre de ayer (capturado a las 00hs, ver
+// cierre-diario.yml), para comparar contra el último dato. Reemplaza el cache en
+// localStorage: antes, el primer visitante del día pagaba la descarga de la serie
+// histórica completa (~7.700 registros, ~400KB) para calcularlo; ahora es una sola
+// lectura rápida a Supabase, igual para todos.
 export async function fetchRiesgoPaisAnterior() {
-  const hoy = fechaArgentinaHoy()
-  try {
-    const cache = JSON.parse(localStorage.getItem(RIESGO_ANTERIOR_KEY) || '{}')
-    if (cache.fecha === hoy && cache.valor) return cache.valor
-  } catch {
-    // localStorage puede no estar disponible, o el valor guardado puede ser inválido.
-  }
-
-  const historico = await getJson('indices/riesgo-pais')
-  if (!Array.isArray(historico) || historico.length < 2) return null
-  const anterior = historico[historico.length - 2]
-
-  try {
-    localStorage.setItem(RIESGO_ANTERIOR_KEY, JSON.stringify({ fecha: hoy, valor: anterior }))
-  } catch {
-    // localStorage puede no estar disponible (modo privado, cuota llena).
-  }
-
-  return anterior
+  const cierres = await fetchCierresDeAyer(['riesgo_pais'])
+  return typeof cierres.riesgo_pais === 'number' ? { valor: cierres.riesgo_pais } : null
 }

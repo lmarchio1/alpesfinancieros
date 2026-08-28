@@ -1,0 +1,24 @@
+name: Capturar cierre diario
+
+on:
+  schedule:
+    # 00:00 hora Argentina (UTC-3, sin horario de verano) = 03:00 UTC, todos los días
+    # -incluye fines de semana, así el front siempre puede leer "fecha = hoy - 1" sin
+    # tener que buscar el día hábil anterior: sábado y domingo simplemente re-guardan
+    # el cierre del viernes.
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  capturar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install @supabase/supabase-js
+      - run: node scripts/capturar-cierre-diario.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
