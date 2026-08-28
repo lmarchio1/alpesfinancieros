@@ -118,7 +118,7 @@ export default function InflacionTab() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="animate-fade-up" style={{ animationDelay: '0ms' }}>
           {interanual !== null ? (
-            <Card className="group h-full border-t-4 !border-t-brand-200 p-6 hover:!border-t-brand-500 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-2 hover:scale-[1.015] hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)]">
+            <Card className="group h-full border-t-4 !border-t-brand-300 p-6 hover:!border-t-brand-500 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-2 hover:scale-[1.015] hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)]">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-brand-600 group-hover:text-white">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
@@ -137,7 +137,7 @@ export default function InflacionTab() {
 
         <div className="animate-fade-up" style={{ animationDelay: '80ms' }}>
           {rem ? (
-            <Card className="group h-full border-t-4 !border-t-[#ecd7bb] p-6 hover:!border-t-[#c17a1e] transition-all duration-300 ease-out hover:z-10 hover:-translate-y-2 hover:scale-[1.015] hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)]">
+            <Card className="group h-full border-t-4 !border-t-[#d4a465] p-6 hover:!border-t-[#c17a1e] transition-all duration-300 ease-out hover:z-10 hover:-translate-y-2 hover:scale-[1.015] hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)]">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#fbeed6] text-[#c17a1e] transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-[#c17a1e] group-hover:text-white">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
@@ -160,7 +160,7 @@ export default function InflacionTab() {
 
         <div className="animate-fade-up" style={{ animationDelay: '160ms' }}>
           {plazoFijo ? (
-            <Card className="group h-full border-t-4 !border-t-emerald-200 p-6 hover:!border-t-emerald-500 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-2 hover:scale-[1.015] hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)]">
+            <Card className="group h-full border-t-4 !border-t-emerald-300 p-6 hover:!border-t-emerald-500 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-2 hover:scale-[1.015] hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)]">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white">
