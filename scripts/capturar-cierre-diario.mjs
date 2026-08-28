@@ -16,28 +16,6 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   process.exit(1)
 }
 
-// Diagnóstico temporal: nunca imprime la key completa, solo forma/largo, para
-// confirmar que el secret que llega acá es el que se espera.
-console.log(
-  'DEBUG url=%s keyPrefix=%s keyLen=%d',
-  SUPABASE_URL,
-  SUPABASE_SERVICE_ROLE_KEY.slice(0, 12),
-  SUPABASE_SERVICE_ROLE_KEY.length
-)
-
-// Diagnóstico temporal: prueba directa vía REST (sin el cliente de supabase-js) con
-// ambos headers, para ver la respuesta cruda de PostgREST y confirmar qué rol está
-// usando realmente.
-{
-  const testRes = await fetch(`${SUPABASE_URL}/rest/v1/cierres_diarios?select=*&limit=1`, {
-    headers: {
-      apikey: SUPABASE_SERVICE_ROLE_KEY,
-      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-    },
-  })
-  console.log('DEBUG select status=%d body=%s', testRes.status, await testRes.text())
-}
-
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 async function getJson(url) {
@@ -51,9 +29,13 @@ const agregar = (instrumento, valor) => {
   if (typeof valor === 'number' && valor > 0) filas.push({ instrumento, valor })
 }
 
-// Dólares (dolarapi): compra/venta por casa.
+// Dólares (dolarapi): compra/venta por casa. bolsa/contadoconliqui (MEP/CCL) se
+// excluyen acá: la app no usa el valor de dolarapi para esas dos, usa el implícito
+// vía AL30/GD30 (mep_compra/ccl_compra más abajo) — guardar también el de dolarapi
+// sería un dato que nadie lee.
 const dolares = await getJson('https://dolarapi.com/v1/dolares')
 for (const d of dolares) {
+  if (d.casa === 'bolsa' || d.casa === 'contadoconliqui') continue
   agregar(`${d.casa}_compra`, d.compra)
   agregar(`${d.casa}_venta`, d.venta)
 }
