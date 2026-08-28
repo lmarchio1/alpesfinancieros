@@ -160,7 +160,7 @@ export default function InflacionTab() {
 
         <div className="animate-fade-up" style={{ animationDelay: '160ms' }}>
           {plazoFijo ? (
-            <Card className="group h-full border-t-4 !border-t-emerald-300 p-6 hover:!border-t-emerald-500 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-2 hover:scale-[1.015] hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)]">
+            <Card className="group h-full border-t-4 !border-t-[#7fa88a] p-6 hover:!border-t-emerald-500 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-2 hover:scale-[1.015] hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)]">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white">
