@@ -66,6 +66,14 @@ export default function InflacionTab() {
 
   const interanual = useMemo(() => (data ? inflacionInteranual(data) : null), [data])
 
+  // Acumulada de enero a hoy, para mostrar al lado de la interanual -mismo motor que
+  // usa la calculadora de abajo, pero con un rango fijo (no el que el usuario elija ahí).
+  const acumuladaAnioActual = useMemo(() => {
+    if (!data) return null
+    const factor = factorAcumulado(data, eneroAnioActual(), mesActual())
+    return (factor - 1) * 100
+  }, [data])
+
   const [rem, setRem] = useState(null)
   useEffect(() => {
     fetchConReintento(fetchExpectativaInflacionREM)
@@ -130,8 +138,21 @@ export default function InflacionTab() {
                 </div>
                 <p className="font-semibold text-slate-900">Inflación interanual</p>
               </div>
-              <p className="mt-3 text-3xl font-bold text-slate-900">{interanual.toFixed(2)}%</p>
-              <p className="mt-1 text-xs text-slate-500">Variación acumulada de los últimos 12 meses (Dato oficial INDEC).</p>
+              <div className="mt-3 grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Últimos 12 meses</p>
+                  <p className="mt-0.5 text-3xl font-bold text-slate-900">{interanual.toFixed(2)}%</p>
+                </div>
+                {acumuladaAnioActual !== null && (
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                      Acumulada {new Date().getFullYear()}
+                    </p>
+                    <p className="mt-0.5 text-3xl font-bold text-slate-900">{acumuladaAnioActual.toFixed(2)}%</p>
+                  </div>
+                )}
+              </div>
+              <p className="mt-2 text-xs text-slate-500">Dato oficial INDEC.</p>
             </Card>
           ) : (
             <div className="h-[122px] animate-pulse rounded-2xl bg-slate-100 sm:h-[223px]" />
@@ -150,10 +171,22 @@ export default function InflacionTab() {
                 </div>
                 <p className="font-semibold text-slate-900">Inflación esperada (REM · BCRA)</p>
               </div>
-              <p className="mt-3 text-3xl font-bold text-slate-900">{rem.proximos12MesesPct.toFixed(2)}%</p>
-              <p className="mt-1 text-xs text-slate-500">
-                Mediana proyectada a 12 meses según el Relevamiento de Expectativas de Mercado.
-                {rem.anioActual && ` · ${rem.anioActual.anio}: ${rem.anioActual.pct.toFixed(1)}%`}
+              <div className="mt-3 grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Próximos 12 meses</p>
+                  <p className="mt-0.5 text-3xl font-bold text-slate-900">{rem.proximos12MesesPct.toFixed(2)}%</p>
+                </div>
+                {rem.anioActual && (
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                      {rem.anioActual.anio} completo
+                    </p>
+                    <p className="mt-0.5 text-3xl font-bold text-slate-900">{rem.anioActual.pct.toFixed(2)}%</p>
+                  </div>
+                )}
+              </div>
+              <p className="mt-2 text-xs text-slate-500">
+                Mediana proyectada según el Relevamiento de Expectativas de Mercado.
               </p>
             </Card>
           ) : (
