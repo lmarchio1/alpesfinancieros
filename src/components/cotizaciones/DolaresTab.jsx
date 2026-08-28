@@ -208,7 +208,7 @@ export default function DolaresTab() {
                     )}
                     {d.casa === 'contadoconliqui' && (
                       <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
-                        Estimado (GD30C)
+                        Estimado{d.fuente ? ` (${d.fuente})` : ''}
                       </p>
                     )}
                   </div>

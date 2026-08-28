@@ -53,8 +53,20 @@ const implicito = (base, variante) => {
   if (!base?.px_bid || !base?.px_ask || !variante?.px_bid || !variante?.px_ask) return null
   return { compra: base.px_bid / variante.px_ask, venta: base.px_ask / variante.px_bid }
 }
+const spread = (bono) => {
+  if (!bono?.px_bid || !bono?.px_ask) return Infinity
+  return (bono.px_ask - bono.px_bid) / bono.px_bid
+}
 const mep = implicito(porSimbolo.get('AL30'), porSimbolo.get('AL30D'))
-const ccl = implicito(porSimbolo.get('GD30'), porSimbolo.get('GD30C'))
+// CCL: entre GD30C (liquida en el exterior) y AL30C (liquida en el país), se usa el
+// que tenga el spread bid/ask más chico en este momento -mismo criterio que
+// src/services/dolaresApi.js (fetchDolaresImplicitos), ver el comentario ahí para el
+// caso real que motivó esto (GD30C con 3.16% de spread por baja liquidez momentánea).
+const al30c = porSimbolo.get('AL30C')
+const gd30c = porSimbolo.get('GD30C')
+const ccl = spread(al30c) < spread(gd30c)
+  ? implicito(porSimbolo.get('AL30'), al30c)
+  : implicito(porSimbolo.get('GD30'), gd30c)
 if (mep) {
   agregar('mep_compra', mep.compra)
   agregar('mep_venta', mep.venta)

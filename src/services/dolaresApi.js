@@ -16,34 +16,49 @@ const INSTRUMENTO_POR_CASA = {
   tarjeta: 'tarjeta',
 }
 
-// MEP vía AL30/AL30D y CCL vía GD30/GD30C: se compra el bono en pesos
-// localmente y se vende en su variante en dólares -AL30D liquida en el país
-// (MEP), GD30C liquida en cuentas de EE.UU. (CCL)-. Cada dólar usa su propia
-// familia de bono (no se mezcla AL30 con GD30C): MEP contrastado contra el
-// cierre de referencia de Ámbito Financiero coincidió exacto ($1.535,08 los
-// dos); para CCL se probó también AL30/AL30C y quedó más cerca de Ámbito,
-// pero se optó por GD30/GD30C de todos modos. Compra = vender el bono en
-// pesos y comprarlo en dólares (base bid / variante ask); venta = al revés
-// (base ask / variante bid) — mismo criterio bid/ask que usa el resto del
-// sitio.
+// Compra = vender el bono en pesos y comprarlo en dólares (base bid / variante ask);
+// venta = al revés (base ask / variante bid) — mismo criterio bid/ask que usa el
+// resto del sitio.
+function implicito(base, variante) {
+  if (!base?.px_bid || !base?.px_ask || !variante?.px_bid || !variante?.px_ask) return null
+  return {
+    compra: base.px_bid / variante.px_ask,
+    venta: base.px_ask / variante.px_bid,
+    fuente: variante.symbol,
+  }
+}
+
+function spread(bono) {
+  if (!bono?.px_bid || !bono?.px_ask) return Infinity
+  return (bono.px_ask - bono.px_bid) / bono.px_bid
+}
+
+// MEP vía AL30/AL30D: contrastado contra el cierre de referencia de Ámbito
+// Financiero coincidió exacto ($1.535,08 los dos).
+//
+// CCL: entre GD30C (liquida en el exterior, lo conceptualmente correcto para
+// "contado con liqui") y AL30C (liquida en el país, como el MEP), se elige en
+// cada momento el que tenga el spread bid/ask más chico -es decir, el más
+// líquido ahora mismo-. Verificado en vivo: GD30C llegó a tener 3.16% de
+// spread (apenas 15.000/5.593 de volumen en punta) mientras AL30C se mantenía
+// en 0.08% -el CCL vía GD30/GD30C daba $1.619 de venta, muy por encima del
+// precio real de mercado ($1.611), y vía AL30/AL30C daba $1.605-. Nunca se
+// mezclan las dos familias entre sí (no GD30 con AL30C ni viceversa), y
+// siempre se usan puntas realmente operables, nunca el último precio operado
+// (que puede quedar viejo).
 async function fetchDolaresImplicitos() {
   try {
     const bonds = await fetchArgBonds()
     const porSimbolo = new Map(bonds.map((b) => [b.symbol, b]))
     const al30 = porSimbolo.get('AL30')
     const al30d = porSimbolo.get('AL30D')
+    const al30c = porSimbolo.get('AL30C')
     const gd30 = porSimbolo.get('GD30')
     const gd30c = porSimbolo.get('GD30C')
 
-    const implicito = (base, variante) => {
-      if (!base?.px_bid || !base?.px_ask || !variante?.px_bid || !variante?.px_ask) return null
-      return {
-        compra: base.px_bid / variante.px_ask,
-        venta: base.px_ask / variante.px_bid,
-      }
-    }
+    const ccl = spread(al30c) < spread(gd30c) ? implicito(al30, al30c) : implicito(gd30, gd30c)
 
-    return { mep: implicito(al30, al30d), ccl: implicito(gd30, gd30c) }
+    return { mep: implicito(al30, al30d), ccl }
   } catch {
     return { mep: null, ccl: null }
   }
