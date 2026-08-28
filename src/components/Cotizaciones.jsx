@@ -49,8 +49,8 @@ export default function Cotizaciones() {
         src={calculadoraMercado}
         alt=""
         aria-hidden="true"
-        className={`absolute inset-0 h-full w-full object-cover saturate-[1.7] transition-[filter] duration-700 ease-out ${
-          abierto ? 'blur-lg sm:blur-md' : 'blur-none'
+        className={`absolute inset-0 h-full w-full object-cover saturate-[1.7] transition-opacity duration-700 ease-out ${
+          abierto ? 'opacity-0' : 'opacity-100'
         }`}
       />
       <div
@@ -61,13 +61,13 @@ export default function Cotizaciones() {
         }}
       />
       {/* Al abrir una pestaña, la sección crece y el fondo (object-cover) se ve más
-          "acercado" por el cambio de alto; se oscurece/aclara un poco más para que las
-          tarjetas de datos queden en primer plano y ese zoom se note menos. Blanco
-          grisáceo metálico -en vez de un color de marca- para no competir con el
-          borde verde/rojo de las tarjetas con variación. */}
+          "acercado" por el cambio de alto. En vez de mostrar la foto recortada
+          (borrosa o no), se reemplaza por un gris liso -mismo tono metálico de antes,
+          un toque más oscuro- para que las tarjetas de datos queden en primer plano
+          sin ese zoom ni el ruido de la foto. */}
       <div
-        className={`absolute inset-0 bg-[#c0c0c0] transition-opacity duration-700 ease-out ${
-          abierto ? 'opacity-70 sm:opacity-55' : 'opacity-0'
+        className={`absolute inset-0 bg-[#b5b5b5] transition-opacity duration-700 ease-out ${
+          abierto ? 'opacity-100' : 'opacity-0'
         }`}
       />
 
