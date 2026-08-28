@@ -58,13 +58,25 @@ const spread = (bono) => {
   return (bono.px_ask - bono.px_bid) / bono.px_bid
 }
 const mep = implicito(porSimbolo.get('AL30'), porSimbolo.get('AL30D'))
-// CCL: entre GD30C (liquida en el exterior) y AL30C (liquida en el país), se usa el
-// que tenga el spread bid/ask más chico en este momento -mismo criterio que
-// src/services/dolaresApi.js (fetchDolaresImplicitos), ver el comentario ahí para el
-// caso real que motivó esto (GD30C con 3.16% de spread por baja liquidez momentánea).
+// CCL: GD30/GD30C durante el día; recién después de las 17:30 ART (mercado local
+// cerrado) se compara el spread bid/ask contra AL30/AL30C y se usa el más líquido
+// -mismo criterio que src/services/dolaresApi.js (fetchDolaresImplicitos), ver el
+// comentario ahí para el caso real que motivó esto. Este script corre a las 00hs, así
+// que en la práctica siempre cae después del cierre, pero se mantiene la misma
+// condición para que ambos lugares reflejen exactamente la misma metodología.
+const hhmm = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'America/Argentina/Buenos_Aires',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+}).format(new Date())
+const [hh, mm] = hhmm.split(':').map(Number)
+const despuesDelCierre = hh > 17 || (hh === 17 && mm >= 30) || hh < 11
+
 const al30c = porSimbolo.get('AL30C')
 const gd30c = porSimbolo.get('GD30C')
-const ccl = spread(al30c) < spread(gd30c)
+const usarAl30c = despuesDelCierre && spread(al30c) < spread(gd30c)
+const ccl = usarAl30c
   ? implicito(porSimbolo.get('AL30'), al30c)
   : implicito(porSimbolo.get('GD30'), gd30c)
 if (mep) {

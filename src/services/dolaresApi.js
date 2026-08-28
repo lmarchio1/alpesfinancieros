@@ -33,19 +33,34 @@ function spread(bono) {
   return (bono.px_ask - bono.px_bid) / bono.px_bid
 }
 
+// Desde las 17:30 ART (cierre del mercado local) y hasta que reabre al otro día
+// (~11hs), la liquidez de GD30C se deteriora rápido y se queda así toda la
+// madrugada -no se arregla solo porque cambió el día- (verificado: 3.16% de spread
+// con 15.000/5.593 de volumen en punta). En el horario de rueda normal (~11 a 17:30)
+// GD30/GD30C funciona bien, y comparar spreads todo el tiempo solo arriesgaría hacer
+// saltar la fuente (GD30C/AL30C) de un pedido al siguiente sin necesidad.
+function despuesDelCierre() {
+  const hhmm = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).format(new Date())
+  const [hh, mm] = hhmm.split(':').map(Number)
+  return hh > 17 || (hh === 17 && mm >= 30) || hh < 11
+}
+
 // MEP vía AL30/AL30D: contrastado contra el cierre de referencia de Ámbito
 // Financiero coincidió exacto ($1.535,08 los dos).
 //
-// CCL: entre GD30C (liquida en el exterior, lo conceptualmente correcto para
-// "contado con liqui") y AL30C (liquida en el país, como el MEP), se elige en
-// cada momento el que tenga el spread bid/ask más chico -es decir, el más
-// líquido ahora mismo-. Verificado en vivo: GD30C llegó a tener 3.16% de
-// spread (apenas 15.000/5.593 de volumen en punta) mientras AL30C se mantenía
-// en 0.08% -el CCL vía GD30/GD30C daba $1.619 de venta, muy por encima del
-// precio real de mercado ($1.611), y vía AL30/AL30C daba $1.605-. Nunca se
-// mezclan las dos familias entre sí (no GD30 con AL30C ni viceversa), y
-// siempre se usan puntas realmente operables, nunca el último precio operado
-// (que puede quedar viejo).
+// CCL vía GD30/GD30C (liquida en el exterior, lo conceptualmente correcto para
+// "contado con liqui") durante el día. Recién después de las 17:30 ART se compara
+// el spread bid/ask de GD30C contra AL30C (liquida en el país, como el MEP) y se
+// usa el que esté más líquido en ese momento -verificado: a esa hora el CCL vía
+// GD30/GD30C daba $1.619 de venta, muy por encima del precio real de mercado
+// (~$1.611), y vía AL30/AL30C daba $1.605-. Nunca se mezclan las dos familias
+// entre sí (no GD30 con AL30C ni viceversa), y siempre se usan puntas realmente
+// operables, nunca el último precio operado (que puede quedar viejo).
 async function fetchDolaresImplicitos() {
   try {
     const bonds = await fetchArgBonds()
@@ -56,7 +71,8 @@ async function fetchDolaresImplicitos() {
     const gd30 = porSimbolo.get('GD30')
     const gd30c = porSimbolo.get('GD30C')
 
-    const ccl = spread(al30c) < spread(gd30c) ? implicito(al30, al30c) : implicito(gd30, gd30c)
+    const usarAl30c = despuesDelCierre() && spread(al30c) < spread(gd30c)
+    const ccl = usarAl30c ? implicito(al30, al30c) : implicito(gd30, gd30c)
 
     return { mep: implicito(al30, al30d), ccl }
   } catch {
