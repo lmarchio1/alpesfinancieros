@@ -25,6 +25,19 @@ console.log(
   SUPABASE_SERVICE_ROLE_KEY.length
 )
 
+// Diagnóstico temporal: prueba directa vía REST (sin el cliente de supabase-js) con
+// ambos headers, para ver la respuesta cruda de PostgREST y confirmar qué rol está
+// usando realmente.
+{
+  const testRes = await fetch(`${SUPABASE_URL}/rest/v1/cierres_diarios?select=*&limit=1`, {
+    headers: {
+      apikey: SUPABASE_SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+    },
+  })
+  console.log('DEBUG select status=%d body=%s', testRes.status, await testRes.text())
+}
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 async function getJson(url) {
