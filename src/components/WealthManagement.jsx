@@ -163,7 +163,7 @@ export default function WealthManagement() {
           align="center"
           eyebrow="Gestión patrimonial · Multi-family office"
           title="Un socio estratégico e independiente para su patrimonio"
-          description="Nuestra misión como Multi-Family Office es optimizar la gestión integral de tesorería y patrimonio bajo un marco de estricto rigor legal y tributario, alineando cada decisión a los objetivos de crecimiento y perfil de riesgo de nuestros clientes."
+          description="Nuestra misión como Multi-Family Office es optimizar la administración de liquidez y patrimonio bajo un marco de estricto rigor legal y tributario, alineando cada decisión a los objetivos de crecimiento y perfil de riesgo de nuestros clientes."
         />
 
         <div ref={itemsRef} className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
