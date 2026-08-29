@@ -10,6 +10,7 @@ const formatArs = (value) =>
 // pesos que ya aparece arriba, en la misma tarjeta).
 const formatUsd = (value, decimales = 2) =>
   `USD ${value.toLocaleString('en-US', { minimumFractionDigits: decimales, maximumFractionDigits: decimales })}`
+const GRAMOS_POR_ONZA_TROY = 31.1034768
 
 const MONEDAS_INFO = {
   EUR: { nombre: 'Euro', simbolo: '€', unidad: 1, decimalesUsd: 4, decimalesInverso: 4, icon: 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white' },
@@ -202,7 +203,7 @@ export default function OtrasMonedasTab() {
                   </div>
                   <div>
                     <p className="font-semibold text-slate-900">{info.nombre}</p>
-                    <p className="text-xs text-slate-500">Precio por onza troy</p>
+                    <p className="text-xs text-slate-500">Metal precioso</p>
                   </div>
                 </div>
                 {pct !== null && (
@@ -212,9 +213,15 @@ export default function OtrasMonedasTab() {
                   </Badge>
                 )}
               </div>
-              <div className="mt-4">
-                <p className="text-xs text-slate-500">En dólares</p>
-                <p className="text-2xl font-bold text-slate-900">{formatUsd(m.usd, 2)}</p>
+              <div className="mt-4 flex items-end justify-between">
+                <div>
+                  <p className="text-xs text-slate-500">Por gramo</p>
+                  <p className="text-lg font-bold text-slate-900">{formatUsd(m.usd / GRAMOS_POR_ONZA_TROY, 2)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-slate-500">Por onza</p>
+                  <p className="text-lg font-bold text-slate-900">{formatUsd(m.usd, 2)}</p>
+                </div>
               </div>
             </Card>
           )

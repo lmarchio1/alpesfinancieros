@@ -1,5 +1,6 @@
 import { fetchArgNotes } from './data912Api'
 import { fetchCierresDeAyer } from './supabaseClient'
+import { LECER_META } from '../data/bondsReference'
 
 const BASE_URL = 'https://api.argentinadatos.com/v1/finanzas'
 
@@ -34,26 +35,41 @@ export async function fetchRentaFija(forzar = false) {
   // el precio en vivo sea igual a ese cierre, se muestra 0%; en cuanto se mueva, se
   // confía en el pct_change que da data912 tal cual.
   const cierres = await fetchCierresDeAyer([...precioPorTicker.keys()])
+  const variacionDeHoy = (ticker, precioActual) => {
+    const cierre = cierres[ticker]
+    const sinMovimiento =
+      typeof cierre === 'number' && typeof precioActual === 'number' && Math.abs(precioActual - cierre) < 0.005
+    return sinMovimiento ? 0 : pctChangePorTicker.get(ticker)
+  }
 
   const letrasOrdenadas = letrasMeta
     .filter(noVencido)
     .map((l) => {
       const precioActual = precioPorTicker.get(l.ticker)
-      const cierre = cierres[l.ticker]
-      const sinMovimiento =
-        typeof cierre === 'number' && typeof precioActual === 'number' && Math.abs(precioActual - cierre) < 0.005
-      return {
-        ...l,
-        precioActual,
-        variacionPorcentaje: sinMovimiento ? 0 : pctChangePorTicker.get(l.ticker),
-      }
+      return { ...l, precioActual, variacionPorcentaje: variacionDeHoy(l.ticker, precioActual) }
     })
     // solo letras con precio de mercado en vivo: sin eso no hay retorno calculable
     .filter((l) => typeof l.precioActual === 'number' && l.precioActual > 0)
     .sort((a, b) => new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento))
     .slice(0, 6)
 
-  return { letras: letrasOrdenadas, riesgoPais }
+  // LECER: no está en el listado de argentinadatos.com, así que el vencimiento
+  // sale de LECER_META (ver bondsReference.js) en vez de letrasMeta.
+  const lecer = Object.entries(LECER_META)
+    .map(([ticker, info]) => {
+      const precioActual = precioPorTicker.get(ticker)
+      if (typeof precioActual !== 'number' || precioActual <= 0) return null
+      return {
+        ticker,
+        fechaVencimiento: info.vencimiento,
+        precioActual,
+        variacionPorcentaje: variacionDeHoy(ticker, precioActual),
+      }
+    })
+    .filter(Boolean)
+    .sort((a, b) => new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento))
+
+  return { letras: letrasOrdenadas, lecer, riesgoPais }
 }
 
 // Valor de riesgo país del cierre de ayer (capturado a las 00hs, ver

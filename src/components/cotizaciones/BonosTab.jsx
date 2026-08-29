@@ -85,6 +85,8 @@ export default function BonosTab() {
         bonares={universo.data.bonares}
         duales={universo.data.duales}
         letras={rentaFija.data.letras}
+        lecer={rentaFija.data.lecer}
+        boncap={universo.data.boncap}
         onActualizar={actualizarAhora}
       />
 

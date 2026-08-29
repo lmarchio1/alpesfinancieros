@@ -19,8 +19,10 @@ const rowDelay = (i) => ({ animationDelay: `${i * 40}ms` })
 const GRUPOS = [
   { id: 'globales', label: 'Globales' },
   { id: 'bonares', label: 'Bonares' },
-  { id: 'letras', label: 'Letras' },
+  { id: 'letras', label: 'Lecap' },
+  { id: 'lecer', label: 'Lecer' },
   { id: 'duales', label: 'Duales' },
+  { id: 'boncap', label: 'Boncap' },
 ]
 
 function VarBadge({ value }) {
@@ -129,7 +131,7 @@ function TablaDuales({ bonos }) {
   )
 }
 
-export default function BondsUniverse({ globales, bonares, duales, letras, onActualizar }) {
+export default function BondsUniverse({ globales, bonares, duales, letras, lecer, boncap, onActualizar }) {
   const [grupo, setGrupo] = useState('globales')
 
   return (
@@ -178,6 +180,8 @@ export default function BondsUniverse({ globales, bonares, duales, letras, onAct
         {grupo === 'bonares' && <TablaUsd key="bonares" bonos={bonares} />}
         {grupo === 'letras' && <TablaLetras key="letras" letras={letras} />}
         {grupo === 'duales' && <TablaDuales key="duales" bonos={duales} />}
+        {grupo === 'lecer' && <TablaLetras key="lecer" letras={lecer} />}
+        {grupo === 'boncap' && <TablaDuales key="boncap" bonos={boncap} />}
       </div>
 
       {grupo === 'duales' && (

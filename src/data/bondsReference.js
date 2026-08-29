@@ -38,3 +38,23 @@ export const BONARES_NUEVOS_META = {
   AO29: { vencimiento: '2029-10-31', ley: 'ARG', duracionAnios: 2.7 },
   AN29: { vencimiento: '2029-11-30', ley: 'ARG', duracionAnios: 2.8 },
 }
+
+// LECER: letras del Tesoro ajustadas por CER, cotizan en pesos (data912.com,
+// endpoint arg_notes). No están en el listado de "letras" de argentinadatos.com,
+// así que se cargan a mano acá -fechas verificadas en Rava/InvertirOnline/
+// doctacapital, no inferidas del ticker-.
+export const LECER_META = {
+  X30S6: { vencimiento: '2026-09-30' },
+  X30N6: { vencimiento: '2026-11-30' },
+  X29E7: { vencimiento: '2027-01-29' },
+}
+
+// BONCAP: bonos del Tesoro a tasa fija capitalizable, cotizan en pesos
+// (data912.com, endpoint arg_bonds). Fechas verificadas en Rava/InvertirOnline/
+// Max Capital.
+export const BONCAP_META = {
+  T15E7: { vencimiento: '2027-01-15' },
+  T30A7: { vencimiento: '2027-04-30' },
+  T31Y7: { vencimiento: '2027-05-31' },
+  T30J7: { vencimiento: '2027-06-30' },
+}

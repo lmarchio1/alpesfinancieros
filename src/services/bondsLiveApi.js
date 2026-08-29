@@ -1,5 +1,5 @@
 import { fetchArgBonds } from './data912Api'
-import { DUALES_META, MATURITY_BY_YEAR, BONARES_NUEVOS_META } from '../data/bondsReference'
+import { DUALES_META, MATURITY_BY_YEAR, BONARES_NUEVOS_META, BONCAP_META } from '../data/bondsReference'
 import { fetchCierresDeAyer } from './supabaseClient'
 
 // Globales y Bonares en dólar MEP (sufijo "D"): detecta automáticamente cualquier
@@ -69,6 +69,7 @@ export async function fetchUniversoBonos(forzar = false) {
   )
   const globales = mapearFamiliaPorAnio(['GD'], 'NY', porSimbolo)
   const duales = mapearGrupo(DUALES_META, '', porSimbolo)
+  const boncap = mapearGrupo(BONCAP_META, '', porSimbolo)
 
   // data912 no da timestamp por especie y sigue devolviendo el % de la rueda anterior
   // toda la madrugada, hasta que el mercado vuelve a operar -confirmado en vivo: a las
@@ -82,7 +83,7 @@ export async function fetchUniversoBonos(forzar = false) {
   // "ticker": varios bonos comparten el mismo ticker mostrado para dos instrumentos
   // distintos (ej. "GD30" a secas, en pesos, vs. "GD30D" -que se muestra como
   // "GD30"-, en dólares), y son precios completamente distintos entre sí.
-  const todos = [...globales, ...bonares, ...duales]
+  const todos = [...globales, ...bonares, ...duales, ...boncap]
   const cierres = await fetchCierresDeAyer(todos.map((b) => b.symbolLive))
   const conVariacionDeHoy = ({ symbolLive, ...b }) => {
     const cierre = cierres[symbolLive]
@@ -97,5 +98,6 @@ export async function fetchUniversoBonos(forzar = false) {
     globales: globales.map(conVariacionDeHoy),
     bonares: bonares.map(conVariacionDeHoy),
     duales: duales.map(conVariacionDeHoy),
+    boncap: boncap.map(conVariacionDeHoy),
   }
 }
