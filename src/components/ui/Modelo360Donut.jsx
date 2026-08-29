@@ -14,12 +14,19 @@ const SEG_LEN = QUARTER - GAP
 
 export default function Modelo360Donut({ activeIndex = null }) {
   return (
-    <div className="relative mx-auto h-full max-h-80 w-full max-w-80">
+    <div className="group relative mx-auto h-full max-h-80 w-full max-w-80 transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.03] motion-reduce:transition-none motion-reduce:hover:transform-none">
       <div
         aria-hidden="true"
         className="absolute -inset-4 rounded-full bg-gradient-to-br from-amber-300 via-yellow-200 to-orange-300 opacity-50 blur-3xl"
       />
-      <svg viewBox="0 0 200 200" className="relative h-full w-full drop-shadow-[0_20px_35px_rgba(0,0,0,0.5)]">
+      <svg
+        viewBox="0 0 200 200"
+        className="relative h-full w-full"
+        style={{
+          filter:
+            'drop-shadow(0 8px 10px rgba(0,0,0,0.45)) drop-shadow(0 26px 40px rgba(0,0,0,0.4))',
+        }}
+      >
         <defs>
           {SEGMENTOS.map((seg, i) => (
             <linearGradient key={i} id={`ring-grad-${i}`} x1="0" y1="0" x2="1" y2="1">
