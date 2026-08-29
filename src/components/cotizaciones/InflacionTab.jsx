@@ -136,7 +136,7 @@ export default function InflacionTab() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 17l6-6 4 4 8-8M15 7h6v6" />
                   </svg>
                 </div>
-                <p className="font-semibold text-slate-900">Inflación interanual</p>
+                <p className="font-semibold text-slate-900">Inflación Interanual</p>
               </div>
               <div className="mt-3 grid grid-cols-2 gap-4">
                 <div>
@@ -152,7 +152,10 @@ export default function InflacionTab() {
                   </div>
                 )}
               </div>
-              <p className="mt-2 text-xs text-slate-500">Dato oficial INDEC.</p>
+              <p className="mt-2 text-xs text-slate-500">
+                Variación acumulada del Índice de Precios al Consumidor (IPC Nacional) publicada por
+                INDEC.
+              </p>
             </Card>
           ) : (
             <div className="h-[122px] animate-pulse rounded-2xl bg-slate-100 sm:h-[223px]" />
@@ -169,7 +172,7 @@ export default function InflacionTab() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 9l-2 6-6 2 2-6 6-2z" />
                   </svg>
                 </div>
-                <p className="font-semibold text-slate-900">Inflación esperada (REM · BCRA)</p>
+                <p className="font-semibold text-slate-900">Inflación Esperada (REM · BCRA)</p>
               </div>
               <div className="mt-3 grid grid-cols-2 gap-4">
                 <div>
@@ -203,7 +206,7 @@ export default function InflacionTab() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v5l3 3M12 3a9 9 0 100 18 9 9 0 000-18z" />
                   </svg>
                 </div>
-                <p className="font-semibold text-slate-900">Plazo fijo a 30 días (BCRA)</p>
+                <p className="font-semibold text-slate-900">Plazo Fijo a 30 Días (BCRA)</p>
               </div>
               <div className="mt-3 grid grid-cols-2 gap-4">
                 <div>

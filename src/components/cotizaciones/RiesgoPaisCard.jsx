@@ -34,7 +34,7 @@ export default function RiesgoPaisCard({ riesgoPais }) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 12h4l2 6 4-16 2 10 2-4h4" />
             </svg>
           </div>
-          <p className="font-semibold text-slate-900">Riesgo país (EMBI+ Argentina)</p>
+          <p className="font-semibold text-slate-900">Riesgo País (EMBI+ Argentina)</p>
         </div>
         <span className="shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-500">
           Al cierre: {formatFecha(riesgoPais.fecha)}

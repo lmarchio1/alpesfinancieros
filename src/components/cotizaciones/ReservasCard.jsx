@@ -36,7 +36,7 @@ export default function ReservasCard() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l1.3-2h5.4l1.3 2" />
             </svg>
           </div>
-          <p className="font-semibold text-slate-900">Reservas brutas (BCRA)</p>
+          <p className="font-semibold text-slate-900">Reservas Brutas (BCRA)</p>
         </div>
         <span className="shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-500">
           Al cierre: {formatFecha(reservas.fecha)}
