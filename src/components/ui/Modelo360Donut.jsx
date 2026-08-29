@@ -14,7 +14,10 @@ const SEG_LEN = QUARTER - GAP
 
 export default function Modelo360Donut({ activeIndex = null }) {
   return (
-    <div className="group relative mx-auto h-full max-h-80 w-full max-w-80 transition-transform duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.03] motion-reduce:transition-none motion-reduce:hover:transform-none">
+    <div
+      className="group relative mx-auto h-full max-h-80 w-full max-w-80 transition-transform duration-300 ease-out [@media(hover:hover)]:hover:-translate-y-1.5 [@media(hover:hover)]:hover:scale-[1.03] motion-reduce:transition-none motion-reduce:hover:transform-none"
+      style={{ WebkitTapHighlightColor: 'transparent' }}
+    >
       <div
         aria-hidden="true"
         className="absolute -inset-4 rounded-full bg-gradient-to-br from-amber-300 via-yellow-200 to-orange-300 opacity-50 blur-3xl"
