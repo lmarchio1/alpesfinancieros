@@ -27,13 +27,13 @@ const GRUPOS = [
   { id: 'globales', label: 'Globales' },
   { id: 'bonares', label: 'Bonares' },
   { id: 'bopreal', label: 'Bopreal' },
+  { id: 'boncap', label: 'Boncap' },
+  { id: 'boncer', label: 'Boncer' },
   { id: 'letras', label: 'Lecap' },
   { id: 'lecer', label: 'Lecer' },
-  { id: 'duales', label: 'Duales' },
-  { id: 'boncap', label: 'Boncap' },
-  { id: 'dolarLinked', label: 'Linked' },
   { id: 'tamar', label: 'Tamar' },
-  { id: 'boncer', label: 'Boncer' },
+  { id: 'duales', label: 'Duales' },
+  { id: 'dolarLinked', label: 'Linked' },
 ]
 
 function VarBadge({ value }) {
