@@ -27,15 +27,14 @@ function mapearFamiliaPorAnio(prefijos, ley, porSimbolo) {
     const meta = MATURITY_BY_YEAR[anio]
     if (!meta) continue // año no reconocido todavía: ver comentario en bondsReference.js
 
-    const ticker = symbol.slice(0, -1) // sin la "D" final
-    if (vistos.has(ticker)) continue
-    vistos.add(ticker)
+    if (vistos.has(symbol)) continue
+    vistos.add(symbol)
 
     const live = porSimbolo.get(symbol)
     if (!live || !live.c) continue
 
     resultado.push({
-      ticker,
+      ticker: symbol, // con la "D" (ej. "GD30D"): es la cotización en dólares que se muestra
       symbolLive: symbol, // símbolo real en data912 (con sufijo), para la apertura diaria
       ley,
       vencimiento: meta.vencimiento,
@@ -55,7 +54,7 @@ function mapearGrupo(meta, sufijo, porSimbolo) {
       const live = porSimbolo.get(symbol)
       if (!live || !live.c) return null
       return {
-        ticker,
+        ticker: symbol, // con el sufijo si lo tiene (ej. "AO27D"): es la cotización real que se muestra
         symbolLive: symbol,
         ...info,
         precio: live.c,
@@ -75,7 +74,9 @@ export async function fetchUniversoBonos(forzar = false) {
   )
   const globales = mapearFamiliaPorAnio(['GD'], 'NY', porSimbolo)
   const boncap = mapearGrupo(BONCAP_META, '', porSimbolo)
-  const tamar = mapearGrupo(TAMAR_META, '', porSimbolo)
+  const tamar = mapearGrupo(TAMAR_META, '', porSimbolo).sort(
+    (a, b) => new Date(a.vencimiento) - new Date(b.vencimiento)
+  )
   const bopreal = mapearGrupo(BOPREAL_META, '', porSimbolo)
   const boncer = mapearGrupo(BONCER_META, '', porSimbolo)
 
@@ -87,10 +88,8 @@ export async function fetchUniversoBonos(forzar = false) {
   // movimiento real todavía y se muestra 0%. En cuanto el precio se mueva, se confía
   // en el pct_change que da data912 tal cual -una vez que el mercado opera, ese campo
   // sí refleja el cambio real, no hace falta recalcularlo-.
-  // Se usa symbolLive (el símbolo real de data912, con su sufijo) como clave, no
-  // "ticker": varios bonos comparten el mismo ticker mostrado para dos instrumentos
-  // distintos (ej. "GD30" a secas, en pesos, vs. "GD30D" -que se muestra como
-  // "GD30"-, en dólares), y son precios completamente distintos entre sí.
+  // Se usa symbolLive (igual a "ticker" acá, ya que ambos incluyen el sufijo) como
+  // clave para el cierre de ayer.
   const todos = [...globales, ...bonares, ...boncap, ...tamar, ...bopreal, ...boncer]
   const cierres = await fetchCierresDeAyer(todos.map((b) => b.symbolLive))
   const conVariacionDeHoy = ({ symbolLive, ...b }) => {
