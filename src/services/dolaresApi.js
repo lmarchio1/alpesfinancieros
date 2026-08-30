@@ -1,4 +1,4 @@
-import { fetchArgBonds } from './data912Api'
+import { fetchArgBonds, fetchArgCcl } from './data912Api'
 import { fetchCierresDeAyer } from './supabaseClient'
 
 const BASE_URL = 'https://dolarapi.com/v1'
@@ -50,18 +50,41 @@ function despuesDelCierre() {
   return hh > 17 || (hh === 17 && mm >= 30) || hh < 11
 }
 
+const CCL_CANASTA_N = 5
+const CCL_CANASTA_SPREAD_MAX = 0.01 // 1%
+const CCL_CANASTA_MIN = 3 // si hay menos candidatos confiables, no se usa la canasta
+
+// CCL vía una canasta de los CEDEARs/ADRs más operados con spread ajustado (<1%),
+// en vez de un ticker fijo -verificado en vivo: los 5-6 más líquidos (Apple,
+// Microsoft, Nvidia, Meta, Amazon, Tesla, etc.) mantienen spreads de 0.3%-0.7%
+// incluso con el mercado cerrado, mientras que GD30C se infla a más de 3% fuera
+// de horario-. Se recalcula qué tickers entran en cada pedido según volumen real
+// (ars_volume), no una lista fija: si mañana la liquidez se corre a otros
+// papeles, se ajusta solo.
+function cclPorCedears(ccl) {
+  if (!Array.isArray(ccl)) return null
+  const candidatos = ccl
+    .filter((c) => c.ars_volume > 0 && c.CCL_bid > 0 && c.CCL_ask > 0)
+    .filter((c) => (c.CCL_ask - c.CCL_bid) / c.CCL_bid < CCL_CANASTA_SPREAD_MAX)
+    .sort((a, b) => b.ars_volume - a.ars_volume)
+    .slice(0, CCL_CANASTA_N)
+
+  if (candidatos.length < CCL_CANASTA_MIN) return null
+
+  const compra = candidatos.reduce((suma, c) => suma + c.CCL_bid, 0) / candidatos.length
+  const venta = candidatos.reduce((suma, c) => suma + c.CCL_ask, 0) / candidatos.length
+  return { compra, venta, fuente: `${candidatos.length} CEDEARs` }
+}
+
 // MEP vía AL30/AL30D: contrastado contra el cierre de referencia de Ámbito
 // Financiero coincidió exacto ($1.535,08 los dos).
-//
-// CCL vía GD30/GD30C (liquida en el exterior, lo conceptualmente correcto para
-// "contado con liqui") durante el día. Recién después de las 17:30 ART se compara
-// el spread bid/ask de GD30C contra AL30C (liquida en el país, como el MEP) y se
-// usa el que esté más líquido en ese momento -verificado: a esa hora el CCL vía
-// GD30/GD30C daba $1.619 de venta, muy por encima del precio real de mercado
-// (~$1.611), y vía AL30/AL30C daba $1.605-. Nunca se mezclan las dos familias
-// entre sí (no GD30 con AL30C ni viceversa), y siempre se usan puntas realmente
-// operables, nunca el último precio operado (que puede quedar viejo).
 async function fetchDolaresImplicitos() {
+  let mep = null
+  let ccl = null
+
+  // Respaldo del CCL por bonos (GD30/GD30C durante el día, AL30/AL30C si tiene
+  // mejor spread después de las 17:30) por si la canasta de CEDEARs no está
+  // disponible o no tiene suficientes tickers confiables en ese momento.
   try {
     const bonds = await fetchArgBonds()
     const porSimbolo = new Map(bonds.map((b) => [b.symbol, b]))
@@ -71,13 +94,22 @@ async function fetchDolaresImplicitos() {
     const gd30 = porSimbolo.get('GD30')
     const gd30c = porSimbolo.get('GD30C')
 
+    mep = implicito(al30, al30d)
     const usarAl30c = despuesDelCierre() && spread(al30c) < spread(gd30c)
-    const ccl = usarAl30c ? implicito(al30, al30c) : implicito(gd30, gd30c)
-
-    return { mep: implicito(al30, al30d), ccl }
+    ccl = usarAl30c ? implicito(al30, al30c) : implicito(gd30, gd30c)
   } catch {
-    return { mep: null, ccl: null }
+    // sin bonos: mep queda null, ccl se intenta igual con la canasta de CEDEARs
   }
+
+  try {
+    const cedears = await fetchArgCcl()
+    const cclCedears = cclPorCedears(cedears)
+    if (cclCedears) ccl = cclCedears
+  } catch {
+    // sin datos912/ccl: se queda con el cálculo por bonos de arriba (o null)
+  }
+
+  return { mep, ccl }
 }
 
 export async function fetchDolares() {

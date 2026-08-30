@@ -37,6 +37,7 @@ async function cachear(fuente, url) {
 const resultados = await Promise.all([
   cachear('data912_arg_bonds', 'https://data912.com/live/arg_bonds'),
   cachear('data912_arg_notes', 'https://data912.com/live/arg_notes'),
+  cachear('data912_ccl', 'https://data912.com/live/ccl'),
 ])
 
 if (resultados.every((ok) => !ok)) process.exit(1)

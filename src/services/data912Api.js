@@ -30,3 +30,9 @@ export async function fetchArgNotes(forzar = false) {
 export async function fetchArgBonds(forzar = false) {
   return getConCache('data912_arg_bonds', 'arg_bonds', forzar)
 }
+
+// CCL implícito por CEDEAR/ADR (ver dolaresApi.js: se usa una canasta de los
+// más líquidos, no un ticker fijo).
+export async function fetchArgCcl(forzar = false) {
+  return getConCache('data912_ccl', 'ccl', forzar)
+}

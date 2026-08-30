@@ -43,9 +43,10 @@ for (const d of dolares) {
 // MEP/CCL implícito y universo de bonos/letras (data912): misma metodología que
 // src/services/dolaresApi.js (fetchDolaresImplicitos) — no duplicar ese archivo acá
 // porque corre en Node, no en el navegador; se mantiene la fórmula sincronizada a mano.
-const [bonds, notas] = await Promise.all([
+const [bonds, notas, ccl912] = await Promise.all([
   getJson('https://data912.com/live/arg_bonds'),
   getJson('https://data912.com/live/arg_notes'),
+  getJson('https://data912.com/live/ccl').catch(() => []),
 ])
 
 const porSimbolo = new Map(bonds.map((b) => [b.symbol, b]))
@@ -58,12 +59,26 @@ const spread = (bono) => {
   return (bono.px_ask - bono.px_bid) / bono.px_bid
 }
 const mep = implicito(porSimbolo.get('AL30'), porSimbolo.get('AL30D'))
-// CCL: GD30/GD30C durante el día; recién después de las 17:30 ART (mercado local
-// cerrado) se compara el spread bid/ask contra AL30/AL30C y se usa el más líquido
-// -mismo criterio que src/services/dolaresApi.js (fetchDolaresImplicitos), ver el
-// comentario ahí para el caso real que motivó esto. Este script corre a las 00hs, así
-// que en la práctica siempre cae después del cierre, pero se mantiene la misma
-// condición para que ambos lugares reflejen exactamente la misma metodología.
+
+// CCL: canasta de los CEDEARs/ADRs más operados con spread ajustado (<1%) —
+// mismo criterio que src/services/dolaresApi.js (cclPorCedears), ver el
+// comentario ahí. Si data912 no responde ese endpoint o no hay suficientes
+// tickers confiables, cae al cálculo por bonos (GD30/GD30C, o AL30/AL30C si
+// tiene mejor spread después de las 17:30 ART).
+function cclPorCedears(datos) {
+  if (!Array.isArray(datos)) return null
+  const candidatos = datos
+    .filter((c) => c.ars_volume > 0 && c.CCL_bid > 0 && c.CCL_ask > 0)
+    .filter((c) => (c.CCL_ask - c.CCL_bid) / c.CCL_bid < 0.01)
+    .sort((a, b) => b.ars_volume - a.ars_volume)
+    .slice(0, 5)
+  if (candidatos.length < 3) return null
+  return {
+    compra: candidatos.reduce((s, c) => s + c.CCL_bid, 0) / candidatos.length,
+    venta: candidatos.reduce((s, c) => s + c.CCL_ask, 0) / candidatos.length,
+  }
+}
+
 const hhmm = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'America/Argentina/Buenos_Aires',
   hour: '2-digit',
@@ -76,9 +91,10 @@ const despuesDelCierre = hh > 17 || (hh === 17 && mm >= 30) || hh < 11
 const al30c = porSimbolo.get('AL30C')
 const gd30c = porSimbolo.get('GD30C')
 const usarAl30c = despuesDelCierre && spread(al30c) < spread(gd30c)
-const ccl = usarAl30c
+const cclBonos = usarAl30c
   ? implicito(porSimbolo.get('AL30'), al30c)
   : implicito(porSimbolo.get('GD30'), gd30c)
+const ccl = cclPorCedears(ccl912) ?? cclBonos
 if (mep) {
   agregar('mep_compra', mep.compra)
   agregar('mep_venta', mep.venta)
