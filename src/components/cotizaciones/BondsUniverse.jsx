@@ -15,6 +15,13 @@ const TICKER_CLASS =
   'px-5 py-3 font-semibold text-brand-600 transition-colors duration-200 group-hover:text-brand-800'
 const HEAD_CLASS = 'border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600'
 const rowDelay = (i) => ({ animationDelay: `${i * 40}ms` })
+const SUBTITLE_CLASS = 'px-6 pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500'
+
+// Dentro de Boncer, TX26/TX28/TX31 pagan cupón semestral y amortizan en
+// cuotas -a diferencia del resto de la familia (TZX), que es cupón cero y
+// paga todo junto al vencimiento-. Se separan en dos tablas en vez de una
+// nota al pie para que la diferencia se note de un vistazo.
+const BONCER_CON_CUPON = ['TX26', 'TX28', 'TX31']
 
 const GRUPOS = [
   { id: 'globales', label: 'Globales' },
@@ -201,7 +208,14 @@ export default function BondsUniverse({
         {grupo === 'boncap' && <TablaDuales key="boncap" bonos={boncap} />}
         {grupo === 'dolarLinked' && <TablaDuales key="dolarLinked" bonos={dolarLinked} />}
         {grupo === 'tamar' && <TablaDuales key="tamar" bonos={tamar} />}
-        {grupo === 'boncer' && <TablaDuales key="boncer" bonos={boncer} />}
+        {grupo === 'boncer' && (
+          <>
+            <p className={SUBTITLE_CLASS}>Cupón cero</p>
+            <TablaDuales key="boncer-cero" bonos={boncer.filter((b) => !BONCER_CON_CUPON.includes(b.ticker))} />
+            <p className={`${SUBTITLE_CLASS} pt-5`}>Con cupón (interés semestral, amortiza en cuotas)</p>
+            <TablaDuales key="boncer-cupon" bonos={boncer.filter((b) => BONCER_CON_CUPON.includes(b.ticker))} />
+          </>
+        )}
       </div>
 
       {grupo === 'duales' && (
@@ -220,13 +234,6 @@ export default function BondsUniverse({
         <p className="px-6 pb-6 -mt-4 text-xs text-slate-400">
           Además de la amortización al vencimiento que se muestra acá, pagan un cupón de interés
           semestral (5% anual) desde la emisión — no son de pago único.
-        </p>
-      )}
-      {grupo === 'boncer' && (
-        <p className="px-6 pb-6 -mt-4 text-xs text-slate-400">
-          TX26, TX28 y TX31 pagan un cupón semestral (2% anual) y amortizan en cuotas antes del
-          vencimiento que se muestra acá; el resto (familia TZX) es cupón cero, pago único al
-          vencimiento.
         </p>
       )}
     </Card>
