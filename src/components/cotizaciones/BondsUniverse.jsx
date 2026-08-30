@@ -199,13 +199,6 @@ export default function BondsUniverse({ globales, bonares, letras, boncap, tamar
           </>
         )}
       </div>
-
-      {grupo === 'bopreal' && (
-        <p className="px-6 pb-6 -mt-4 text-xs text-slate-400">
-          Además de la amortización al vencimiento que se muestra acá, pagan un cupón de interés
-          semestral (5% anual) desde la emisión — no son de pago único.
-        </p>
-      )}
     </Card>
   )
 }
