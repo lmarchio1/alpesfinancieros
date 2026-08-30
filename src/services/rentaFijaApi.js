@@ -1,6 +1,5 @@
 import { fetchArgNotes } from './data912Api'
 import { fetchCierresDeAyer } from './supabaseClient'
-import { LECER_META } from '../data/bondsReference'
 
 const BASE_URL = 'https://api.argentinadatos.com/v1/finanzas'
 
@@ -53,23 +52,7 @@ export async function fetchRentaFija(forzar = false) {
     .sort((a, b) => new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento))
     .slice(0, 6)
 
-  // LECER: no está en el listado de argentinadatos.com, así que el vencimiento
-  // sale de LECER_META (ver bondsReference.js) en vez de letrasMeta.
-  const lecer = Object.entries(LECER_META)
-    .map(([ticker, info]) => {
-      const precioActual = precioPorTicker.get(ticker)
-      if (typeof precioActual !== 'number' || precioActual <= 0) return null
-      return {
-        ticker,
-        fechaVencimiento: info.vencimiento,
-        precioActual,
-        variacionPorcentaje: variacionDeHoy(ticker, precioActual),
-      }
-    })
-    .filter(Boolean)
-    .sort((a, b) => new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento))
-
-  return { letras: letrasOrdenadas, lecer, riesgoPais }
+  return { letras: letrasOrdenadas, riesgoPais }
 }
 
 // Valor de riesgo país del cierre de ayer (capturado a las 00hs, ver

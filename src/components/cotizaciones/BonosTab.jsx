@@ -83,11 +83,8 @@ export default function BonosTab() {
       <BondsUniverse
         globales={universo.data.globales}
         bonares={universo.data.bonares}
-        duales={universo.data.duales}
         letras={rentaFija.data.letras}
-        lecer={rentaFija.data.lecer}
         boncap={universo.data.boncap}
-        dolarLinked={universo.data.dolarLinked}
         tamar={universo.data.tamar}
         bopreal={universo.data.bopreal}
         boncer={universo.data.boncer}

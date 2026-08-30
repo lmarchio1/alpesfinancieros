@@ -1,10 +1,8 @@
 import { fetchArgBonds } from './data912Api'
 import {
-  DUALES_META,
   MATURITY_BY_YEAR,
   BONARES_NUEVOS_META,
   BONCAP_META,
-  DOLAR_LINKED_META,
   TAMAR_META,
   BOPREAL_META,
   BONCER_META,
@@ -67,7 +65,6 @@ function mapearGrupo(meta, sufijo, porSimbolo) {
     .filter(Boolean)
 }
 
-// Duales cotizan directo en pesos, sin sufijo.
 export async function fetchUniversoBonos(forzar = false) {
   const bonds = await fetchArgBonds(forzar)
   const porSimbolo = new Map(bonds.map((b) => [b.symbol, b]))
@@ -77,9 +74,7 @@ export async function fetchUniversoBonos(forzar = false) {
     (a, b) => new Date(a.vencimiento) - new Date(b.vencimiento)
   )
   const globales = mapearFamiliaPorAnio(['GD'], 'NY', porSimbolo)
-  const duales = mapearGrupo(DUALES_META, '', porSimbolo)
   const boncap = mapearGrupo(BONCAP_META, '', porSimbolo)
-  const dolarLinked = mapearGrupo(DOLAR_LINKED_META, '', porSimbolo)
   const tamar = mapearGrupo(TAMAR_META, '', porSimbolo)
   const bopreal = mapearGrupo(BOPREAL_META, '', porSimbolo)
   const boncer = mapearGrupo(BONCER_META, '', porSimbolo)
@@ -96,7 +91,7 @@ export async function fetchUniversoBonos(forzar = false) {
   // "ticker": varios bonos comparten el mismo ticker mostrado para dos instrumentos
   // distintos (ej. "GD30" a secas, en pesos, vs. "GD30D" -que se muestra como
   // "GD30"-, en dólares), y son precios completamente distintos entre sí.
-  const todos = [...globales, ...bonares, ...duales, ...boncap, ...dolarLinked, ...tamar, ...bopreal, ...boncer]
+  const todos = [...globales, ...bonares, ...boncap, ...tamar, ...bopreal, ...boncer]
   const cierres = await fetchCierresDeAyer(todos.map((b) => b.symbolLive))
   const conVariacionDeHoy = ({ symbolLive, ...b }) => {
     const cierre = cierres[symbolLive]
@@ -110,9 +105,7 @@ export async function fetchUniversoBonos(forzar = false) {
   return {
     globales: globales.map(conVariacionDeHoy),
     bonares: bonares.map(conVariacionDeHoy),
-    duales: duales.map(conVariacionDeHoy),
     boncap: boncap.map(conVariacionDeHoy),
-    dolarLinked: dolarLinked.map(conVariacionDeHoy),
     tamar: tamar.map(conVariacionDeHoy),
     bopreal: bopreal.map(conVariacionDeHoy),
     boncer: boncer.map(conVariacionDeHoy),

@@ -30,10 +30,7 @@ const GRUPOS = [
   { id: 'boncap', label: 'Boncap' },
   { id: 'boncer', label: 'Boncer' },
   { id: 'letras', label: 'Lecap' },
-  { id: 'lecer', label: 'Lecer' },
   { id: 'tamar', label: 'Tamar' },
-  { id: 'duales', label: 'Duales' },
-  { id: 'dolarLinked', label: 'Linked' },
 ]
 
 function VarBadge({ value }) {
@@ -142,19 +139,7 @@ function TablaDuales({ bonos }) {
   )
 }
 
-export default function BondsUniverse({
-  globales,
-  bonares,
-  duales,
-  letras,
-  lecer,
-  boncap,
-  dolarLinked,
-  tamar,
-  bopreal,
-  boncer,
-  onActualizar,
-}) {
+export default function BondsUniverse({ globales, bonares, letras, boncap, tamar, bopreal, boncer, onActualizar }) {
   const [grupo, setGrupo] = useState('globales')
 
   return (
@@ -203,10 +188,7 @@ export default function BondsUniverse({
         {grupo === 'bonares' && <TablaUsd key="bonares" bonos={bonares} />}
         {grupo === 'bopreal' && <TablaUsd key="bopreal" bonos={bopreal} />}
         {grupo === 'letras' && <TablaLetras key="letras" letras={letras} />}
-        {grupo === 'duales' && <TablaDuales key="duales" bonos={duales} />}
-        {grupo === 'lecer' && <TablaLetras key="lecer" letras={lecer} />}
         {grupo === 'boncap' && <TablaDuales key="boncap" bonos={boncap} />}
-        {grupo === 'dolarLinked' && <TablaDuales key="dolarLinked" bonos={dolarLinked} />}
         {grupo === 'tamar' && <TablaDuales key="tamar" bonos={tamar} />}
         {grupo === 'boncer' && (
           <>
@@ -218,18 +200,6 @@ export default function BondsUniverse({
         )}
       </div>
 
-      {grupo === 'duales' && (
-        <p className="px-6 pb-6 -mt-4 text-xs text-slate-400">
-          Los duales pagan lo mayor entre una tasa fija y una tasa ligada a devaluación + spread;
-          el precio de mercado ya refleja esa opcionalidad.
-        </p>
-      )}
-      {grupo === 'dolarLinked' && (
-        <p className="px-6 pb-6 -mt-4 text-xs text-slate-400">
-          Se compran y pagan en pesos, pero siguen la evolución del dólar oficial -a diferencia de
-          los duales, que ajustan por dólar o inflación según cuál rinda más-.
-        </p>
-      )}
       {grupo === 'bopreal' && (
         <p className="px-6 pb-6 -mt-4 text-xs text-slate-400">
           Además de la amortización al vencimiento que se muestra acá, pagan un cupón de interés
