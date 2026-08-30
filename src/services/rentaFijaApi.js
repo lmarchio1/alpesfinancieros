@@ -1,4 +1,4 @@
-import { fetchArgNotes } from './data912Api'
+import { fetchArgNotes, fetchArgBonds } from './data912Api'
 import { fetchCierresDeAyer } from './supabaseClient'
 import { LECER_META } from '../data/bondsReference'
 
@@ -20,14 +20,15 @@ function noVencido(instrumento) {
 }
 
 export async function fetchRentaFija(forzar = false) {
-  const [letrasMeta, riesgoPais, notas] = await Promise.all([
+  const [letrasMeta, riesgoPais, notas, bonds] = await Promise.all([
     getJson('letras'),
     getJson('indices/riesgo-pais/ultimo'),
     fetchArgNotes(forzar),
+    fetchArgBonds(forzar), // TX26/TX28/TX31 (Lecer de plazo más largo) viven acá, no en arg_notes
   ])
 
-  const precioPorTicker = new Map(notas.map((n) => [n.symbol, n.c]))
-  const pctChangePorTicker = new Map(notas.map((n) => [n.symbol, n.pct_change]))
+  const precioPorTicker = new Map([...notas, ...bonds].map((n) => [n.symbol, n.c]))
+  const pctChangePorTicker = new Map([...notas, ...bonds].map((n) => [n.symbol, n.pct_change]))
 
   // data912 no da timestamp por especie y sigue devolviendo el % de la rueda anterior
   // toda la madrugada, hasta que el mercado vuelve a operar. El cierre de ayer
