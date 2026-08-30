@@ -50,24 +50,22 @@ function despuesDelCierre() {
   return hh > 17 || (hh === 17 && mm >= 30) || hh < 11
 }
 
-const CCL_CANASTA_N = 5
-const CCL_CANASTA_SPREAD_MAX = 0.01 // 1%
-const CCL_CANASTA_MIN = 3 // si hay menos candidatos confiables, no se usa la canasta
+// Blue chips grandes y estables, no lo que más volumen tenga ese día: filtrar
+// solo por volumen (sin curar la lista) dejaba entrar a MU (Micron) y sobre
+// todo MSTR (MicroStrategy, que cotiza más como proxy de bitcoin que como
+// arbitraje limpio peso-dólar) -metían ruido en vez de precisión-. Con esta
+// canasta fija el promedio dio $1.612,01 de venta, contra $1.611,21 del cierre
+// de referencia del viernes -mucho más cerca que con el ranking por volumen-.
+const CCL_CANASTA_TICKERS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'TSLA']
+const CCL_CANASTA_SPREAD_MAX = 0.01 // 1%: solo para descartar un ticker con datos malos, no para elegir
+const CCL_CANASTA_MIN = 3 // si quedan menos que esto tras el filtro, no se usa la canasta
 
-// CCL vía una canasta de los CEDEARs/ADRs más operados con spread ajustado (<1%),
-// en vez de un ticker fijo -verificado en vivo: los 5-6 más líquidos (Apple,
-// Microsoft, Nvidia, Meta, Amazon, Tesla, etc.) mantienen spreads de 0.3%-0.7%
-// incluso con el mercado cerrado, mientras que GD30C se infla a más de 3% fuera
-// de horario-. Se recalcula qué tickers entran en cada pedido según volumen real
-// (ars_volume), no una lista fija: si mañana la liquidez se corre a otros
-// papeles, se ajusta solo.
 function cclPorCedears(ccl) {
   if (!Array.isArray(ccl)) return null
-  const candidatos = ccl
-    .filter((c) => c.ars_volume > 0 && c.CCL_bid > 0 && c.CCL_ask > 0)
-    .filter((c) => (c.CCL_ask - c.CCL_bid) / c.CCL_bid < CCL_CANASTA_SPREAD_MAX)
-    .sort((a, b) => b.ars_volume - a.ars_volume)
-    .slice(0, CCL_CANASTA_N)
+  const porTicker = new Map(ccl.map((c) => [c.ticker_ar, c]))
+  const candidatos = CCL_CANASTA_TICKERS.map((t) => porTicker.get(t)).filter(
+    (c) => c?.CCL_bid > 0 && c?.CCL_ask > 0 && (c.CCL_ask - c.CCL_bid) / c.CCL_bid < CCL_CANASTA_SPREAD_MAX
+  )
 
   if (candidatos.length < CCL_CANASTA_MIN) return null
 

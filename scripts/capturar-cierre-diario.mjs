@@ -60,18 +60,19 @@ const spread = (bono) => {
 }
 const mep = implicito(porSimbolo.get('AL30'), porSimbolo.get('AL30D'))
 
-// CCL: canasta de los CEDEARs/ADRs más operados con spread ajustado (<1%) —
-// mismo criterio que src/services/dolaresApi.js (cclPorCedears), ver el
-// comentario ahí. Si data912 no responde ese endpoint o no hay suficientes
-// tickers confiables, cae al cálculo por bonos (GD30/GD30C, o AL30/AL30C si
-// tiene mejor spread después de las 17:30 ART).
+// CCL: canasta fija de blue chips grandes (no ranking por volumen — dejaba
+// entrar a MU/MSTR, que meten ruido) — mismo criterio que
+// src/services/dolaresApi.js (cclPorCedears), ver el comentario ahí. Si data912
+// no responde ese endpoint o no hay suficientes tickers confiables, cae al
+// cálculo por bonos (GD30/GD30C, o AL30/AL30C si tiene mejor spread después de
+// las 17:30 ART).
+const CCL_CANASTA_TICKERS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'TSLA']
 function cclPorCedears(datos) {
   if (!Array.isArray(datos)) return null
-  const candidatos = datos
-    .filter((c) => c.ars_volume > 0 && c.CCL_bid > 0 && c.CCL_ask > 0)
-    .filter((c) => (c.CCL_ask - c.CCL_bid) / c.CCL_bid < 0.01)
-    .sort((a, b) => b.ars_volume - a.ars_volume)
-    .slice(0, 5)
+  const porTicker = new Map(datos.map((c) => [c.ticker_ar, c]))
+  const candidatos = CCL_CANASTA_TICKERS.map((t) => porTicker.get(t)).filter(
+    (c) => c?.CCL_bid > 0 && c?.CCL_ask > 0 && (c.CCL_ask - c.CCL_bid) / c.CCL_bid < 0.01
+  )
   if (candidatos.length < 3) return null
   return {
     compra: candidatos.reduce((s, c) => s + c.CCL_bid, 0) / candidatos.length,
