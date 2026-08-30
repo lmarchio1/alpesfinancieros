@@ -216,6 +216,19 @@ export default function BondsUniverse({
           los duales, que ajustan por dólar o inflación según cuál rinda más-.
         </p>
       )}
+      {grupo === 'bopreal' && (
+        <p className="px-6 pb-6 -mt-4 text-xs text-slate-400">
+          Además de la amortización al vencimiento que se muestra acá, pagan un cupón de interés
+          semestral (5% anual) desde la emisión — no son de pago único.
+        </p>
+      )}
+      {grupo === 'boncer' && (
+        <p className="px-6 pb-6 -mt-4 text-xs text-slate-400">
+          TX26, TX28 y TX31 pagan un cupón semestral (2% anual) y amortizan en cuotas antes del
+          vencimiento que se muestra acá; el resto (familia TZX) es cupón cero, pago único al
+          vencimiento.
+        </p>
+      )}
     </Card>
   )
 }
