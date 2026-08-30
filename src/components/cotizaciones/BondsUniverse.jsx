@@ -19,14 +19,14 @@ const rowDelay = (i) => ({ animationDelay: `${i * 40}ms` })
 const GRUPOS = [
   { id: 'globales', label: 'Globales' },
   { id: 'bonares', label: 'Bonares' },
+  { id: 'bopreal', label: 'Bopreal' },
   { id: 'letras', label: 'Lecap' },
   { id: 'lecer', label: 'Lecer' },
   { id: 'duales', label: 'Duales' },
   { id: 'boncap', label: 'Boncap' },
-  { id: 'dolarLinked', label: 'Dólar Linked' },
+  { id: 'dolarLinked', label: 'Linked' },
   { id: 'tamar', label: 'Tamar' },
-  { id: 'bopreales', label: 'Bopreales' },
-  { id: 'boncer', label: 'BONCER' },
+  { id: 'boncer', label: 'Boncer' },
 ]
 
 function VarBadge({ value }) {
@@ -144,7 +144,7 @@ export default function BondsUniverse({
   boncap,
   dolarLinked,
   tamar,
-  bopreales,
+  bopreal,
   boncer,
   onActualizar,
 }) {
@@ -194,13 +194,13 @@ export default function BondsUniverse({
       <div className="overflow-x-auto pb-6">
         {grupo === 'globales' && <TablaUsd key="globales" bonos={globales} />}
         {grupo === 'bonares' && <TablaUsd key="bonares" bonos={bonares} />}
+        {grupo === 'bopreal' && <TablaUsd key="bopreal" bonos={bopreal} />}
         {grupo === 'letras' && <TablaLetras key="letras" letras={letras} />}
         {grupo === 'duales' && <TablaDuales key="duales" bonos={duales} />}
         {grupo === 'lecer' && <TablaLetras key="lecer" letras={lecer} />}
         {grupo === 'boncap' && <TablaDuales key="boncap" bonos={boncap} />}
         {grupo === 'dolarLinked' && <TablaDuales key="dolarLinked" bonos={dolarLinked} />}
         {grupo === 'tamar' && <TablaDuales key="tamar" bonos={tamar} />}
-        {grupo === 'bopreales' && <TablaDuales key="bopreales" bonos={bopreales} />}
         {grupo === 'boncer' && <TablaDuales key="boncer" bonos={boncer} />}
       </div>
 

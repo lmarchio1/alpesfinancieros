@@ -89,7 +89,7 @@ export default function BonosTab() {
         boncap={universo.data.boncap}
         dolarLinked={universo.data.dolarLinked}
         tamar={universo.data.tamar}
-        bopreales={universo.data.bopreales}
+        bopreal={universo.data.bopreal}
         boncer={universo.data.boncer}
         onActualizar={actualizarAhora}
       />
