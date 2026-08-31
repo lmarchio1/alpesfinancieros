@@ -2,14 +2,14 @@ name: Capturar cierre diario
 
 on:
   schedule:
-    # 00:45 hora Argentina (UTC-3, sin horario de verano) = 03:45 UTC, todos los días
+    # 00:15 hora Argentina (UTC-3, sin horario de verano) = 03:15 UTC, todos los días
     # -incluye fines de semana, así el front siempre puede leer "fecha = hoy - 1" sin
     # tener que buscar el día hábil anterior: sábado y domingo simplemente re-guardan
-    # el cierre del viernes-. Minuto no redondo a propósito: GitHub avisa que los cron
-    # justo "en punto" (minuto 0) son los que más demora sufren por acumulación de
-    # workflows programados a la misma hora en runners compartidos (se vio en vivo:
-    # con minuto 0 corría 6-7hs tarde).
-    - cron: '45 3 * * *'
+    # el cierre del viernes-. Minuto no redondo a propósito (evita el minuto 0, que
+    # GitHub marca como el más congestionado), pero probamos con 00:45 y igual corrió
+    # con 6-7hs de demora -no es la solución real, es una limitación de GitHub Actions
+    # en runners compartidos-. Se deja en 00:15 para acortar la espera mientras tanto.
+    - cron: '15 3 * * *'
   workflow_dispatch:
 
 jobs:
