@@ -72,13 +72,12 @@ const ICONS = {
       <circle cx="12" cy="12" r="0.9" fill="currentColor" />
     </>
   ),
-  layersPro: (
-    <>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 2.5L3 7l9 4.5 9-4.5-9-4.5z" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l9 4.5 9-4.5" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5l9 4.5 9-4.5" />
-      <path strokeLinecap="round" strokeLinejoin="round" opacity="0.5" d="M12 11.5v2M12 16v2" />
-    </>
+  gearPro: (
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 15a3 3 0 100-6 3 3 0 000 6z M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82A1.65 1.65 0 003 13.5H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"
+    />
   ),
   barsTrend: (
     <>
@@ -173,7 +172,7 @@ const PROCESO = [
   },
   {
     paso: '03',
-    icon: 'layersPro',
+    icon: 'gearPro',
     color: 'bg-brand-600',
     glow: 'shadow-brand-600/40',
     title: 'Implementación',
