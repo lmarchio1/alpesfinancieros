@@ -52,30 +52,40 @@ const ICONS = {
   home: (
     <path strokeLinecap="round" strokeLinejoin="round" d="M3 11l9-8 9 8M5 10v10h14V10M9 20v-6h6v6" />
   ),
-  search: (
+  // Cuatro íconos con más detalle que otros ya usados más arriba en la
+  // página (compass/trending), para que "Un proceso, no una única decisión"
+  // no se sienta genérico ni repita nada.
+  searchPro: (
     <>
-      <circle cx="11" cy="11" r="7" strokeLinecap="round" strokeLinejoin="round" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35" />
+      <circle cx="10.5" cy="10.5" r="6.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M20.5 20.5l-4.3-4.3" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 11l1.8 1.8 3.2-4" />
+      <path strokeLinecap="round" strokeLinejoin="round" opacity="0.5" d="M7.7 6.8a4.7 4.7 0 013-1.4" />
     </>
   ),
-  layers: (
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-    />
-  ),
-  target: (
+  compassPro: (
     <>
       <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="12" cy="12" r="5" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="12" cy="12" r="1" fill="currentColor" />
+      <circle cx="12" cy="12" r="6.3" strokeWidth="1" opacity="0.5" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 2.3v1.7M12 20v1.7M2.3 12H4M20 12h1.7" />
+      <path strokeLinecap="round" strokeLinejoin="round" fill="currentColor" d="M15 9l-2.2 5.8L9 17l2.2-5.8z" />
+      <circle cx="12" cy="12" r="0.9" fill="currentColor" />
     </>
   ),
-  eye: (
+  layersPro: (
     <>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
-      <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 2.5L3 7l9 4.5 9-4.5-9-4.5z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l9 4.5 9-4.5" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5l9 4.5 9-4.5" />
+      <path strokeLinecap="round" strokeLinejoin="round" opacity="0.5" d="M12 11.5v2M12 16v2" />
+    </>
+  ),
+  barsTrend: (
+    <>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 20h18" />
+      <path strokeLinecap="round" strokeLinejoin="round" opacity="0.5" d="M6 20v-4M11 20v-8M16 20v-11" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 13l5-4 4 3 7-7" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16 4h4v4" />
     </>
   ),
 }
@@ -145,7 +155,7 @@ const MODELO_360 = [
 const PROCESO = [
   {
     paso: '01',
-    icon: 'search',
+    icon: 'searchPro',
     color: 'bg-brand-400',
     glow: 'shadow-brand-400/40',
     title: 'Diagnóstico',
@@ -154,7 +164,7 @@ const PROCESO = [
   },
   {
     paso: '02',
-    icon: 'target',
+    icon: 'compassPro',
     color: 'bg-brand-500',
     glow: 'shadow-brand-500/40',
     title: 'Estrategia 360°',
@@ -163,7 +173,7 @@ const PROCESO = [
   },
   {
     paso: '03',
-    icon: 'layers',
+    icon: 'layersPro',
     color: 'bg-brand-600',
     glow: 'shadow-brand-600/40',
     title: 'Implementación',
@@ -172,7 +182,7 @@ const PROCESO = [
   },
   {
     paso: '04',
-    icon: 'eye',
+    icon: 'barsTrend',
     color: 'bg-brand-700',
     glow: 'shadow-brand-700/40',
     title: 'Monitoreo',
