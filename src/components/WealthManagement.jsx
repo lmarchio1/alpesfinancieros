@@ -65,6 +65,19 @@ const ICONS = {
       d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
     />
   ),
+  target: (
+    <>
+      <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="12" cy="12" r="5" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="12" cy="12" r="1" fill="currentColor" />
+    </>
+  ),
+  eye: (
+    <>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+      <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" />
+    </>
+  ),
 }
 
 const ITEMS = [
@@ -141,7 +154,7 @@ const PROCESO = [
   },
   {
     paso: '02',
-    icon: 'compass',
+    icon: 'target',
     color: 'bg-brand-500',
     glow: 'shadow-brand-500/40',
     title: 'Estrategia 360°',
@@ -159,7 +172,7 @@ const PROCESO = [
   },
   {
     paso: '04',
-    icon: 'trending',
+    icon: 'eye',
     color: 'bg-brand-700',
     glow: 'shadow-brand-700/40',
     title: 'Monitoreo',
