@@ -52,6 +52,19 @@ const ICONS = {
   home: (
     <path strokeLinecap="round" strokeLinejoin="round" d="M3 11l9-8 9 8M5 10v10h14V10M9 20v-6h6v6" />
   ),
+  search: (
+    <>
+      <circle cx="11" cy="11" r="7" strokeLinecap="round" strokeLinejoin="round" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35" />
+    </>
+  ),
+  layers: (
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+    />
+  ),
 }
 
 const ITEMS = [
@@ -119,6 +132,7 @@ const MODELO_360 = [
 const PROCESO = [
   {
     paso: '01',
+    icon: 'search',
     color: 'bg-brand-400',
     glow: 'shadow-brand-400/40',
     title: 'Diagnóstico',
@@ -127,6 +141,7 @@ const PROCESO = [
   },
   {
     paso: '02',
+    icon: 'compass',
     color: 'bg-brand-500',
     glow: 'shadow-brand-500/40',
     title: 'Estrategia 360°',
@@ -135,6 +150,7 @@ const PROCESO = [
   },
   {
     paso: '03',
+    icon: 'layers',
     color: 'bg-brand-600',
     glow: 'shadow-brand-600/40',
     title: 'Implementación',
@@ -143,6 +159,7 @@ const PROCESO = [
   },
   {
     paso: '04',
+    icon: 'trending',
     color: 'bg-brand-700',
     glow: 'shadow-brand-700/40',
     title: 'Monitoreo',
@@ -307,9 +324,14 @@ export default function WealthManagement() {
                 style={{ transitionDelay: procesoVisible ? `${i * 150}ms` : '0ms' }}
               >
                 <span
-                  className={`relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white shadow-lg transition-transform duration-300 ease-out hover:scale-125 ${paso.color} ${paso.glow}`}
+                  className={`relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-white shadow-lg transition-transform duration-300 ease-out hover:scale-125 ${paso.color} ${paso.glow}`}
                 >
-                  {paso.paso}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6">
+                    {ICONS[paso.icon]}
+                  </svg>
+                  <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] font-bold text-slate-700 shadow ring-1 ring-slate-200">
+                    {paso.paso}
+                  </span>
                 </span>
                 <div className="md:mt-4">
                   <h4 className="font-semibold text-slate-900">{paso.title}</h4>
