@@ -1,15 +1,16 @@
 name: Capturar cierre diario
 
 on:
-  schedule:
-    # 00:15 hora Argentina (UTC-3, sin horario de verano) = 03:15 UTC, todos los días
-    # -incluye fines de semana, así el front siempre puede leer "fecha = hoy - 1" sin
-    # tener que buscar el día hábil anterior: sábado y domingo simplemente re-guardan
-    # el cierre del viernes-. Minuto no redondo a propósito (evita el minuto 0, que
-    # GitHub marca como el más congestionado), pero probamos con 00:45 y igual corrió
-    # con 6-7hs de demora -no es la solución real, es una limitación de GitHub Actions
-    # en runners compartidos-. Se deja en 00:15 para acortar la espera mientras tanto.
-    - cron: '15 3 * * *'
+  # Disparado por un cronjob externo (cron-job.org) a las 00:15 hora Argentina, todos
+  # los días -incluye fines de semana, así el front siempre puede leer "fecha = hoy -
+  # 1" sin buscar el día hábil anterior-. Antes tenía también un "schedule:" nativo de
+  # GitHub Actions de respaldo, pero se sacó a propósito: además de la demora errática
+  # de varias horas que tiene el cron nativo en este repo (ver cachear-precios.yml,
+  # que sí lo conserva porque ahí no importa), un disparo duplicado y tardío acá sí
+  # rompía algo real -el dólar cripto opera las 24hs, así que una segunda corrida a la
+  # mañana pisaba el "cierre de ayer" con el precio de ese momento en vez del cierre
+  # real de medianoche, mientras que el resto de los instrumentos (mercado cerrado a
+  # esa hora) no tenían este problema-.
   workflow_dispatch:
 
 jobs:
