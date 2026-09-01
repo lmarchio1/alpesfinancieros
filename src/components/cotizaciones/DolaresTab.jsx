@@ -188,7 +188,7 @@ export default function DolaresTab() {
             <Card
               key={d.casa}
               className={`group animate-fade-up border-t-4 p-5 shadow-md shadow-slate-200/70 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-2 hover:scale-[1.015] hover:bg-gradient-to-br hover:from-white hover:to-brand-50/60 hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)] motion-reduce:transition-none motion-reduce:animate-none ${trendBorder}`}
-              style={{ animationDelay: `${i * 80}ms` }}
+              style={{ animationDelay: `${150 + i * 80}ms` }}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
