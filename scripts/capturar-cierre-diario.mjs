@@ -125,7 +125,23 @@ if (filas.length === 0) {
   process.exit(1)
 }
 
-const fecha = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
+// Se guarda con la fecha de AYER (no la de hoy): el script corre de madrugada,
+// antes de que abra el mercado (~11hs), así que lo que captura siempre es el
+// cierre del día hábil anterior, nunca el de hoy -mismo cálculo de "ayer" que
+// usa el front en fetchCierresDeAyer (supabaseClient.js), para que su
+// `.eq('fecha', ayer)` siempre encuentre lo que corresponde. Antes se guardaba
+// con la fecha de hoy, lo que generaba un desfasaje de un día completo apenas
+// pasaba el primer día hábil real desde que el cron quedó automático -invisible
+// los fines de semana porque viernes/sábado/domingo/lunes-de-madrugada tienen
+// todos el mismo precio congelado-.
+function fechaArgentinaAyer() {
+  const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
+  const d = new Date(`${hoy}T00:00:00Z`)
+  d.setUTCDate(d.getUTCDate() - 1)
+  return d.toISOString().slice(0, 10)
+}
+
+const fecha = fechaArgentinaAyer()
 const registros = filas.map((f) => ({ fecha, ...f }))
 
 const { error } = await supabase.from('cierres_diarios').upsert(registros, { onConflict: 'fecha,instrumento' })
