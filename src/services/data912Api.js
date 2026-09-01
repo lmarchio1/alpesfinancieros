@@ -22,12 +22,29 @@ async function getJson(path) {
 // sentirse en vivo. Se vuelve al default (30 min) para no perder eso; con el Action
 // corriendo irregular, esto simplemente hace que la mayoría de los pedidos caigan al
 // fetch directo de siempre, como ya venía pasando antes de armar la cache.
+// fetchArgBonds() se llama por separado desde dolaresApi.js (para el MEP) y desde
+// bondsLiveApi.js (para todo el universo de bonos) -en Renta Fija, las dos disparan
+// casi al mismo tiempo, duplicando el pedido de los ~191 bonos-. Este mapa evita ese
+// duplicado: si ya hay un pedido en vuelo para la misma fuente, el segundo llamado
+// reusa esa misma promesa en vez de disparar un fetch nuevo.
+const enVuelo = new Map()
+
 async function getConCache(fuente, path, forzar) {
+  if (!forzar && enVuelo.has(fuente)) return enVuelo.get(fuente)
+
+  const promesa = (async () => {
+    if (!forzar) {
+      const cacheado = await fetchPreciosCache(fuente)
+      if (cacheado) return cacheado
+    }
+    return getJson(path)
+  })()
+
   if (!forzar) {
-    const cacheado = await fetchPreciosCache(fuente)
-    if (cacheado) return cacheado
+    enVuelo.set(fuente, promesa)
+    promesa.finally(() => enVuelo.delete(fuente))
   }
-  return getJson(path)
+  return promesa
 }
 
 // Letras y notas del Tesoro (LECAPs, BONCAPs): precio actual por 100 nominal.
