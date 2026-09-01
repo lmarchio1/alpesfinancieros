@@ -44,14 +44,18 @@ export async function fetchCierresDeAyer(instrumentos) {
   return Object.fromEntries(data.map((r) => [r.instrumento, r.valor]))
 }
 
-const CACHE_MAX_ANTIGUEDAD_MS = 30 * 60 * 1000 // 30 minutos
+const CACHE_MAX_ANTIGUEDAD_MS = 30 * 60 * 1000 // 30 minutos: bonos/CCL, se mueven en horario de rueda
 
-// Respuesta cruda de una fuente externa (data912, etc.), cacheada periódicamente por un
-// GitHub Action (ver scripts/cachear-precios.mjs) para no depender de esa fuente en cada
-// apertura de pestaña. Si no hay fila, o está más vieja que el techo de frescura (el
-// Action dejó de correr, o Supabase no responde), devuelve null: el que llama cae al
-// fetch directo de siempre.
-export async function fetchPreciosCache(fuente) {
+// Respuesta cruda de una fuente externa (data912, BCRA, etc.), cacheada periódicamente
+// por un GitHub Action (ver scripts/cachear-precios.mjs) para no depender de esa fuente
+// en cada apertura de pestaña. Si no hay fila, o está más vieja que el techo de frescura
+// (el Action tardó en correr -GitHub no garantiza el horario exacto de un cron, se vio
+// en vivo corriendo cada 2-8hs en vez de cada 5 min-, o Supabase no responde), devuelve
+// null: el que llama cae al fetch directo de siempre. maxAntiguedadMs es configurable
+// por fuente: 30 min por default sirve para datos que se mueven en el día (bonos/CCL),
+// pero para algo que el BCRA solo publica una vez por día no tiene sentido ese límite
+// tan corto -se pasa una ventana más larga para esos casos, ver bcraApi.js-.
+export async function fetchPreciosCache(fuente, maxAntiguedadMs = CACHE_MAX_ANTIGUEDAD_MS) {
   if (!supabase) return null
   try {
     const { data, error } = await supabase
@@ -62,7 +66,7 @@ export async function fetchPreciosCache(fuente) {
 
     if (error || !data) return null
     const antiguedad = Date.now() - new Date(data.actualizado_en).getTime()
-    if (antiguedad > CACHE_MAX_ANTIGUEDAD_MS) return null
+    if (antiguedad > maxAntiguedadMs) return null
 
     return data.datos
   } catch {

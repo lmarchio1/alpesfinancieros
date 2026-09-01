@@ -2,6 +2,14 @@ import { fetchPreciosCache } from './supabaseClient'
 
 const BASE_URL = 'https://api.bcra.gob.ar/estadisticas/v4.0/monetarias'
 
+// El BCRA publica estos datos una vez por día -a diferencia de los bonos/CCL
+// (30 min de default en fetchPreciosCache), acá no hay ningún problema en
+// aceptar un caché de varias horas: sigue siendo el mismo cierre del día
+// hasta que el BCRA publique el próximo. Con esta ventana más ancha, el
+// caché protege de verdad contra que la API del BCRA falle, en vez de
+// descartarse casi siempre por "vieja" cuando el Action tarda en correr.
+const BCRA_CACHE_MAX_ANTIGUEDAD_MS = 12 * 60 * 60 * 1000 // 12 horas
+
 // Régimen de bandas cambiarias del BCRA: Límite inferior (1187) y superior (1188),
 // ajustan a diario según la inflación (T-2). La serie tiene fechas futuras ya
 // publicadas (por eso acotamos "hasta" a hoy) pero el valor de "hoy" puede no
@@ -73,7 +81,7 @@ function tnaATea(tnaPct, dias = 30) {
 // antes de pegarle directo al BCRA; si no hay caché o está vieja, cae al
 // fetch de siempre.
 export async function fetchBandaCambiaria() {
-  const cache = await fetchPreciosCache('bcra_variables')
+  const cache = await fetchPreciosCache('bcra_variables', BCRA_CACHE_MAX_ANTIGUEDAD_MS)
   if (cache?.banda) return cache.banda
 
   const hoy = fechaArgentinaHoy()
@@ -87,7 +95,7 @@ export async function fetchBandaCambiaria() {
 }
 
 export async function fetchTasaPlazoFijo30Dias() {
-  const cache = await fetchPreciosCache('bcra_variables')
+  const cache = await fetchPreciosCache('bcra_variables', BCRA_CACHE_MAX_ANTIGUEDAD_MS)
   if (cache?.plazoFijo) return cache.plazoFijo
 
   const hoy = fechaArgentinaHoy()
@@ -105,7 +113,7 @@ export async function fetchTasaPlazoFijo30Dias() {
 }
 
 export async function fetchReservasInternacionales() {
-  const cache = await fetchPreciosCache('bcra_variables')
+  const cache = await fetchPreciosCache('bcra_variables', BCRA_CACHE_MAX_ANTIGUEDAD_MS)
   if (cache?.reservas) return cache.reservas
 
   const hoy = fechaArgentinaHoy()
@@ -124,7 +132,7 @@ export async function fetchInflacionMensual() {
 }
 
 export async function fetchBadlar() {
-  const cache = await fetchPreciosCache('bcra_variables')
+  const cache = await fetchPreciosCache('bcra_variables', BCRA_CACHE_MAX_ANTIGUEDAD_MS)
   if (cache?.badlar) return cache.badlar
 
   const hoy = fechaArgentinaHoy()
@@ -145,7 +153,7 @@ export async function fetchBadlar() {
 }
 
 export async function fetchTamar() {
-  const cache = await fetchPreciosCache('bcra_variables')
+  const cache = await fetchPreciosCache('bcra_variables', BCRA_CACHE_MAX_ANTIGUEDAD_MS)
   if (cache?.tamar) return cache.tamar
 
   const hoy = fechaArgentinaHoy()
