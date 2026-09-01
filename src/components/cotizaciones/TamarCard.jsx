@@ -24,7 +24,7 @@ export default function TamarCard() {
   return (
     <Card
       className="group animate-fade-up border-t-4 !border-t-violet-300 p-6 hover:!border-t-violet-500 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-2 hover:scale-[1.015] hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)]"
-      style={{ animationDelay: '300ms' }}
+      style={{ animationDelay: '240ms' }}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
