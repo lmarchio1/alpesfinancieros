@@ -7,7 +7,7 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 // un build sin esas variables de entorno tumbaba TODA la página, no solo la sección que
 // necesita Supabase-. Envuelto en try/catch para que, en el peor caso, se pierdan las
 // comparaciones que dependen de Supabase pero el resto del sitio siga funcionando.
-export const supabase = (() => {
+const supabase = (() => {
   try {
     return createClient(supabaseUrl, supabaseKey)
   } catch (err) {
