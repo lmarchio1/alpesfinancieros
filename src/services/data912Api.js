@@ -8,24 +8,23 @@ async function getJson(path) {
   return res.json()
 }
 
-// El Action que llena esta cache está programado cada 5 min, pero en la práctica
-// GitHub lo viene corriendo cada 2-8hs (no garantiza el horario de un cron, se
-// verificó en vivo) -mientras no se resuelva eso con un disparador externo, el techo
-// de frescura por default de fetchPreciosCache (30 min) casi nunca se cumple y la
-// cache queda inactiva casi siempre-. Se sube acá a 3hs como paliativo temporal:
-// mejor aprovechar un dato de bonos/CCL de hasta 3hs (siguen siendo el mismo
-// universo, no cambia la lista de instrumentos) que pegarle directo a data912.com en
-// cada apertura de pestaña sin ninguna protección si data912 tiene un problema.
-const DATA912_CACHE_MAX_ANTIGUEDAD_MS = 3 * 60 * 60 * 1000 // 3 horas
-
-// Intenta primero la cache de Supabase (ver scripts/cachear-precios.mjs) para no
-// depender de data912.com en cada apertura de pestaña. Si no hay fila, está vieja, o
-// Supabase no responde, cae al fetch directo de siempre -mismo comportamiento que
-// antes de agregar la cache-. Con forzar=true se salta la cache a propósito (botón
-// "Actualizar ahora").
+// Intenta primero la cache de Supabase (actualizada cada 5 min por un GitHub Action,
+// ver scripts/cachear-precios.mjs) para no depender de data912.com en cada apertura de
+// pestaña. Si no hay fila, está vieja, o Supabase no responde, cae al fetch directo de
+// siempre -mismo comportamiento que antes de agregar la cache-. Con forzar=true se
+// salta la cache a propósito (botón "Actualizar ahora").
+//
+// A diferencia del BCRA (bcraApi.js, 12hs de tolerancia porque publica una vez por
+// día), bonos y CCL se mueven en horario de rueda: se probó subir esto a 3hs mientras
+// el Action corre irregular, pero significaba repetir el mismo precio guardado hasta
+// 3hs seguidas -aunque la pestaña siga preguntando cada 60s, le sigue preguntando a
+// la misma fila vieja de Supabase-, o sea que la actualización en vivo dejaba de
+// sentirse en vivo. Se vuelve al default (30 min) para no perder eso; con el Action
+// corriendo irregular, esto simplemente hace que la mayoría de los pedidos caigan al
+// fetch directo de siempre, como ya venía pasando antes de armar la cache.
 async function getConCache(fuente, path, forzar) {
   if (!forzar) {
-    const cacheado = await fetchPreciosCache(fuente, DATA912_CACHE_MAX_ANTIGUEDAD_MS)
+    const cacheado = await fetchPreciosCache(fuente)
     if (cacheado) return cacheado
   }
   return getJson(path)
