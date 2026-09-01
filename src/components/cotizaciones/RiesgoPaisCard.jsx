@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react'
 import Card from '../ui/Card'
 import DayChangeBadge from '../ui/DayChangeBadge'
 import { useCountUp } from '../../hooks/useCountUp'
 import { fetchRiesgoPaisAnterior } from '../../services/rentaFijaApi'
-import { fetchConReintento } from '../../utils/fetchRetry'
+import { usePolling } from '../../hooks/usePolling'
 
 const formatFecha = (fechaIso) => {
   const d = new Date(fechaIso)
@@ -15,12 +14,12 @@ const formatFecha = (fechaIso) => {
 export default function RiesgoPaisCard({ riesgoPais }) {
   const animatedValor = useCountUp(riesgoPais.valor)
 
-  const [anterior, setAnterior] = useState(null)
-  useEffect(() => {
-    fetchConReintento(fetchRiesgoPaisAnterior)
-      .then(setAnterior)
-      .catch(() => setAnterior(null))
-  }, [])
+  // Ver comentario en ReservasCard.jsx: el intervalo corto es para autocorregir
+  // un fallo transitorio, no por necesidad de frescura (el cierre de ayer no cambia).
+  const { data: anterior } = usePolling(fetchRiesgoPaisAnterior, {
+    intervalMs: 5 * 60 * 1000,
+    persistKey: 'riesgo_pais_anterior',
+  })
 
   return (
     <Card

@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
 import Card from '../ui/Card'
 import { fetchDolarEsperadoREM } from '../../services/remApi'
-import { fetchConReintento } from '../../utils/fetchRetry'
+import { usePolling } from '../../hooks/usePolling'
 
 const formatArs = (value) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(value)
@@ -13,12 +12,12 @@ const formatMesCorto = (periodoDesde) => {
 }
 
 export default function DolarEsperadoCard() {
-  const [rem, setRem] = useState(null)
-  useEffect(() => {
-    fetchConReintento(fetchDolarEsperadoREM)
-      .then(setRem)
-      .catch(() => setRem(null))
-  }, [])
+  // Ver comentario en ReservasCard.jsx: el intervalo corto es para autocorregir
+  // un fallo transitorio, no por necesidad de frescura (el REM se publica 1 vez/mes).
+  const { data: rem } = usePolling(fetchDolarEsperadoREM, {
+    intervalMs: 5 * 60 * 1000,
+    persistKey: 'dolar_esperado_rem',
+  })
 
   if (!rem) {
     return (

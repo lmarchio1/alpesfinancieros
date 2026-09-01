@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { usePolling } from '../../hooks/usePolling'
 import { fetchDolares, fetchCierresDolares } from '../../services/dolaresApi'
 import { fetchBandaCambiaria } from '../../services/bcraApi'
-import { fetchConReintento } from '../../utils/fetchRetry'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
 import FlashPrice from '../ui/FlashPrice'
@@ -53,19 +52,17 @@ export default function DolaresTab() {
   const fetcher = useCallback(() => fetchDolares(), [])
   const { data, error, loading, updatedAt, refresh } = usePolling(fetcher, { intervalMs: 60000, persistKey: 'dolares' })
 
-  const [cierres, setCierres] = useState(null)
-  useEffect(() => {
-    fetchConReintento(fetchCierresDolares)
-      .then(setCierres)
-      .catch(() => setCierres(null))
-  }, [])
+  // Ver comentario en ReservasCard.jsx: el intervalo corto es para autocorregir un
+  // fallo transitorio, no por necesidad de frescura (ambos son datos de una vez al día).
+  const { data: cierres } = usePolling(fetchCierresDolares, {
+    intervalMs: 5 * 60 * 1000,
+    persistKey: 'cierres_dolares',
+  })
 
-  const [banda, setBanda] = useState(null)
-  useEffect(() => {
-    fetchConReintento(fetchBandaCambiaria)
-      .then(setBanda)
-      .catch(() => setBanda(null))
-  }, [])
+  const { data: banda } = usePolling(fetchBandaCambiaria, {
+    intervalMs: 5 * 60 * 1000,
+    persistKey: 'banda_cambiaria',
+  })
 
   const mayorista = useMemo(() => data?.find((d) => d.casa === 'mayorista'), [data])
 

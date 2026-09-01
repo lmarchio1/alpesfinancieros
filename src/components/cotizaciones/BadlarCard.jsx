@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
 import Card from '../ui/Card'
 import DayChangeBadge from '../ui/DayChangeBadge'
 import { fetchBadlar } from '../../services/bcraApi'
-import { fetchConReintento } from '../../utils/fetchRetry'
+import { usePolling } from '../../hooks/usePolling'
 
 const formatFecha = (fechaIso) => {
   const d = new Date(fechaIso)
@@ -12,12 +11,12 @@ const formatFecha = (fechaIso) => {
 }
 
 export default function BadlarCard() {
-  const [badlar, setBadlar] = useState(null)
-  useEffect(() => {
-    fetchConReintento(fetchBadlar)
-      .then(setBadlar)
-      .catch(() => setBadlar(null))
-  }, [])
+  // Ver comentario en ReservasCard.jsx: el intervalo corto es para autocorregir
+  // un fallo transitorio, no por necesidad de frescura (el BCRA publica 1 vez/día).
+  const { data: badlar } = usePolling(fetchBadlar, {
+    intervalMs: 5 * 60 * 1000,
+    persistKey: 'badlar_bcra',
+  })
 
   if (!badlar) return null
 

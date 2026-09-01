@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { usePolling } from '../../hooks/usePolling'
 import { fetchExpectativaInflacionREM } from '../../services/remApi'
 import { fetchTasaPlazoFijo30Dias, fetchInflacionMensual } from '../../services/bcraApi'
 import { valorActualizado, factorAcumulado, mesesEnRango, inflacionInteranual } from '../../utils/inflacionMath'
-import { fetchConReintento } from '../../utils/fetchRetry'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
 import DayChangeBadge from '../ui/DayChangeBadge'
@@ -74,19 +73,18 @@ export default function InflacionTab() {
     return (factor - 1) * 100
   }, [data])
 
-  const [rem, setRem] = useState(null)
-  useEffect(() => {
-    fetchConReintento(fetchExpectativaInflacionREM)
-      .then(setRem)
-      .catch(() => setRem(null))
-  }, [])
+  // Ver comentario en ReservasCard.jsx: el intervalo corto es para autocorregir un
+  // fallo transitorio, no por necesidad de frescura (ninguno de los dos cambia
+  // seguido: el REM es mensual, el plazo fijo lo publica el BCRA 1 vez/día).
+  const { data: rem } = usePolling(fetchExpectativaInflacionREM, {
+    intervalMs: 5 * 60 * 1000,
+    persistKey: 'expectativa_inflacion_rem',
+  })
 
-  const [plazoFijo, setPlazoFijo] = useState(null)
-  useEffect(() => {
-    fetchConReintento(fetchTasaPlazoFijo30Dias)
-      .then(setPlazoFijo)
-      .catch(() => setPlazoFijo(null))
-  }, [])
+  const { data: plazoFijo } = usePolling(fetchTasaPlazoFijo30Dias, {
+    intervalMs: 5 * 60 * 1000,
+    persistKey: 'plazo_fijo_30d',
+  })
 
   // Si ya se cargó bien una vez, un error transitorio en una actualización en
   // segundo plano no debe hacer desaparecer el contenido.

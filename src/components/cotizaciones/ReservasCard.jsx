@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
 import Card from '../ui/Card'
 import DayChangeBadge from '../ui/DayChangeBadge'
 import { fetchReservasInternacionales } from '../../services/bcraApi'
-import { fetchConReintento } from '../../utils/fetchRetry'
+import { usePolling } from '../../hooks/usePolling'
 
 const formatMillones = (valor) => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 }).format(valor)
 
@@ -14,12 +13,14 @@ const formatFecha = (fechaIso) => {
 }
 
 export default function ReservasCard() {
-  const [reservas, setReservas] = useState(null)
-  useEffect(() => {
-    fetchConReintento(fetchReservasInternacionales)
-      .then(setReservas)
-      .catch(() => setReservas(null))
-  }, [])
+  // intervalMs corto (5 min) no es para "frescura" -el BCRA publica una vez por
+  // día- sino para que un fallo transitorio (conexión inestable, hiccup de
+  // Supabase/BCRA) se autocorrija solo en la siguiente rueda, en vez de dejar la
+  // tarjeta en blanco hasta que alguien recargue la página a mano.
+  const { data: reservas } = usePolling(fetchReservasInternacionales, {
+    intervalMs: 5 * 60 * 1000,
+    persistKey: 'reservas_bcra',
+  })
 
   if (!reservas) return null
 

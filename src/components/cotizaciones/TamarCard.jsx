@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
 import Card from '../ui/Card'
 import DayChangeBadge from '../ui/DayChangeBadge'
 import { fetchTamar } from '../../services/bcraApi'
-import { fetchConReintento } from '../../utils/fetchRetry'
+import { usePolling } from '../../hooks/usePolling'
 
 const formatFecha = (fechaIso) => {
   const d = new Date(fechaIso)
@@ -12,12 +11,12 @@ const formatFecha = (fechaIso) => {
 }
 
 export default function TamarCard() {
-  const [tamar, setTamar] = useState(null)
-  useEffect(() => {
-    fetchConReintento(fetchTamar)
-      .then(setTamar)
-      .catch(() => setTamar(null))
-  }, [])
+  // Ver comentario en ReservasCard.jsx: el intervalo corto es para autocorregir
+  // un fallo transitorio, no por necesidad de frescura (el BCRA publica 1 vez/día).
+  const { data: tamar } = usePolling(fetchTamar, {
+    intervalMs: 5 * 60 * 1000,
+    persistKey: 'tamar_bcra',
+  })
 
   if (!tamar) return null
 
