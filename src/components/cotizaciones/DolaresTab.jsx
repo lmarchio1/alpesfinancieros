@@ -119,7 +119,10 @@ export default function DolaresTab() {
       </div>
 
       {banda && (
-        <Card className="group mb-4 overflow-hidden !border-white/10 !bg-[#0F2942] p-5 !shadow-[0_10px_25px_-5px_rgba(0,0,0,0.35)]">
+        <Card
+          className="group mb-4 animate-fade-up overflow-hidden !border-white/10 !bg-[#0F2942] p-5 !shadow-[0_10px_25px_-5px_rgba(0,0,0,0.35)]"
+          style={{ animationDelay: '0ms' }}
+        >
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-brand-600 transition-transform duration-300 ease-out group-hover:scale-110">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
