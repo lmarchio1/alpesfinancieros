@@ -1,3 +1,5 @@
+import { fetchPreciosCache } from './supabaseClient'
+
 const BASE_URL = 'https://api.bcra.gob.ar/estadisticas/v4.0/monetarias'
 
 // Régimen de bandas cambiarias del BCRA: Límite inferior (1187) y superior (1188),
@@ -61,7 +63,19 @@ function tnaATea(tnaPct, dias = 30) {
   return (Math.pow(1 + tnaPct / 100 / n, n) - 1) * 100
 }
 
+// Reservas/BADLAR/TAMAR/Plazo fijo/Banda cambiaria son datos que el BCRA
+// publica una vez por día, y su API pública es conocida por fallar/tardar de
+// forma intermitente -cada tarjeta reintenta 2 veces y si sigue sin
+// responder, desaparece en silencio en vez de mostrar un error, así que un
+// visitante podía ver la tarjeta faltante según el momento justo en que
+// entraba, mientras otro no-. Igual que con data912, se intenta primero el
+// caché de Supabase (actualizado cada 5 min por scripts/cachear-precios.mjs)
+// antes de pegarle directo al BCRA; si no hay caché o está vieja, cae al
+// fetch de siempre.
 export async function fetchBandaCambiaria() {
+  const cache = await fetchPreciosCache('bcra_variables')
+  if (cache?.banda) return cache.banda
+
   const hoy = fechaArgentinaHoy()
   const desde = haceNDias(hoy, 7)
   const [piso, techo] = await Promise.all([
@@ -73,6 +87,9 @@ export async function fetchBandaCambiaria() {
 }
 
 export async function fetchTasaPlazoFijo30Dias() {
+  const cache = await fetchPreciosCache('bcra_variables')
+  if (cache?.plazoFijo) return cache.plazoFijo
+
   const hoy = fechaArgentinaHoy()
   const desde = haceNDias(hoy, 10)
   const serie = await fetchSerie(ID_PLAZO_FIJO_30D, desde, hoy)
@@ -88,6 +105,9 @@ export async function fetchTasaPlazoFijo30Dias() {
 }
 
 export async function fetchReservasInternacionales() {
+  const cache = await fetchPreciosCache('bcra_variables')
+  if (cache?.reservas) return cache.reservas
+
   const hoy = fechaArgentinaHoy()
   const desde = haceNDias(hoy, 10)
   const serie = await fetchSerie(ID_RESERVAS, desde, hoy)
@@ -104,6 +124,9 @@ export async function fetchInflacionMensual() {
 }
 
 export async function fetchBadlar() {
+  const cache = await fetchPreciosCache('bcra_variables')
+  if (cache?.badlar) return cache.badlar
+
   const hoy = fechaArgentinaHoy()
   const desde = haceNDias(hoy, 10)
   const [serie, teaSerie] = await Promise.all([
@@ -122,6 +145,9 @@ export async function fetchBadlar() {
 }
 
 export async function fetchTamar() {
+  const cache = await fetchPreciosCache('bcra_variables')
+  if (cache?.tamar) return cache.tamar
+
   const hoy = fechaArgentinaHoy()
   const desde = haceNDias(hoy, 10)
   const [serie, teaSerie] = await Promise.all([
