@@ -3,13 +3,7 @@ import { createPortal } from 'react-dom'
 import { usePolling } from '../../hooks/usePolling'
 import { fetchExpectativaInflacionREM } from '../../services/remApi'
 import { fetchTasaPlazoFijo30Dias, fetchInflacionMensual } from '../../services/bcraApi'
-import {
-  valorActualizado,
-  factorAcumulado,
-  mesesEnRango,
-  inflacionInteranual,
-  serieInteranual,
-} from '../../utils/inflacionMath'
+import { valorActualizado, factorAcumulado, mesesEnRango, inflacionInteranual } from '../../utils/inflacionMath'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
 import DayChangeBadge from '../ui/DayChangeBadge'
@@ -33,9 +27,9 @@ const ALTO_PLOT_G = ALTO_G - MARGEN_G.top - MARGEN_G.bottom
 const CANT_TICKS_Y_G = 6
 
 const RANGOS_INFLACION = [
-  { id: '3a', label: '3 años', anios: 3 },
-  { id: '5a', label: '5 años', anios: 5 },
-  { id: 'todo', label: 'Todo (desde 2015)', anios: Infinity },
+  { id: '1a', label: '1 año', anios: 1 },
+  { id: '2a', label: '2 años', anios: 2 },
+  { id: '4a', label: '4 años', anios: 4 },
 ]
 
 // Mismo criterio de escalones "lindos" que ReservasCard.jsx -se duplica en vez de
@@ -82,6 +76,8 @@ function calcularTicksXG(serie, pasoMeses) {
 // la serie ya calculada en memoria (no pide nada al BCRA: la serie mensual del IPC
 // ya está cargada por el polling principal de esta pestaña).
 function GraficoInteranual({ serieCompleta, rangoId }) {
+  const [hoverIndex, setHoverIndex] = useState(null)
+
   const serie = useMemo(() => {
     const anios = RANGOS_INFLACION.find((r) => r.id === rangoId).anios
     if (anios === Infinity) return serieCompleta
@@ -115,7 +111,7 @@ function GraficoInteranual({ serieCompleta, rangoId }) {
   const [xMin, yMin] = puntoXY(serie[iMin], iMin)
   const [xMax, yMax] = puntoXY(serie[iMax], iMax)
 
-  const pasoMeses = rangoId === '3a' ? 3 : rangoId === '5a' ? 6 : 12
+  const pasoMeses = rangoId === '1a' ? 2 : rangoId === '2a' ? 3 : 6
   const ticksX = calcularTicksXG(serie, pasoMeses)
 
   return (
@@ -127,7 +123,7 @@ function GraficoInteranual({ serieCompleta, rangoId }) {
             <g key={v}>
               <line x1={MARGEN_G.left} x2={ANCHO_G - MARGEN_G.right} y1={y} y2={y} stroke="#e2e8f0" strokeWidth="1" />
               <text x={MARGEN_G.left - 8} y={y} textAnchor="end" dominantBaseline="middle" className="fill-slate-400 text-[10px]">
-                {v.toFixed(0)}%
+                {v.toFixed(1)}%
               </text>
             </g>
           )
@@ -140,7 +136,7 @@ function GraficoInteranual({ serieCompleta, rangoId }) {
           transform={`rotate(-90, 14, ${MARGEN_G.top + ALTO_PLOT_G / 2})`}
           className="fill-slate-500 text-[10px] font-semibold uppercase tracking-wide"
         >
-          Inflación interanual
+          Inflación mensual
         </text>
 
         {ticksX.map((i) => {
@@ -153,8 +149,54 @@ function GraficoInteranual({ serieCompleta, rangoId }) {
         })}
 
         <polyline points={puntos} fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+
+        {/* Puntitos en cada mes: el círculo visible es chico, pero el área que
+            realmente responde al mouse/toque es más grande (invisible) para que sea
+            fácil de acertar, sobre todo en el celular. */}
+        {serie.map((d, i) => {
+          const [x, y] = puntoXY(d, i)
+          const espacioPunto = serie.length > 1 ? ANCHO_PLOT_G / (serie.length - 1) : ANCHO_PLOT_G
+          return (
+            <g key={d.fecha}>
+              <circle cx={x} cy={y} r={hoverIndex === i ? 4 : 2.5} fill="#7c3aed" className="transition-all" />
+              <circle
+                cx={x}
+                cy={y}
+                r={Math.max(8, espacioPunto / 2)}
+                fill="transparent"
+                onMouseEnter={() => setHoverIndex(i)}
+                onMouseLeave={() => setHoverIndex(null)}
+                onClick={() => setHoverIndex(i)}
+                className="cursor-pointer"
+              />
+            </g>
+          )
+        })}
+
         <circle cx={xMin} cy={yMin} r="4" fill="#059669" />
         <circle cx={xMax} cy={yMax} r="4" fill="#e11d48" />
+
+        {hoverIndex !== null && serie[hoverIndex] && (
+          (() => {
+            const d = serie[hoverIndex]
+            const [x, y] = puntoXY(d, hoverIndex)
+            const anchoCaja = 84
+            const xCaja = Math.min(Math.max(x - anchoCaja / 2, MARGEN_G.left), ANCHO_G - MARGEN_G.right - anchoCaja)
+            const arribaOk = y - 34 > MARGEN_G.top
+            const yCaja = arribaOk ? y - 34 : y + 12
+            return (
+              <g pointerEvents="none">
+                <rect x={xCaja} y={yCaja} width={anchoCaja} height={26} rx="5" fill="#1e293b" />
+                <text x={xCaja + anchoCaja / 2} y={yCaja + 10} textAnchor="middle" className="fill-white text-[9px] font-semibold">
+                  {formatMesAnio(d.fecha)}
+                </text>
+                <text x={xCaja + anchoCaja / 2} y={yCaja + 20} textAnchor="middle" className="fill-white text-[10px] font-bold">
+                  {d.valor.toFixed(1)}%
+                </text>
+              </g>
+            )
+          })()
+        )}
       </svg>
       <div className="mt-3 flex flex-wrap gap-4 text-xs">
         <span className="flex items-center gap-1.5">
@@ -173,7 +215,7 @@ function GraficoInteranual({ serieCompleta, rangoId }) {
 }
 
 function ModalInteranual({ onClose, serieCompleta }) {
-  const [rangoId, setRangoId] = useState('5a')
+  const [rangoId, setRangoId] = useState('2a')
 
   useEffect(() => {
     const onKeyDown = (e) => e.key === 'Escape' && onClose()
@@ -188,8 +230,8 @@ function ModalInteranual({ onClose, serieCompleta }) {
       <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="font-semibold text-slate-900">Inflación interanual histórica</p>
-            <p className="text-xs text-slate-500">Variación del IPC en los 12 meses previos a cada mes</p>
+            <p className="font-semibold text-slate-900">Inflación mensual histórica</p>
+            <p className="text-xs text-slate-500">Variación mensual del IPC (INDEC)</p>
           </div>
           <button
             type="button"
@@ -284,10 +326,9 @@ export default function InflacionTab() {
 
   const interanual = useMemo(() => (data ? inflacionInteranual(data) : null), [data])
 
-  // Serie completa de interanual mes a mes, para el gráfico de tendencia. No pide
-  // nada nuevo al BCRA: la serie mensual del IPC (`data`) ya está cargada por el
-  // polling principal de esta pestaña, esto es puro cálculo en el navegador.
-  const serieInteranualCompleta = useMemo(() => (data ? serieInteranual(data) : null), [data])
+  // `data` ya es la serie mensual del IPC -no hace falta pedir nada nuevo al BCRA
+  // ni calcular nada: es el mismo dato que ya carga el polling principal de esta
+  // pestaña, se lo pasa directo al gráfico-.
   const [modalInteranualAbierto, setModalInteranualAbierto] = useState(false)
 
   // Acumulada de enero a hoy, para mostrar al lado de la interanual -mismo motor que
@@ -360,11 +401,11 @@ export default function InflacionTab() {
                   </svg>
                 </div>
                 <p className="font-semibold text-slate-900">Inflación Interanual</p>
-                {serieInteranualCompleta && serieInteranualCompleta.length >= 2 && (
+                {data && data.length >= 2 && (
                   <button
                     type="button"
                     onClick={() => setModalInteranualAbierto(true)}
-                    aria-label="Ver tendencia histórica de la inflación interanual"
+                    aria-label="Ver tendencia histórica de la inflación mensual"
                     className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-colors hover:bg-brand-50 hover:text-brand-600"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
@@ -582,7 +623,7 @@ export default function InflacionTab() {
       </div>
 
       {modalInteranualAbierto && (
-        <ModalInteranual onClose={() => setModalInteranualAbierto(false)} serieCompleta={serieInteranualCompleta} />
+        <ModalInteranual onClose={() => setModalInteranualAbierto(false)} serieCompleta={data} />
       )}
     </div>
   )

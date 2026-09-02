@@ -26,34 +26,12 @@ const formatMesAnio = (fechaIso) => {
   return `${MESES_CORTOS[d.getUTCMonth()]}-${String(d.getUTCFullYear()).slice(2)}`
 }
 
-// Etiquetas del eje X, con una estrategia distinta según el rango -igual que hace
-// cualquier gráfico de fechas "de verdad" (Excel incluido): a 30 días tiene sentido
-// mostrar el día del mes con el mes aclarado abajo cuando cambia; a 12 meses o más,
-// directamente mes-año, salteando meses para no amontonar etiquetas.
-//
-// Para 30 días se toman ~7 muestras espaciadas parejo dentro de la serie disponible
-// (el BCRA no publica fines de semana/feriados, así que "cada 5 días" en el
-// calendario no siempre cae en un dato real -se prioriza tener el tick en un punto
-// que sí existe-). Para 12 meses/2 años/4 años, en cambio, los ticks se anclan al
-// primer dato disponible de cada mes calendario (salteando de a 2 o 6 meses), así
-// las etiquetas caen en meses "redondos" de verdad (ene, jul, ene...) y no en
-// fechas arbitrarias.
+// Etiquetas del eje X, ancladas al primer dato disponible de cada mes calendario
+// (salteando de a N meses según el rango elegido), así las etiquetas caen en meses
+// "redondos" de verdad (ene, jul, ene...) y no en fechas arbitrarias -mismo criterio
+// que usa cualquier gráfico de fechas "de verdad", Excel incluido-.
 function calcularTicksX(serie, rangoId) {
-  if (rangoId === '30d') {
-    const cantidad = Math.min(7, serie.length)
-    const indices = [...new Set(Array.from({ length: cantidad }, (_, i) => Math.round((i / (cantidad - 1)) * (serie.length - 1))))]
-    return indices.map((i, idx) => {
-      const d = new Date(serie[i].fecha)
-      const mesAnterior = idx > 0 ? new Date(serie[indices[idx - 1]].fecha).getUTCMonth() : null
-      return {
-        i,
-        dia: String(d.getUTCDate()),
-        mes: idx === 0 || d.getUTCMonth() !== mesAnterior ? MESES_CORTOS[d.getUTCMonth()] : null,
-      }
-    })
-  }
-
-  const pasoMeses = rangoId === '12m' ? 2 : 6
+  const pasoMeses = rangoId === '6m' ? 1 : rangoId === '12m' ? 2 : 6
   const primera = new Date(serie[0].fecha)
   const ultima = serie[serie.length - 1].fecha
   const resultado = []
@@ -66,10 +44,16 @@ function calcularTicksX(serie, rangoId) {
     cursor = new Date(Date.UTC(cursor.getUTCFullYear(), cursor.getUTCMonth() + pasoMeses, 1))
   }
   // El último punto de la serie siempre se muestra, aunque no caiga justo en un
-  // "mes redondo" -así el gráfico nunca corta sin aclarar hasta cuándo llega-.
+  // "mes redondo" -así el gráfico nunca corta sin aclarar hasta cuándo llega-. Si el
+  // último tick "redondo" ya cae en el mismo mes que el último punto real, se
+  // reemplaza en vez de agregar uno nuevo -si no, con pasoMeses=1 quedaban dos
+  // etiquetas casi pegadas mostrando el mismo mes (ej. "ago-26" dos veces)-.
   const ultimoIndice = serie.length - 1
-  if (resultado[resultado.length - 1]?.i !== ultimoIndice) {
-    resultado.push({ i: ultimoIndice, label: formatMesAnio(serie[ultimoIndice].fecha) })
+  const ultimoLabel = formatMesAnio(serie[ultimoIndice].fecha)
+  if (resultado[resultado.length - 1]?.label === ultimoLabel) {
+    resultado[resultado.length - 1] = { i: ultimoIndice, label: ultimoLabel }
+  } else {
+    resultado.push({ i: ultimoIndice, label: ultimoLabel })
   }
   return resultado
 }
@@ -87,8 +71,8 @@ const ALTO_PLOT = ALTO - MARGEN.top - MARGEN.bottom
 const CANT_TICKS_Y_OBJETIVO = 6
 
 const RANGOS = [
-  { id: '30d', label: '30 días', dias: 30 },
-  { id: '12m', label: '12 meses', dias: 365 },
+  { id: '6m', label: '6 meses', dias: 182 },
+  { id: '12m', label: '1 año', dias: 365 },
   { id: '2a', label: '2 años', dias: 730 },
   { id: '4a', label: '4 años', dias: 1460 },
 ]
@@ -187,37 +171,15 @@ function GraficoTendencia({ serieCompleta, rangoId }) {
           Miles de millones de USD
         </text>
 
-        {/* Etiquetas del eje X: a 30 días, día del mes arriba y mes abajo (solo
-            cuando cambia); a 12 meses o más, directamente mes-año. */}
-        {rangoId === '30d'
-          ? ticksX.map((t) => {
-              const [x] = puntoXY(serie[t.i], t.i)
-              return (
-                <g key={t.i}>
-                  <text x={x} y={ALTO - MARGEN.bottom + 16} textAnchor="middle" className="fill-slate-500 text-[10px]">
-                    {t.dia}
-                  </text>
-                  {t.mes && (
-                    <text
-                      x={x}
-                      y={ALTO - MARGEN.bottom + 30}
-                      textAnchor="middle"
-                      className="fill-slate-400 text-[9px] font-semibold uppercase tracking-wide"
-                    >
-                      {t.mes}
-                    </text>
-                  )}
-                </g>
-              )
-            })
-          : ticksX.map((t) => {
-              const [x] = puntoXY(serie[t.i], t.i)
-              return (
-                <text key={t.i} x={x} y={ALTO - MARGEN.bottom + 18} textAnchor="middle" className="fill-slate-400 text-[10px]">
-                  {t.label}
-                </text>
-              )
-            })}
+        {/* Etiquetas del eje X: mes-año, ancladas al primer dato de cada mes. */}
+        {ticksX.map((t) => {
+          const [x] = puntoXY(serie[t.i], t.i)
+          return (
+            <text key={t.i} x={x} y={ALTO - MARGEN.bottom + 18} textAnchor="middle" className="fill-slate-400 text-[10px]">
+              {t.label}
+            </text>
+          )
+        })}
 
         <polyline
           points={puntos}
