@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import Card from '../ui/Card'
 import DayChangeBadge from '../ui/DayChangeBadge'
@@ -20,63 +20,126 @@ const formatFechaCorta = (fechaIso) => {
   return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`
 }
 
-const ANCHO = 640
-const ALTO = 280
-const MARGEN = { top: 12, right: 16, bottom: 34, left: 68 }
-const ANCHO_PLOT = ANCHO - MARGEN.left - MARGEN.right
-const ALTO_PLOT = ALTO - MARGEN.top - MARGEN.bottom
-const CANT_TICKS_Y = 4
-const CANT_TICKS_X = 6
-
 const formatFechaEje = (fechaIso) => {
   const d = new Date(fechaIso)
   return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${String(d.getUTCFullYear()).slice(2)}`
 }
 
+// Mil millones de USD (lo que en inglés es "billion"), con 1 decimal y coma
+// decimal -formato profesional tipo Excel, no el número crudo con separador de miles-.
+const formatMilesDeMillones = (valorEnMillones) =>
+  (valorEnMillones / 1000).toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+
+const ANCHO = 640
+const ALTO = 300
+const MARGEN = { top: 12, right: 16, bottom: 34, left: 78 }
+const ANCHO_PLOT = ANCHO - MARGEN.left - MARGEN.right
+const ALTO_PLOT = ALTO - MARGEN.top - MARGEN.bottom
+const CANT_TICKS_X = 6
+const CANT_TICKS_Y_OBJETIVO = 6
+
+const RANGOS = [
+  { id: '30d', label: '30 días', dias: 30 },
+  { id: '12m', label: '12 meses', dias: 365 },
+  { id: '2a', label: '2 años', dias: 730 },
+  { id: '4a', label: '4 años', dias: 1460 },
+]
+
+// Escalones "lindos" para el eje Y (1, 2, 2.5, 5 o 10 × una potencia de 10), el mismo
+// criterio que usa Excel/cualquier librería de gráficos profesional para no mostrar
+// números arbitrarios como resultado de dividir el rango a lo bruto.
+function pasoLindo(rango, ticksObjetivo) {
+  const pasoCrudo = rango / ticksObjetivo
+  const magnitud = Math.pow(10, Math.floor(Math.log10(pasoCrudo)))
+  const residual = pasoCrudo / magnitud
+  if (residual > 5) return 10 * magnitud
+  if (residual > 2) return 5 * magnitud
+  if (residual > 1) return 2 * magnitud
+  return magnitud
+}
+
+function calcularTicksY(min, max) {
+  const paso = pasoLindo(max - min || 1, CANT_TICKS_Y_OBJETIVO)
+  const inicio = Math.floor(min / paso) * paso
+  const fin = Math.ceil(max / paso) * paso
+  const ticks = []
+  for (let v = inicio; v <= fin + paso * 0.001; v += paso) ticks.push(v)
+  return ticks
+}
+
 // Gráfico de tendencia a mano con SVG (sin librería de gráficos, igual que el resto
-// de los íconos del sitio): eje Y (millones de USD) con grilla horizontal, eje X
-// (fechas) con marcas espaciadas parejo. Funciona igual de bien con 30 puntos que
-// con 480 (2 años) -el eje X solo toma ~6 muestras de la serie para las etiquetas,
-// no depende de cuántos puntos tenga la línea-.
-function GraficoTendencia({ serie }) {
-  if (!serie || serie.length < 2) return null
+// de los íconos del sitio): eje Y en miles de millones de USD, con escalones parejos
+// y grilla horizontal (estilo profesional/Excel); eje X con fechas espaciadas parejo.
+// Recibe la serie completa (hasta 4 años, un solo pedido) y el rango elegido -el
+// recorte es puramente en el navegador, cambiar de rango no dispara ningún pedido
+// nuevo-.
+function GraficoTendencia({ serieCompleta, rangoId }) {
+  const serie = useMemo(() => {
+    const dias = RANGOS.find((r) => r.id === rangoId).dias
+    const corte = new Date()
+    corte.setUTCDate(corte.getUTCDate() - dias)
+    const corteIso = corte.toISOString().slice(0, 10)
+    return serieCompleta.filter((d) => d.fecha >= corteIso)
+  }, [serieCompleta, rangoId])
+
+  if (serie.length < 2) {
+    return <p className="text-sm text-slate-500">No hay suficientes publicaciones del BCRA en este rango.</p>
+  }
 
   const valores = serie.map((d) => d.valor)
-  const min = Math.min(...valores)
-  const max = Math.max(...valores)
-  const rango = max - min || 1
-  const iMin = valores.indexOf(min)
-  const iMax = valores.indexOf(max)
+  const minValor = Math.min(...valores)
+  const maxValor = Math.max(...valores)
+  const iMin = valores.indexOf(minValor)
+  const iMax = valores.indexOf(maxValor)
+
+  // Los ticks se calculan en miles de millones (dividiendo por 1000) para que salgan
+  // escalones lindos en esa unidad -en millones crudos, un "escalón lindo" quedaría
+  // en múltiplos de 1000/2000/5000, que es exactamente lo mismo pero más difícil de
+  // leer que "25,0 / 30,0 / 35,0"-.
+  const ticksY = calcularTicksY(minValor / 1000, maxValor / 1000)
+  const dominioMin = ticksY[0]
+  const dominioMax = ticksY[ticksY.length - 1]
+  const dominioRango = dominioMax - dominioMin || 1
 
   const puntoXY = (d, i) => {
     const x = MARGEN.left + (i / (serie.length - 1)) * ANCHO_PLOT
-    const y = MARGEN.top + ALTO_PLOT - ((d.valor - min) / rango) * ALTO_PLOT
+    const y = MARGEN.top + ALTO_PLOT - (d.valor / 1000 - dominioMin) / dominioRango * ALTO_PLOT
     return [x, y]
   }
   const puntos = serie.map((d, i) => puntoXY(d, i).map((n) => n.toFixed(1)).join(',')).join(' ')
   const [xMin, yMin] = puntoXY(serie[iMin], iMin)
   const [xMax, yMax] = puntoXY(serie[iMax], iMax)
 
-  const ticksY = Array.from({ length: CANT_TICKS_Y + 1 }, (_, i) => min + (rango * i) / CANT_TICKS_Y)
   const indicesX = Array.from({ length: CANT_TICKS_X }, (_, i) =>
     Math.round((i / (CANT_TICKS_X - 1)) * (serie.length - 1))
   )
 
   return (
     <div>
-      <svg viewBox={`0 0 ${ANCHO} ${ALTO}`} className="h-64 w-full" preserveAspectRatio="none">
+      <svg viewBox={`0 0 ${ANCHO} ${ALTO}`} className="h-64 w-full sm:h-72" preserveAspectRatio="none">
         {/* Grilla y etiquetas del eje Y */}
         {ticksY.map((v) => {
-          const y = MARGEN.top + ALTO_PLOT - ((v - min) / rango) * ALTO_PLOT
+          const y = MARGEN.top + ALTO_PLOT - ((v - dominioMin) / dominioRango) * ALTO_PLOT
           return (
             <g key={v}>
               <line x1={MARGEN.left} x2={ANCHO - MARGEN.right} y1={y} y2={y} stroke="#e2e8f0" strokeWidth="1" />
-              <text x={MARGEN.left - 8} y={y} textAnchor="end" dominantBaseline="middle" className="fill-slate-400 text-[10px]">
-                {formatMillones(v)}
+              <text x={MARGEN.left - 12} y={y} textAnchor="end" dominantBaseline="middle" className="fill-slate-400 text-[10px]">
+                {v.toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
               </text>
             </g>
           )
         })}
+
+        {/* Título vertical del eje Y, rotado -90°, estilo Excel */}
+        <text
+          x={16}
+          y={MARGEN.top + ALTO_PLOT / 2}
+          textAnchor="middle"
+          transform={`rotate(-90, 16, ${MARGEN.top + ALTO_PLOT / 2})`}
+          className="fill-slate-500 text-[10px] font-semibold uppercase tracking-wide"
+        >
+          Miles de millones de USD
+        </text>
 
         {/* Etiquetas del eje X */}
         {indicesX.map((i) => {
@@ -105,18 +168,15 @@ function GraficoTendencia({ serie }) {
         <circle cx={xMin} cy={yMin} r="4" fill="#e11d48" />
         <circle cx={xMax} cy={yMax} r="4" fill="#059669" />
       </svg>
-      <p className="mt-1 text-center text-[10px] uppercase tracking-wide text-slate-400">
-        Millones de USD (eje Y) · Fecha (eje X)
-      </p>
       <div className="mt-3 flex flex-wrap gap-4 text-xs">
         <span className="flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-rose-600" />
-          Mínimo: <strong className="text-slate-900">USD {formatMillones(min)} M</strong>
+          Mínimo: <strong className="text-slate-900">USD {formatMilesDeMillones(minValor)} mil M</strong>
           <span className="text-slate-400">({formatFechaCorta(serie[iMin].fecha)})</span>
         </span>
         <span className="flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-emerald-600" />
-          Máximo: <strong className="text-slate-900">USD {formatMillones(max)} M</strong>
+          Máximo: <strong className="text-slate-900">USD {formatMilesDeMillones(maxValor)} mil M</strong>
           <span className="text-slate-400">({formatFechaCorta(serie[iMax].fecha)})</span>
         </span>
       </div>
@@ -124,7 +184,9 @@ function GraficoTendencia({ serie }) {
   )
 }
 
-function ModalTendencia({ onClose, serie, cargando }) {
+function ModalTendencia({ onClose, serieCompleta, cargando }) {
+  const [rangoId, setRangoId] = useState('2a')
+
   useEffect(() => {
     const onKeyDown = (e) => e.key === 'Escape' && onClose()
     document.addEventListener('keydown', onKeyDown)
@@ -148,7 +210,7 @@ function ModalTendencia({ onClose, serie, cargando }) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="font-semibold text-slate-900">Reservas Internacionales (BCRA)</p>
-            <p className="text-xs text-slate-500">Últimos 2 años, valores al cierre de cada publicación</p>
+            <p className="text-xs text-slate-500">Valores al cierre de cada publicación</p>
           </div>
           <button
             type="button"
@@ -162,10 +224,26 @@ function ModalTendencia({ onClose, serie, cargando }) {
           </button>
         </div>
 
-        <div className="mt-5">
-          {cargando && <div className="h-56 animate-pulse rounded bg-slate-100" />}
-          {!cargando && serie && <GraficoTendencia serie={serie} />}
-          {!cargando && !serie && (
+        {/* Selector de rango: recorta la misma serie ya traída, no dispara pedidos nuevos. */}
+        <div className="mt-4 inline-flex rounded-lg bg-slate-100 p-1 text-xs">
+          {RANGOS.map((r) => (
+            <button
+              key={r.id}
+              type="button"
+              onClick={() => setRangoId(r.id)}
+              className={`rounded-md px-3 py-1.5 font-medium transition-colors ${
+                rangoId === r.id ? 'bg-white text-[#a35f24] shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-4">
+          {cargando && <div className="h-64 animate-pulse rounded bg-slate-100 sm:h-72" />}
+          {!cargando && serieCompleta && <GraficoTendencia serieCompleta={serieCompleta} rangoId={rangoId} />}
+          {!cargando && !serieCompleta && (
             <p className="text-sm text-rose-500">No se pudo cargar la tendencia, probá de nuevo en un momento.</p>
           )}
         </div>
@@ -189,11 +267,14 @@ export default function ReservasCard() {
   const [serie, setSerie] = useState(null)
   const [cargandoSerie, setCargandoSerie] = useState(false)
 
+  // Se pide una sola vez, al máximo rango (4 años) -no en la carga inicial de la
+  // página, recién cuando se abre la tendencia-. Los botones de 30 días/12 meses/2
+  // años solo recortan esta misma serie en el navegador, sin volver a pedir nada.
   const abrirTendencia = () => {
     setModalAbierto(true)
     if (!serie) {
       setCargandoSerie(true)
-      fetchConReintento(fetchReservasSerie)
+      fetchConReintento(() => fetchReservasSerie(1460))
         .then(setSerie)
         .catch(() => setSerie(null))
         .finally(() => setCargandoSerie(false))
@@ -219,7 +300,7 @@ export default function ReservasCard() {
           <button
             type="button"
             onClick={abrirTendencia}
-            aria-label="Ver tendencia de los últimos 2 años"
+            aria-label="Ver tendencia histórica"
             className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-colors hover:bg-[#fdf6e3] hover:text-[#dba61f]"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
@@ -239,7 +320,7 @@ export default function ReservasCard() {
       <p className="mt-1 text-xs text-slate-500">Reservas Internacionales del BCRA expresada en millones de USD.</p>
 
       {modalAbierto && (
-        <ModalTendencia onClose={() => setModalAbierto(false)} serie={serie} cargando={cargandoSerie} />
+        <ModalTendencia onClose={() => setModalAbierto(false)} serieCompleta={serie} cargando={cargandoSerie} />
       )}
     </Card>
   )
