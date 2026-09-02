@@ -20,9 +20,58 @@ const formatFechaCorta = (fechaIso) => {
   return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`
 }
 
-const formatFechaEje = (fechaIso) => {
+const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+const formatMesAnio = (fechaIso) => {
   const d = new Date(fechaIso)
-  return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${String(d.getUTCFullYear()).slice(2)}`
+  return `${MESES_CORTOS[d.getUTCMonth()]}-${String(d.getUTCFullYear()).slice(2)}`
+}
+
+// Etiquetas del eje X, con una estrategia distinta según el rango -igual que hace
+// cualquier gráfico de fechas "de verdad" (Excel incluido): a 30 días tiene sentido
+// mostrar el día del mes con el mes aclarado abajo cuando cambia; a 12 meses o más,
+// directamente mes-año, salteando meses para no amontonar etiquetas.
+//
+// Para 30 días se toman ~7 muestras espaciadas parejo dentro de la serie disponible
+// (el BCRA no publica fines de semana/feriados, así que "cada 5 días" en el
+// calendario no siempre cae en un dato real -se prioriza tener el tick en un punto
+// que sí existe-). Para 12 meses/2 años/4 años, en cambio, los ticks se anclan al
+// primer dato disponible de cada mes calendario (salteando de a 2 o 6 meses), así
+// las etiquetas caen en meses "redondos" de verdad (ene, jul, ene...) y no en
+// fechas arbitrarias.
+function calcularTicksX(serie, rangoId) {
+  if (rangoId === '30d') {
+    const cantidad = Math.min(7, serie.length)
+    const indices = [...new Set(Array.from({ length: cantidad }, (_, i) => Math.round((i / (cantidad - 1)) * (serie.length - 1))))]
+    return indices.map((i, idx) => {
+      const d = new Date(serie[i].fecha)
+      const mesAnterior = idx > 0 ? new Date(serie[indices[idx - 1]].fecha).getUTCMonth() : null
+      return {
+        i,
+        dia: String(d.getUTCDate()),
+        mes: idx === 0 || d.getUTCMonth() !== mesAnterior ? MESES_CORTOS[d.getUTCMonth()] : null,
+      }
+    })
+  }
+
+  const pasoMeses = rangoId === '12m' ? 2 : 6
+  const primera = new Date(serie[0].fecha)
+  const ultima = serie[serie.length - 1].fecha
+  const resultado = []
+  let cursor = new Date(Date.UTC(primera.getUTCFullYear(), primera.getUTCMonth(), 1))
+  while (true) {
+    const cursorIso = cursor.toISOString().slice(0, 10)
+    if (cursorIso > ultima) break
+    const i = serie.findIndex((d) => d.fecha >= cursorIso)
+    if (i !== -1) resultado.push({ i, label: formatMesAnio(serie[i].fecha) })
+    cursor = new Date(Date.UTC(cursor.getUTCFullYear(), cursor.getUTCMonth() + pasoMeses, 1))
+  }
+  // El último punto de la serie siempre se muestra, aunque no caiga justo en un
+  // "mes redondo" -así el gráfico nunca corta sin aclarar hasta cuándo llega-.
+  const ultimoIndice = serie.length - 1
+  if (resultado[resultado.length - 1]?.i !== ultimoIndice) {
+    resultado.push({ i: ultimoIndice, label: formatMesAnio(serie[ultimoIndice].fecha) })
+  }
+  return resultado
 }
 
 // Mil millones de USD (lo que en inglés es "billion"), con 1 decimal y coma
@@ -32,10 +81,9 @@ const formatMilesDeMillones = (valorEnMillones) =>
 
 const ANCHO = 640
 const ALTO = 300
-const MARGEN = { top: 12, right: 16, bottom: 34, left: 78 }
+const MARGEN = { top: 12, right: 16, bottom: 44, left: 78 }
 const ANCHO_PLOT = ANCHO - MARGEN.left - MARGEN.right
 const ALTO_PLOT = ALTO - MARGEN.top - MARGEN.bottom
-const CANT_TICKS_X = 6
 const CANT_TICKS_Y_OBJETIVO = 6
 
 const RANGOS = [
@@ -110,9 +158,7 @@ function GraficoTendencia({ serieCompleta, rangoId }) {
   const [xMin, yMin] = puntoXY(serie[iMin], iMin)
   const [xMax, yMax] = puntoXY(serie[iMax], iMax)
 
-  const indicesX = Array.from({ length: CANT_TICKS_X }, (_, i) =>
-    Math.round((i / (CANT_TICKS_X - 1)) * (serie.length - 1))
-  )
+  const ticksX = calcularTicksX(serie, rangoId)
 
   return (
     <div>
@@ -141,21 +187,37 @@ function GraficoTendencia({ serieCompleta, rangoId }) {
           Miles de millones de USD
         </text>
 
-        {/* Etiquetas del eje X */}
-        {indicesX.map((i) => {
-          const [x] = puntoXY(serie[i], i)
-          return (
-            <text
-              key={i}
-              x={x}
-              y={ALTO - MARGEN.bottom + 18}
-              textAnchor="middle"
-              className="fill-slate-400 text-[10px]"
-            >
-              {formatFechaEje(serie[i].fecha)}
-            </text>
-          )
-        })}
+        {/* Etiquetas del eje X: a 30 días, día del mes arriba y mes abajo (solo
+            cuando cambia); a 12 meses o más, directamente mes-año. */}
+        {rangoId === '30d'
+          ? ticksX.map((t) => {
+              const [x] = puntoXY(serie[t.i], t.i)
+              return (
+                <g key={t.i}>
+                  <text x={x} y={ALTO - MARGEN.bottom + 16} textAnchor="middle" className="fill-slate-500 text-[10px]">
+                    {t.dia}
+                  </text>
+                  {t.mes && (
+                    <text
+                      x={x}
+                      y={ALTO - MARGEN.bottom + 30}
+                      textAnchor="middle"
+                      className="fill-slate-400 text-[9px] font-semibold uppercase tracking-wide"
+                    >
+                      {t.mes}
+                    </text>
+                  )}
+                </g>
+              )
+            })
+          : ticksX.map((t) => {
+              const [x] = puntoXY(serie[t.i], t.i)
+              return (
+                <text key={t.i} x={x} y={ALTO - MARGEN.bottom + 18} textAnchor="middle" className="fill-slate-400 text-[10px]">
+                  {t.label}
+                </text>
+              )
+            })}
 
         <polyline
           points={puntos}
@@ -184,7 +246,7 @@ function GraficoTendencia({ serieCompleta, rangoId }) {
   )
 }
 
-function ModalTendencia({ onClose, serieCompleta, cargando }) {
+function ModalTendencia({ onClose, serieCompleta, cargando, onReintentar }) {
   const [rangoId, setRangoId] = useState('2a')
 
   useEffect(() => {
@@ -244,7 +306,16 @@ function ModalTendencia({ onClose, serieCompleta, cargando }) {
           {cargando && <div className="h-64 animate-pulse rounded bg-slate-100 sm:h-72" />}
           {!cargando && serieCompleta && <GraficoTendencia serieCompleta={serieCompleta} rangoId={rangoId} />}
           {!cargando && !serieCompleta && (
-            <p className="text-sm text-rose-500">No se pudo cargar la tendencia, probá de nuevo en un momento.</p>
+            <div className="text-center">
+              <p className="text-sm text-rose-500">No se pudo cargar la tendencia. Puede ser un problema pasajero del BCRA.</p>
+              <button
+                type="button"
+                onClick={onReintentar}
+                className="mt-3 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+              >
+                Reintentar
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -270,15 +341,20 @@ export default function ReservasCard() {
   // Se pide una sola vez, al máximo rango (4 años) -no en la carga inicial de la
   // página, recién cuando se abre la tendencia-. Los botones de 30 días/12 meses/2
   // años solo recortan esta misma serie en el navegador, sin volver a pedir nada.
+  // fetchConReintento ya reintenta 2 veces solo; si aun así falla (BCRA caído,
+  // Supabase sin respuesta), el modal muestra un botón para reintentar a mano en
+  // vez de quedar en un estado sin salida.
+  const cargarSerie = () => {
+    setCargandoSerie(true)
+    fetchConReintento(() => fetchReservasSerie(1460))
+      .then(setSerie)
+      .catch(() => setSerie(null))
+      .finally(() => setCargandoSerie(false))
+  }
+
   const abrirTendencia = () => {
     setModalAbierto(true)
-    if (!serie) {
-      setCargandoSerie(true)
-      fetchConReintento(() => fetchReservasSerie(1460))
-        .then(setSerie)
-        .catch(() => setSerie(null))
-        .finally(() => setCargandoSerie(false))
-    }
+    if (!serie) cargarSerie()
   }
 
   if (!reservas) return null
@@ -320,7 +396,12 @@ export default function ReservasCard() {
       <p className="mt-1 text-xs text-slate-500">Reservas Internacionales del BCRA expresada en millones de USD.</p>
 
       {modalAbierto && (
-        <ModalTendencia onClose={() => setModalAbierto(false)} serieCompleta={serie} cargando={cargandoSerie} />
+        <ModalTendencia
+          onClose={() => setModalAbierto(false)}
+          serieCompleta={serie}
+          cargando={cargandoSerie}
+          onReintentar={cargarSerie}
+        />
       )}
     </Card>
   )
