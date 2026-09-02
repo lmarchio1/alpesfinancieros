@@ -36,3 +36,16 @@ export function inflacionInteranual(data) {
   const factor = ultimos12.reduce((acc, d) => acc * (1 + d.valor / 100), 1)
   return (factor - 1) * 100
 }
+
+// Serie histórica de inflación interanual (para el gráfico de tendencia de
+// InflacionTab): la interanual de cada mes, calculada con los 12 meses previos a
+// ese mes (inclusive) -mismo cálculo que inflacionInteranual, pero repetido mes a
+// mes en vez de solo para el último dato-.
+export function serieInteranual(data) {
+  const resultado = []
+  for (let i = 11; i < data.length; i++) {
+    const factor = data.slice(i - 11, i + 1).reduce((acc, d) => acc * (1 + d.valor / 100), 1)
+    resultado.push({ fecha: data[i].fecha, valor: (factor - 1) * 100 })
+  }
+  return resultado
+}
