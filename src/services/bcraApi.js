@@ -204,14 +204,3 @@ export async function fetchTamar() {
     teaAnterior: teaSerie[1]?.valor ?? null,
   }
 }
-
-// Serie histórica de TAMAR TNA para el gráfico de tasa real mensual (TamarCard).
-// Igual que fetchReservasSerie: pedido directo al BCRA, a demanda -no en la carga
-// inicial de la página-. 730 días de sobra: TAMAR reemplaza a la BADLAR recién desde
-// fines de 2024, así que su historia completa entra holgada en ese rango.
-export async function fetchTamarSerie(dias = 730) {
-  const hoy = fechaArgentinaHoy()
-  const desde = haceNDias(hoy, dias)
-  const serie = await fetchSerie(ID_TAMAR, desde, hoy)
-  return serie.slice().reverse()
-}
