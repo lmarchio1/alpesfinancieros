@@ -141,6 +141,21 @@ export async function fetchReservasInternacionales() {
   return { valor: actual.valor, fecha: actual.fecha, valorAnterior: serie[1]?.valor ?? null }
 }
 
+// Serie de los últimos N días para el gráfico de tendencia (ReservasCard). Se pide
+// directo del BCRA (sin pasar por precios_cache, que solo guarda el resumen de 2
+// puntos) y a demanda -recién cuando alguien abre la tendencia-, no en la carga
+// inicial de la página. fetchSerie devuelve del más reciente al más antiguo; se
+// invierte para que el gráfico quede en orden cronológico (izquierda = más viejo).
+// 730 días (2 años, ~480 publicaciones hábiles): probado en vivo, la API del BCRA
+// lo devuelve completo en un solo pedido (metadata.resultset.limit=1000, muy por
+// encima de lo que hace falta acá), sin necesidad de paginar.
+export async function fetchReservasSerie(dias = 730) {
+  const hoy = fechaArgentinaHoy()
+  const desde = haceNDias(hoy, dias)
+  const serie = await fetchSerie(ID_RESERVAS, desde, hoy)
+  return serie.slice().reverse()
+}
+
 // Serie mensual de inflación (IPC - INDEC), [{ fecha, valor: %mensual }] ascendente.
 export async function fetchInflacionMensual() {
   const hoy = fechaArgentinaHoy()
