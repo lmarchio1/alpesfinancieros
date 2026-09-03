@@ -448,7 +448,7 @@ export default function InflacionTab() {
                     type="button"
                     onClick={() => setModalInteranualAbierto(true)}
                     aria-label="Ver tendencia histórica de la inflación mensual"
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-colors hover:bg-brand-50 hover:text-brand-600"
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-600 transition-colors hover:bg-brand-600 hover:text-white"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 17l5-5 4 3 6-7M18 8h3v3" />
