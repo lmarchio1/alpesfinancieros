@@ -111,12 +111,25 @@ function GraficoInteranual({ serieCompleta, rangoId }) {
   const [xMin, yMin] = puntoXY(serie[iMin], iMin)
   const [xMax, yMax] = puntoXY(serie[iMax], iMax)
 
+  // Área sombreada bajo la línea -mismo criterio que ReservasCard.jsx-.
+  const yPiso = MARGEN_G.top + ALTO_PLOT_G
+  const [xPrimero] = puntoXY(serie[0], 0)
+  const [xUltimo] = puntoXY(serie[serie.length - 1], serie.length - 1)
+  const areaPath = `M${xPrimero},${yPiso} L${puntos.split(' ').join(' L')} L${xUltimo},${yPiso} Z`
+
   const pasoMeses = rangoId === '1a' ? 2 : rangoId === '2a' ? 3 : 6
   const ticksX = calcularTicksXG(serie, pasoMeses)
 
   return (
     <div>
       <svg viewBox={`0 0 ${ANCHO_G} ${ALTO_G}`} className="h-64 w-full sm:h-72" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="gradienteInflacion" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="#7c3aed" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+
         {ticksY.map((v) => {
           const y = MARGEN_G.top + ALTO_PLOT_G - ((v - dominioMin) / dominioRango) * ALTO_PLOT_G
           return (
@@ -129,12 +142,14 @@ function GraficoInteranual({ serieCompleta, rangoId }) {
           )
         })}
 
+        {/* Oculta en mobile: ahí la unidad se aclara en el subtítulo del modal para
+            no comerse espacio del gráfico en pantallas angostas. */}
         <text
           x={14}
           y={MARGEN_G.top + ALTO_PLOT_G / 2}
           textAnchor="middle"
           transform={`rotate(-90, 14, ${MARGEN_G.top + ALTO_PLOT_G / 2})`}
-          className="fill-slate-500 text-[10px] font-semibold uppercase tracking-wide"
+          className="hidden fill-slate-500 text-[10px] font-semibold uppercase tracking-wide sm:block"
         >
           Inflación mensual
         </text>
@@ -148,6 +163,7 @@ function GraficoInteranual({ serieCompleta, rangoId }) {
           )
         })}
 
+        <path d={areaPath} fill="url(#gradienteInflacion)" />
         <polyline points={puntos} fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 
         {/* Puntitos en cada mes: el círculo visible es chico, pero el área que
@@ -226,12 +242,14 @@ function ModalInteranual({ onClose, serieCompleta }) {
   // Portal a document.body: ver comentario en ReservasCard.jsx -mismo bug de
   // position:fixed atrapado por el transform de la tarjeta, mismo arreglo-.
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
-      <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 sm:p-4" onClick={onClose}>
+      <div className="w-full max-w-2xl rounded-2xl bg-white p-4 shadow-2xl sm:p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="font-semibold text-slate-900">Inflación mensual histórica</p>
-            <p className="text-xs text-slate-500">Variación mensual del IPC (INDEC)</p>
+            <p className="text-xs text-slate-500">
+              Variación mensual del IPC (INDEC) <span className="sm:hidden">(% mensual)</span>
+            </p>
           </div>
           <button
             type="button"
@@ -245,7 +263,7 @@ function ModalInteranual({ onClose, serieCompleta }) {
           </button>
         </div>
 
-        <div className="mt-4 inline-flex rounded-lg bg-slate-100 p-1 text-xs">
+        <div className="mt-4 grid grid-cols-3 gap-1 rounded-lg bg-slate-100 p-1 text-xs sm:inline-flex sm:gap-0">
           {RANGOS_INFLACION.map((r) => (
             <button
               key={r.id}
