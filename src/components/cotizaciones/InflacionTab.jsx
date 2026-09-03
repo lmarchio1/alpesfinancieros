@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { usePolling } from '../../hooks/usePolling'
 import { fetchExpectativaInflacionREM } from '../../services/remApi'
@@ -77,6 +77,8 @@ function calcularTicksXG(serie, pasoMeses) {
 // ya está cargada por el polling principal de esta pestaña).
 function GraficoInteranual({ serieCompleta, rangoId }) {
   const [hoverIndex, setHoverIndex] = useState(null)
+  const svgRef = useRef(null)
+  useEffect(() => setHoverIndex(null), [rangoId])
 
   const serie = useMemo(() => {
     const anios = RANGOS_INFLACION.find((r) => r.id === rangoId).anios
@@ -120,9 +122,25 @@ function GraficoInteranual({ serieCompleta, rangoId }) {
   const pasoMeses = rangoId === '1a' ? 2 : rangoId === '2a' ? 3 : 6
   const ticksX = calcularTicksXG(serie, pasoMeses)
 
+  // Ver comentario en ReservasCard.jsx: convierte una posición X de mouse/touch al
+  // índice del dato más cercano, para que la línea de seguimiento enganche en
+  // cualquier lugar del ancho del gráfico, no solo sobre un puntito chico.
+  const indiceDesdeClientX = (clientX) => {
+    const rect = svgRef.current.getBoundingClientRect()
+    const xViewBox = ((clientX - rect.left) / rect.width) * ANCHO_G
+    const proporcion = (xViewBox - MARGEN_G.left) / ANCHO_PLOT_G
+    const indice = Math.round(proporcion * (serie.length - 1))
+    return Math.min(Math.max(indice, 0), serie.length - 1)
+  }
+  const onPointerMove = (e) => setHoverIndex(indiceDesdeClientX(e.clientX))
+  const onTouchMove = (e) => {
+    e.preventDefault()
+    setHoverIndex(indiceDesdeClientX(e.touches[0].clientX))
+  }
+
   return (
     <div>
-      <svg viewBox={`0 0 ${ANCHO_G} ${ALTO_G}`} className="h-64 w-full sm:h-72" preserveAspectRatio="none">
+      <svg ref={svgRef} viewBox={`0 0 ${ANCHO_G} ${ALTO_G}`} className="h-64 w-full sm:h-72" preserveAspectRatio="none">
         <defs>
           <linearGradient id="gradienteInflacion" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.3" />
@@ -166,32 +184,11 @@ function GraficoInteranual({ serieCompleta, rangoId }) {
         <path d={areaPath} fill="url(#gradienteInflacion)" />
         <polyline points={puntos} fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 
-        {/* Puntitos en cada mes: el círculo visible es chico, pero el área que
-            realmente responde al mouse/toque es más grande (invisible) para que sea
-            fácil de acertar, sobre todo en el celular. */}
-        {serie.map((d, i) => {
-          const [x, y] = puntoXY(d, i)
-          const espacioPunto = serie.length > 1 ? ANCHO_PLOT_G / (serie.length - 1) : ANCHO_PLOT_G
-          return (
-            <g key={d.fecha}>
-              <circle cx={x} cy={y} r={hoverIndex === i ? 4 : 2.5} fill="#7c3aed" className="transition-all" />
-              <circle
-                cx={x}
-                cy={y}
-                r={Math.max(8, espacioPunto / 2)}
-                fill="transparent"
-                onMouseEnter={() => setHoverIndex(i)}
-                onMouseLeave={() => setHoverIndex(null)}
-                onClick={() => setHoverIndex(i)}
-                className="cursor-pointer"
-              />
-            </g>
-          )
-        })}
-
         <circle cx={xMin} cy={yMin} r="4" fill="#059669" />
         <circle cx={xMax} cy={yMax} r="4" fill="#e11d48" />
 
+        {/* Línea de seguimiento ("crosshair"): sigue el dedo/mouse y engancha al
+            dato más cercano, en vez de depender de acertarle a un puntito chico. */}
         {hoverIndex !== null && serie[hoverIndex] && (
           (() => {
             const d = serie[hoverIndex]
@@ -202,6 +199,8 @@ function GraficoInteranual({ serieCompleta, rangoId }) {
             const yCaja = arribaOk ? y - 34 : y + 12
             return (
               <g pointerEvents="none">
+                <line x1={x} x2={x} y1={MARGEN_G.top} y2={ALTO_G - MARGEN_G.bottom} stroke="#94a3b8" strokeWidth="1" strokeDasharray="3,3" />
+                <circle cx={x} cy={y} r="5" fill="#7c3aed" stroke="white" strokeWidth="2" />
                 <rect x={xCaja} y={yCaja} width={anchoCaja} height={26} rx="5" fill="#1e293b" />
                 <text x={xCaja + anchoCaja / 2} y={yCaja + 10} textAnchor="middle" className="fill-white text-[9px] font-semibold">
                   {formatMesAnio(d.fecha)}
@@ -213,6 +212,22 @@ function GraficoInteranual({ serieCompleta, rangoId }) {
             )
           })()
         )}
+
+        {/* Franja invisible sobre todo el área del gráfico: mover el mouse o
+            arrastrar el dedo en cualquier lado engancha al dato más cercano. */}
+        <rect
+          x={MARGEN_G.left}
+          y={MARGEN_G.top}
+          width={ANCHO_PLOT_G}
+          height={ALTO_PLOT_G}
+          fill="transparent"
+          style={{ touchAction: 'none' }}
+          onMouseMove={onPointerMove}
+          onMouseLeave={() => setHoverIndex(null)}
+          onTouchStart={onTouchMove}
+          onTouchMove={onTouchMove}
+          onTouchEnd={() => setHoverIndex(null)}
+        />
       </svg>
       <div className="mt-3 flex flex-wrap gap-4 text-xs">
         <span className="flex items-center gap-1.5">
