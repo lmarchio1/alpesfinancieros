@@ -90,8 +90,18 @@ function pasoLindo(rango, ticksObjetivo) {
   return magnitud
 }
 
-function calcularTicksY(min, max) {
-  const paso = pasoLindo(max - min || 1, CANT_TICKS_Y_OBJETIVO)
+// Margen del 10% arriba y abajo del rango real antes de calcular los escalones: sin
+// esto, en rangos angostos (ej. 6 meses) el mínimo o el máximo podían caer justo en
+// el borde del gráfico -la línea quedaba pegada a la grilla de abajo o arriba, sin
+// aire-.
+const MARGEN_DOMINIO_PCT = 0.1
+
+function calcularTicksY(minRaw, maxRaw) {
+  const rango = maxRaw - minRaw || 1
+  const margen = rango * MARGEN_DOMINIO_PCT
+  const min = minRaw - margen
+  const max = maxRaw + margen
+  const paso = pasoLindo(max - min, CANT_TICKS_Y_OBJETIVO)
   const inicio = Math.floor(min / paso) * paso
   const fin = Math.ceil(max / paso) * paso
   const ticks = []
