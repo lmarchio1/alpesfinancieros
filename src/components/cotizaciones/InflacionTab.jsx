@@ -43,8 +43,17 @@ function pasoLindoG(rango, ticksObjetivo) {
   if (residual > 1) return 2 * magnitud
   return magnitud
 }
-function calcularTicksYG(min, max) {
-  const paso = pasoLindoG(max - min || 1, CANT_TICKS_Y_G)
+// Ver comentario en ReservasCard.jsx: margen del 10% arriba y abajo del rango real
+// antes de calcular los escalones, para que la línea no quede pegada a los bordes
+// en rangos angostos (ej. 1 año).
+const MARGEN_DOMINIO_PCT_G = 0.1
+
+function calcularTicksYG(minRaw, maxRaw) {
+  const rango = maxRaw - minRaw || 1
+  const margen = rango * MARGEN_DOMINIO_PCT_G
+  const min = minRaw - margen
+  const max = maxRaw + margen
+  const paso = pasoLindoG(max - min, CANT_TICKS_Y_G)
   const inicio = Math.floor(min / paso) * paso
   const fin = Math.ceil(max / paso) * paso
   const ticks = []
