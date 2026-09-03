@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import Card from '../ui/Card'
 import DayChangeBadge from '../ui/DayChangeBadge'
@@ -107,6 +107,7 @@ function calcularTicksY(min, max) {
 // nuevo-.
 function GraficoTendencia({ serieCompleta, rangoId }) {
   const [hoverIndex, setHoverIndex] = useState(null)
+  const svgRef = useRef(null)
   useEffect(() => setHoverIndex(null), [rangoId])
 
   const serie = useMemo(() => {
@@ -155,9 +156,33 @@ function GraficoTendencia({ serieCompleta, rangoId }) {
 
   const ticksX = calcularTicksX(serie, rangoId)
 
+  // Convierte una posición X de mouse/touch (en píxeles de pantalla) al índice del
+  // dato más cercano -así no hay que acertarle a un puntito chico: cualquier lugar
+  // del ancho del gráfico engancha al dato más cercano, mucho más fácil en el
+  // celular. getBoundingClientRect da el tamaño real en pantalla; se escala a las
+  // unidades del viewBox (ANCHO) porque el SVG puede estar renderizado más chico o
+  // más grande que su viewBox.
+  const indiceDesdeClientX = (clientX) => {
+    const rect = svgRef.current.getBoundingClientRect()
+    const xViewBox = ((clientX - rect.left) / rect.width) * ANCHO
+    const proporcion = (xViewBox - MARGEN.left) / ANCHO_PLOT
+    const indice = Math.round(proporcion * (serie.length - 1))
+    return Math.min(Math.max(indice, 0), serie.length - 1)
+  }
+  const onPointerMove = (e) => setHoverIndex(indiceDesdeClientX(e.clientX))
+  const onTouchMove = (e) => {
+    e.preventDefault()
+    setHoverIndex(indiceDesdeClientX(e.touches[0].clientX))
+  }
+
   return (
     <div>
-      <svg viewBox={`0 0 ${ANCHO} ${ALTO}`} className="h-64 w-full sm:h-72" preserveAspectRatio="none">
+      <svg
+        ref={svgRef}
+        viewBox={`0 0 ${ANCHO} ${ALTO}`}
+        className="h-64 w-full sm:h-72"
+        preserveAspectRatio="none"
+      >
         <defs>
           <linearGradient id="gradienteReservas" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#dba61f" stopOpacity="0.35" />
@@ -211,33 +236,11 @@ function GraficoTendencia({ serieCompleta, rangoId }) {
           strokeLinejoin="round"
         />
 
-        {/* Puntitos en cada publicación: el círculo visible es chico, pero el área
-            que responde al mouse/toque es más grande (invisible) para que sea fácil
-            de acertar, sobre todo en el celular. Hover o tap muestra un tooltip con
-            la fecha exacta y el valor de ese día. */}
-        {serie.map((d, i) => {
-          const [x, y] = puntoXY(d, i)
-          const espacioPunto = serie.length > 1 ? ANCHO_PLOT / (serie.length - 1) : ANCHO_PLOT
-          return (
-            <g key={d.fecha}>
-              <circle cx={x} cy={y} r={hoverIndex === i ? 4 : 2} fill="#dba61f" className="transition-all" />
-              <circle
-                cx={x}
-                cy={y}
-                r={Math.max(7, espacioPunto / 2)}
-                fill="transparent"
-                onMouseEnter={() => setHoverIndex(i)}
-                onMouseLeave={() => setHoverIndex(null)}
-                onClick={() => setHoverIndex(i)}
-                className="cursor-pointer"
-              />
-            </g>
-          )
-        })}
-
         <circle cx={xMin} cy={yMin} r="4" fill="#e11d48" />
         <circle cx={xMax} cy={yMax} r="4" fill="#059669" />
 
+        {/* Línea de seguimiento ("crosshair"): sigue el dedo/mouse y engancha al
+            dato más cercano, en vez de depender de acertarle a un puntito chico. */}
         {hoverIndex !== null && serie[hoverIndex] && (
           (() => {
             const d = serie[hoverIndex]
@@ -248,6 +251,8 @@ function GraficoTendencia({ serieCompleta, rangoId }) {
             const yCaja = arribaOk ? y - 34 : y + 12
             return (
               <g pointerEvents="none">
+                <line x1={x} x2={x} y1={MARGEN.top} y2={ALTO - MARGEN.bottom} stroke="#94a3b8" strokeWidth="1" strokeDasharray="3,3" />
+                <circle cx={x} cy={y} r="5" fill="#dba61f" stroke="white" strokeWidth="2" />
                 <rect x={xCaja} y={yCaja} width={anchoCaja} height={26} rx="5" fill="#1e293b" />
                 <text x={xCaja + anchoCaja / 2} y={yCaja + 10} textAnchor="middle" className="fill-white text-[9px] font-semibold">
                   {formatFechaCorta(d.fecha)}
@@ -259,6 +264,22 @@ function GraficoTendencia({ serieCompleta, rangoId }) {
             )
           })()
         )}
+
+        {/* Franja invisible sobre todo el área del gráfico: mover el mouse o
+            arrastrar el dedo en cualquier lado engancha al dato más cercano. */}
+        <rect
+          x={MARGEN.left}
+          y={MARGEN.top}
+          width={ANCHO_PLOT}
+          height={ALTO_PLOT}
+          fill="transparent"
+          style={{ touchAction: 'none' }}
+          onMouseMove={onPointerMove}
+          onMouseLeave={() => setHoverIndex(null)}
+          onTouchStart={onTouchMove}
+          onTouchMove={onTouchMove}
+          onTouchEnd={() => setHoverIndex(null)}
+        />
       </svg>
       <div className="mt-3 flex flex-wrap gap-4 text-xs">
         <span className="flex items-center gap-1.5">
