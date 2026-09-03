@@ -106,6 +106,9 @@ function calcularTicksY(min, max) {
 // recorte es puramente en el navegador, cambiar de rango no dispara ningún pedido
 // nuevo-.
 function GraficoTendencia({ serieCompleta, rangoId }) {
+  const [hoverIndex, setHoverIndex] = useState(null)
+  useEffect(() => setHoverIndex(null), [rangoId])
+
   const serie = useMemo(() => {
     const dias = RANGOS.find((r) => r.id === rangoId).dias
     const corte = new Date()
@@ -142,11 +145,26 @@ function GraficoTendencia({ serieCompleta, rangoId }) {
   const [xMin, yMin] = puntoXY(serie[iMin], iMin)
   const [xMax, yMax] = puntoXY(serie[iMax], iMax)
 
+  // Área sombreada bajo la línea: mismos puntos de la polyline, cerrando el path
+  // hacia abajo (piso del gráfico) y de vuelta al primer punto -relleno con el
+  // degradé amarillo-a-transparente definido en <defs>-.
+  const yPiso = MARGEN.top + ALTO_PLOT
+  const [xPrimero] = puntoXY(serie[0], 0)
+  const [xUltimo] = puntoXY(serie[serie.length - 1], serie.length - 1)
+  const areaPath = `M${xPrimero},${yPiso} L${puntos.split(' ').join(' L')} L${xUltimo},${yPiso} Z`
+
   const ticksX = calcularTicksX(serie, rangoId)
 
   return (
     <div>
       <svg viewBox={`0 0 ${ANCHO} ${ALTO}`} className="h-64 w-full sm:h-72" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="gradienteReservas" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#dba61f" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="#dba61f" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+
         {/* Grilla y etiquetas del eje Y */}
         {ticksY.map((v) => {
           const y = MARGEN.top + ALTO_PLOT - ((v - dominioMin) / dominioRango) * ALTO_PLOT
@@ -160,13 +178,15 @@ function GraficoTendencia({ serieCompleta, rangoId }) {
           )
         })}
 
-        {/* Título vertical del eje Y, rotado -90°, estilo Excel */}
+        {/* Título vertical del eje Y, rotado -90°, estilo Excel -oculto en mobile,
+            ahí la unidad se aclara en el subtítulo del modal para no comerse
+            espacio del gráfico en pantallas angostas-. */}
         <text
           x={16}
           y={MARGEN.top + ALTO_PLOT / 2}
           textAnchor="middle"
           transform={`rotate(-90, 16, ${MARGEN.top + ALTO_PLOT / 2})`}
-          className="fill-slate-500 text-[10px] font-semibold uppercase tracking-wide"
+          className="hidden fill-slate-500 text-[10px] font-semibold uppercase tracking-wide sm:block"
         >
           Miles de millones de USD
         </text>
@@ -181,6 +201,7 @@ function GraficoTendencia({ serieCompleta, rangoId }) {
           )
         })}
 
+        <path d={areaPath} fill="url(#gradienteReservas)" />
         <polyline
           points={puntos}
           fill="none"
@@ -189,8 +210,55 @@ function GraficoTendencia({ serieCompleta, rangoId }) {
           strokeLinecap="round"
           strokeLinejoin="round"
         />
+
+        {/* Puntitos en cada publicación: el círculo visible es chico, pero el área
+            que responde al mouse/toque es más grande (invisible) para que sea fácil
+            de acertar, sobre todo en el celular. Hover o tap muestra un tooltip con
+            la fecha exacta y el valor de ese día. */}
+        {serie.map((d, i) => {
+          const [x, y] = puntoXY(d, i)
+          const espacioPunto = serie.length > 1 ? ANCHO_PLOT / (serie.length - 1) : ANCHO_PLOT
+          return (
+            <g key={d.fecha}>
+              <circle cx={x} cy={y} r={hoverIndex === i ? 4 : 2} fill="#dba61f" className="transition-all" />
+              <circle
+                cx={x}
+                cy={y}
+                r={Math.max(7, espacioPunto / 2)}
+                fill="transparent"
+                onMouseEnter={() => setHoverIndex(i)}
+                onMouseLeave={() => setHoverIndex(null)}
+                onClick={() => setHoverIndex(i)}
+                className="cursor-pointer"
+              />
+            </g>
+          )
+        })}
+
         <circle cx={xMin} cy={yMin} r="4" fill="#e11d48" />
         <circle cx={xMax} cy={yMax} r="4" fill="#059669" />
+
+        {hoverIndex !== null && serie[hoverIndex] && (
+          (() => {
+            const d = serie[hoverIndex]
+            const [x, y] = puntoXY(d, hoverIndex)
+            const anchoCaja = 96
+            const xCaja = Math.min(Math.max(x - anchoCaja / 2, MARGEN.left), ANCHO - MARGEN.right - anchoCaja)
+            const arribaOk = y - 34 > MARGEN.top
+            const yCaja = arribaOk ? y - 34 : y + 12
+            return (
+              <g pointerEvents="none">
+                <rect x={xCaja} y={yCaja} width={anchoCaja} height={26} rx="5" fill="#1e293b" />
+                <text x={xCaja + anchoCaja / 2} y={yCaja + 10} textAnchor="middle" className="fill-white text-[9px] font-semibold">
+                  {formatFechaCorta(d.fecha)}
+                </text>
+                <text x={xCaja + anchoCaja / 2} y={yCaja + 20} textAnchor="middle" className="fill-white text-[10px] font-bold">
+                  USD {formatMilesDeMillones(d.valor)} mil M
+                </text>
+              </g>
+            )
+          })()
+        )}
       </svg>
       <div className="mt-3 flex flex-wrap gap-4 text-xs">
         <span className="flex items-center gap-1.5">
@@ -224,17 +292,19 @@ function ModalTendencia({ onClose, serieCompleta, cargando, onReintentar }) {
   // toda la pantalla-. El portal lo saca de ese árbol por completo.
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 sm:p-4"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl"
+        className="w-full max-w-2xl rounded-2xl bg-white p-4 shadow-2xl sm:p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="font-semibold text-slate-900">Reservas Internacionales (BCRA)</p>
-            <p className="text-xs text-slate-500">Valores al cierre de cada publicación</p>
+            <p className="text-xs text-slate-500">
+              Valores al cierre de cada publicación <span className="sm:hidden">(en miles de millones de USD)</span>
+            </p>
           </div>
           <button
             type="button"
@@ -248,8 +318,10 @@ function ModalTendencia({ onClose, serieCompleta, cargando, onReintentar }) {
           </button>
         </div>
 
-        {/* Selector de rango: recorta la misma serie ya traída, no dispara pedidos nuevos. */}
-        <div className="mt-4 inline-flex rounded-lg bg-slate-100 p-1 text-xs">
+        {/* Selector de rango: recorta la misma serie ya traída, no dispara pedidos
+            nuevos. En mobile, grilla 2x2 -en una sola fila los 4 botones quedaban muy
+            apretados para tocar con el dedo con comodidad-. */}
+        <div className="mt-4 grid grid-cols-2 gap-1 rounded-lg bg-slate-100 p-1 text-xs sm:inline-flex sm:gap-0">
           {RANGOS.map((r) => (
             <button
               key={r.id}
