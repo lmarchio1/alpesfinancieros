@@ -72,10 +72,6 @@ const COLOR_IPC = '#f59e0b'
 // dentro del tooltip oscuro -mejor contraste que el color de la línea-.
 const COLOR_TAMAR_TOOLTIP = '#a78bfa'
 
-// Sombra muy sutil debajo de cada línea -más discreta que el degradé de área que
-// tienen Reservas/Inflación, el glow probado antes quedaba muy cargado-: un solo
-// drop-shadow chico, desplazado hacia abajo, con poca opacidad.
-const sombra = (color) => `drop-shadow(0 2px 1.5px ${color}30)`
 
 const RANGOS = [
   { id: '6m', label: '6 meses', dias: 182 },
@@ -199,6 +195,20 @@ function GraficoComparativo({ serieCompleta, rangoId }) {
         className="h-64 w-full sm:h-72"
         preserveAspectRatio="none"
       >
+        <defs>
+          {/* Sombra muy sutil debajo de cada línea -más discreta que el degradé de área
+              que tienen Reservas/Inflación-. Filtro SVG nativo (feDropShadow) en vez de
+              CSS filter vía style: en iPhone/Safari el CSS drop-shadow inline sobre un
+              <polyline> no se renderizaba -confirmado en vivo-, mientras que el filtro
+              SVG nativo es el mecanismo estándar y soportado en todos los navegadores. */}
+          <filter id="sombraIpcTamar" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="2" stdDeviation="1" floodColor={COLOR_IPC} floodOpacity="0.35" />
+          </filter>
+          <filter id="sombraTamar" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="2" stdDeviation="1" floodColor={COLOR_TAMAR} floodOpacity="0.35" />
+          </filter>
+        </defs>
+
         {ticksY.map((v) => {
           const y = MARGEN.top + ALTO_PLOT - ((v - dominioMin) / dominioRango) * ALTO_PLOT
           return (
@@ -237,7 +247,7 @@ function GraficoComparativo({ serieCompleta, rangoId }) {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          style={{ filter: sombra(COLOR_IPC) }}
+          filter="url(#sombraIpcTamar)"
         />
         <polyline
           points={puntosTamar}
@@ -246,7 +256,7 @@ function GraficoComparativo({ serieCompleta, rangoId }) {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          style={{ filter: sombra(COLOR_TAMAR) }}
+          filter="url(#sombraTamar)"
         />
 
         {hoverIndex !== null && serie[hoverIndex] && (

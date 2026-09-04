@@ -138,9 +138,6 @@ function calcularSerieComparativa(tnaSerie, ipcSerie, campo) {
 
 const COLOR_IPC_COMPARATIVA = '#f59e0b'
 
-// Ver comentario en TamarCard.jsx: sombra muy sutil debajo de cada línea, más
-// discreta que el degradé de área que tienen Reservas/Inflación.
-const sombra = (color) => `drop-shadow(0 2px 1.5px ${color}30)`
 
 // Gráfico de dos líneas -tasa capitalizada día a día vs. IPC mensual, cada una un
 // dato independiente, sin combinarlas en un único número-. Mismo estilo que
@@ -205,6 +202,19 @@ function GraficoComparativoG({ serieCompleta, rangoId, campo, color, colorToolti
         </span>
       </div>
       <svg ref={svgRef} viewBox={`0 0 ${ANCHO_G} ${ALTO_G}`} className="h-64 w-full sm:h-72" preserveAspectRatio="none">
+        <defs>
+          {/* Ver comentario en TamarCard.jsx: filtro SVG nativo (feDropShadow) en vez de
+              CSS filter vía style -en iPhone/Safari el CSS drop-shadow inline sobre un
+              <polyline> no se renderizaba-. IDs con el campo para no colisionar si en
+              el futuro se reusa este gráfico para más de una serie a la vez. */}
+          <filter id={`sombraIpc-${campo}`} x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="2" stdDeviation="1" floodColor={COLOR_IPC_COMPARATIVA} floodOpacity="0.35" />
+          </filter>
+          <filter id={`sombraPropia-${campo}`} x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="2" stdDeviation="1" floodColor={color} floodOpacity="0.35" />
+          </filter>
+        </defs>
+
         {ticksY.map((v) => {
           const y = MARGEN_G.top + ALTO_PLOT_G - ((v - dominioMin) / dominioRango) * ALTO_PLOT_G
           return (
@@ -240,7 +250,7 @@ function GraficoComparativoG({ serieCompleta, rangoId, campo, color, colorToolti
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          style={{ filter: sombra(COLOR_IPC_COMPARATIVA) }}
+          filter={`url(#sombraIpc-${campo})`}
         />
         <polyline
           points={puntosPropia}
@@ -249,7 +259,7 @@ function GraficoComparativoG({ serieCompleta, rangoId, campo, color, colorToolti
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          style={{ filter: sombra(color) }}
+          filter={`url(#sombraPropia-${campo})`}
         />
 
         {hoverIndex !== null && serie[hoverIndex] && (

@@ -68,9 +68,6 @@ const COLOR_IPC = '#f59e0b'
 // texto dentro de esa caja.
 const COLOR_BADLAR_TOOLTIP = '#c4b5fd'
 
-// Ver comentario en TamarCard.jsx: sombra muy sutil debajo de cada línea, más
-// discreta que el degradé de área que tienen Reservas/Inflación.
-const sombra = (color) => `drop-shadow(0 2px 1.5px ${color}30)`
 
 const RANGOS = [
   { id: '6m', label: '6 meses', dias: 182 },
@@ -194,6 +191,18 @@ function GraficoComparativo({ serieCompleta, rangoId }) {
         className="h-64 w-full sm:h-72"
         preserveAspectRatio="none"
       >
+        <defs>
+          {/* Ver comentario en TamarCard.jsx: filtro SVG nativo (feDropShadow) en vez de
+              CSS filter vía style -en iPhone/Safari el CSS drop-shadow inline sobre un
+              <polyline> no se renderizaba-. */}
+          <filter id="sombraIpcBadlar" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="2" stdDeviation="1" floodColor={COLOR_IPC} floodOpacity="0.35" />
+          </filter>
+          <filter id="sombraBadlar" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="2" stdDeviation="1" floodColor={COLOR_BADLAR} floodOpacity="0.35" />
+          </filter>
+        </defs>
+
         {ticksY.map((v) => {
           const y = MARGEN.top + ALTO_PLOT - ((v - dominioMin) / dominioRango) * ALTO_PLOT
           return (
@@ -232,7 +241,7 @@ function GraficoComparativo({ serieCompleta, rangoId }) {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          style={{ filter: sombra(COLOR_IPC) }}
+          filter="url(#sombraIpcBadlar)"
         />
         <polyline
           points={puntosBadlar}
@@ -241,7 +250,7 @@ function GraficoComparativo({ serieCompleta, rangoId }) {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          style={{ filter: sombra(COLOR_BADLAR) }}
+          filter="url(#sombraBadlar)"
         />
 
         {hoverIndex !== null && serie[hoverIndex] && (
