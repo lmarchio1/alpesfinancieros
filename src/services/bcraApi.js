@@ -129,6 +129,19 @@ export async function fetchTasaPlazoFijo30Dias() {
   }
 }
 
+// Serie histórica de Plazo Fijo (TNA diaria cruda) para el gráfico de tendencia
+// (InflacionTab: comparación contra el IPC, mismo criterio que TamarCard.jsx). Igual
+// que fetchReservasSerie/fetchTamarSerie: pedido directo al BCRA, a demanda -no en
+// la carga inicial de la página-. Se devuelve la TNA cruda (no convertida a TEA acá)
+// porque el gráfico compone día a día para calcular la tasa efectiva mensual -la
+// misma conversión que hace tnaATea, pero aplicada mes a mes en vez de una sola vez-.
+export async function fetchPlazoFijoSerie(dias = 730) {
+  const hoy = fechaArgentinaHoy()
+  const desde = haceNDias(hoy, dias)
+  const serie = await fetchSerie(ID_PLAZO_FIJO_30D, desde, hoy)
+  return serie.slice().reverse()
+}
+
 export async function fetchReservasInternacionales() {
   const cache = await fetchVariablesBcra()
   if (cache?.reservas) return cache.reservas
@@ -203,4 +216,25 @@ export async function fetchTamar() {
     tea: teaSerie[0]?.valor ?? null,
     teaAnterior: teaSerie[1]?.valor ?? null,
   }
+}
+
+// Serie histórica de TAMAR TNA para el gráfico de tendencia (TamarCard). Igual que
+// fetchReservasSerie: pedido directo al BCRA, a demanda -no en la carga inicial de
+// la página-. TAMAR reemplaza a la BADLAR recién desde fines de 2024, así que su
+// historia completa entra holgada en 730 días.
+export async function fetchTamarSerie(dias = 730) {
+  const hoy = fechaArgentinaHoy()
+  const desde = haceNDias(hoy, dias)
+  const serie = await fetchSerie(ID_TAMAR, desde, hoy)
+  return serie.slice().reverse()
+}
+
+// Serie histórica de BADLAR TNA para el gráfico de tendencia (BadlarCard), misma
+// idea que fetchTamarSerie: TNA diaria cruda -el gráfico compone día a día para
+// calcular la tasa efectiva mensual comparable contra el IPC-.
+export async function fetchBadlarSerie(dias = 730) {
+  const hoy = fechaArgentinaHoy()
+  const desde = haceNDias(hoy, dias)
+  const serie = await fetchSerie(ID_BADLAR, desde, hoy)
+  return serie.slice().reverse()
 }

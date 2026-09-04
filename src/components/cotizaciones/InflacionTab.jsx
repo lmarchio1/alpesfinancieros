@@ -2,8 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { usePolling } from '../../hooks/usePolling'
 import { fetchExpectativaInflacionREM } from '../../services/remApi'
-import { fetchTasaPlazoFijo30Dias, fetchInflacionMensual } from '../../services/bcraApi'
+import { fetchTasaPlazoFijo30Dias, fetchPlazoFijoSerie, fetchInflacionMensual } from '../../services/bcraApi'
 import { valorActualizado, factorAcumulado, mesesEnRango, inflacionInteranual } from '../../utils/inflacionMath'
+import { fetchConReintento } from '../../utils/fetchRetry'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
 import DayChangeBadge from '../ui/DayChangeBadge'
@@ -61,6 +62,25 @@ function calcularTicksYG(minRaw, maxRaw) {
   return ticks
 }
 
+// Variante para los gráficos comparativos (dos series, ej. Plazo Fijo vs. IPC): el
+// piso del eje se ancla en 0% -no con el mismo margen del 10% que calcularTicksYG
+// aplica también abajo- porque acá lo que importa es comparar la brecha entre dos
+// líneas, y recortar el piso exagera esa brecha visualmente (un mes con TAMAR 3,9%
+// e IPC 2,1% se veía con una diferencia como el triple de grande arrancando en
+// 1,0% en vez de en 0%). Si algún mes diera negativo (deflación), se respeta ese
+// mínimo real en vez de forzar 0 -para no cortar el dato-.
+function calcularTicksYComparativa(minRaw, maxRaw) {
+  const rango = maxRaw - minRaw || 1
+  const max = maxRaw + rango * MARGEN_DOMINIO_PCT_G
+  const min = Math.min(0, minRaw)
+  const paso = pasoLindoG(max - min, CANT_TICKS_Y_G)
+  const inicio = Math.floor(min / paso) * paso
+  const fin = Math.ceil(max / paso) * paso
+  const ticks = []
+  for (let v = inicio; v <= fin + paso * 0.001; v += paso) ticks.push(v)
+  return ticks
+}
+
 // Ticks del eje X anclados al primer dato de cada mes calendario, salteando de a N
 // meses según el rango -mismo criterio que ReservasCard.jsx-.
 function calcularTicksXG(serie, pasoMeses) {
@@ -80,11 +100,199 @@ function calcularTicksXG(serie, pasoMeses) {
   return resultado
 }
 
-// Gráfico de tendencia de inflación interanual -mismo estilo que ReservasCard.jsx
-// (SVG a mano, ejes con escalones lindos, sin librería de gráficos)-, pero recibe
-// la serie ya calculada en memoria (no pide nada al BCRA: la serie mensual del IPC
-// ya está cargada por el polling principal de esta pestaña).
-function GraficoInteranual({ serieCompleta, rangoId }) {
+// Ver comentario en TamarCard.jsx (calcularSerieMensual): capitalización diaria
+// exacta -TED = TNA/365 cada día calendario, no solo los hábiles-, con forward-fill
+// para cubrir fines de semana/feriados sin publicación (si no, se subestima el
+// resultado: probado en vivo con TAMAR, saltear fines de semana daba casi la mitad
+// del valor real). Genérico para reusar con Plazo Fijo (y cualquier otra tasa BCRA
+// diaria) contra el IPC mensual.
+function calcularSerieComparativa(tnaSerie, ipcSerie, campo) {
+  if (tnaSerie.length === 0) return []
+
+  const porDia = new Map(tnaSerie.map((d) => [d.fecha, d.valor]))
+  const primerDia = new Date(`${tnaSerie[0].fecha}T00:00:00Z`)
+  const ultimoDia = new Date(`${tnaSerie[tnaSerie.length - 1].fecha}T00:00:00Z`)
+
+  const porMes = new Map()
+  let ultimoValorConocido = null
+  for (let d = new Date(primerDia); d <= ultimoDia; d.setUTCDate(d.getUTCDate() + 1)) {
+    const fechaIso = d.toISOString().slice(0, 10)
+    if (porDia.has(fechaIso)) ultimoValorConocido = porDia.get(fechaIso)
+    if (ultimoValorConocido === null) continue
+    const mes = fechaIso.slice(0, 7)
+    if (!porMes.has(mes)) porMes.set(mes, [])
+    porMes.get(mes).push(ultimoValorConocido)
+  }
+
+  const ipcPorMes = new Map(ipcSerie.map((d) => [d.fecha.slice(0, 7), d.valor]))
+
+  const resultado = []
+  for (const [mes, valoresDiarios] of porMes) {
+    if (!ipcPorMes.has(mes)) continue
+    if (valoresDiarios.length < 25) continue // mes incompleto (primer/último mes de la serie)
+    const factor = valoresDiarios.reduce((acc, tna) => acc * (1 + tna / 100 / 365), 1)
+    resultado.push({ mes, fecha: `${mes}-01`, [campo]: (factor - 1) * 100, ipc: ipcPorMes.get(mes) })
+  }
+  return resultado.sort((a, b) => a.mes.localeCompare(b.mes))
+}
+
+const COLOR_IPC_COMPARATIVA = '#f59e0b'
+
+// Gráfico de dos líneas -tasa capitalizada día a día vs. IPC mensual, cada una un
+// dato independiente, sin combinarlas en un único número-. Mismo estilo que
+// TamarCard.jsx (GraficoComparativo), reusando los ejes ya genéricos de este archivo.
+function GraficoComparativoG({ serieCompleta, rangoId, campo, color, colorTooltip = color, etiquetaSerie }) {
+  const [hoverIndex, setHoverIndex] = useState(null)
+  const svgRef = useRef(null)
+  useEffect(() => setHoverIndex(null), [rangoId])
+
+  const serie = useMemo(() => {
+    const anios = RANGOS_INFLACION.find((r) => r.id === rangoId).anios
+    const corte = new Date()
+    corte.setUTCFullYear(corte.getUTCFullYear() - anios)
+    const corteIso = corte.toISOString().slice(0, 10)
+    return serieCompleta.filter((d) => d.fecha >= corteIso)
+  }, [serieCompleta, rangoId])
+
+  if (serie.length < 2) {
+    return <p className="text-sm text-slate-500">No hay suficientes meses en este rango.</p>
+  }
+
+  const valores = serie.flatMap((d) => [d[campo], d.ipc])
+  const ticksY = calcularTicksYComparativa(Math.min(...valores), Math.max(...valores))
+  const dominioMin = ticksY[0]
+  const dominioMax = ticksY[ticksY.length - 1]
+  const dominioRango = dominioMax - dominioMin || 1
+
+  const puntoXY = (valor, i) => {
+    const x = MARGEN_G.left + (i / (serie.length - 1)) * ANCHO_PLOT_G
+    const y = MARGEN_G.top + ALTO_PLOT_G - ((valor - dominioMin) / dominioRango) * ALTO_PLOT_G
+    return [x, y]
+  }
+  const puntosPropia = serie.map((d, i) => puntoXY(d[campo], i).map((n) => n.toFixed(1)).join(',')).join(' ')
+  const puntosIpc = serie.map((d, i) => puntoXY(d.ipc, i).map((n) => n.toFixed(1)).join(',')).join(' ')
+
+  const pasoMeses = rangoId === '1a' ? 2 : rangoId === '2a' ? 3 : 6
+  const ticksX = calcularTicksXG(serie, pasoMeses)
+
+  const indiceDesdeClientX = (clientX) => {
+    const rect = svgRef.current.getBoundingClientRect()
+    const xViewBox = ((clientX - rect.left) / rect.width) * ANCHO_G
+    const proporcion = (xViewBox - MARGEN_G.left) / ANCHO_PLOT_G
+    const indice = Math.round(proporcion * (serie.length - 1))
+    return Math.min(Math.max(indice, 0), serie.length - 1)
+  }
+  const onPointerMove = (e) => setHoverIndex(indiceDesdeClientX(e.clientX))
+  const onTouchMove = (e) => {
+    e.preventDefault()
+    setHoverIndex(indiceDesdeClientX(e.touches[0].clientX))
+  }
+
+  return (
+    <div>
+      <div className="mb-2 flex flex-wrap gap-4 text-xs">
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full" style={{ background: color }} />
+          {etiquetaSerie}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full" style={{ background: COLOR_IPC_COMPARATIVA }} />
+          IPC mensual
+        </span>
+      </div>
+      <svg ref={svgRef} viewBox={`0 0 ${ANCHO_G} ${ALTO_G}`} className="h-64 w-full sm:h-72" preserveAspectRatio="none">
+        {ticksY.map((v) => {
+          const y = MARGEN_G.top + ALTO_PLOT_G - ((v - dominioMin) / dominioRango) * ALTO_PLOT_G
+          return (
+            <g key={v}>
+              <line x1={MARGEN_G.left} x2={ANCHO_G - MARGEN_G.right} y1={y} y2={y} stroke="#e2e8f0" strokeWidth="1" />
+              <text x={MARGEN_G.left - 8} y={y} textAnchor="end" dominantBaseline="middle" className="fill-slate-400 text-[10px]">
+                {v.toFixed(1)}%
+              </text>
+            </g>
+          )
+        })}
+
+        <text
+          x={14}
+          y={MARGEN_G.top + ALTO_PLOT_G / 2}
+          textAnchor="middle"
+          transform={`rotate(-90, 14, ${MARGEN_G.top + ALTO_PLOT_G / 2})`}
+          className="hidden fill-slate-500 text-[10px] font-semibold uppercase tracking-wide sm:block"
+        >
+          Tasa mensual
+        </text>
+
+        {ticksX.map((i) => (
+          <text key={i} x={puntoXY(serie[i][campo], i)[0]} y={ALTO_G - MARGEN_G.bottom + 18} textAnchor="middle" className="fill-slate-400 text-[10px]">
+            {formatMesAnio(serie[i].fecha)}
+          </text>
+        ))}
+
+        <polyline points={puntosIpc} fill="none" stroke={COLOR_IPC_COMPARATIVA} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <polyline points={puntosPropia} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+
+        {hoverIndex !== null && serie[hoverIndex] && (
+          (() => {
+            const d = serie[hoverIndex]
+            const [xPropia, yPropia] = puntoXY(d[campo], hoverIndex)
+            const [, yIpc] = puntoXY(d.ipc, hoverIndex)
+            const anchoCaja = 124
+            const xCaja = Math.min(Math.max(xPropia - anchoCaja / 2, MARGEN_G.left), ANCHO_G - MARGEN_G.right - anchoCaja)
+            const yTope = Math.min(yPropia, yIpc)
+            const arribaOk = yTope - 46 > MARGEN_G.top
+            const yCaja = arribaOk ? yTope - 46 : Math.max(yPropia, yIpc) + 12
+            return (
+              <g pointerEvents="none">
+                <line x1={xPropia} x2={xPropia} y1={MARGEN_G.top} y2={ALTO_G - MARGEN_G.bottom} stroke="#94a3b8" strokeWidth="1" strokeDasharray="3,3" />
+                <circle cx={xPropia} cy={yIpc} r="5" fill={COLOR_IPC_COMPARATIVA} stroke="white" strokeWidth="2" />
+                <circle cx={xPropia} cy={yPropia} r="5" fill={color} stroke="white" strokeWidth="2" />
+                <rect x={xCaja} y={yCaja} width={anchoCaja} height={38} rx="5" fill="#1e293b" />
+                <text x={xCaja + anchoCaja / 2} y={yCaja + 11} textAnchor="middle" className="fill-white text-[9px] font-semibold">
+                  {formatMesAnio(d.fecha)}
+                </text>
+                <text x={xCaja + anchoCaja / 2} y={yCaja + 23} textAnchor="middle" className="text-[10px] font-bold" fill={colorTooltip}>
+                  {etiquetaSerie} {d[campo].toFixed(2)}%
+                </text>
+                <text x={xCaja + anchoCaja / 2} y={yCaja + 34} textAnchor="middle" className="text-[10px] font-bold" fill={COLOR_IPC_COMPARATIVA}>
+                  IPC {d.ipc.toFixed(2)}%
+                </text>
+              </g>
+            )
+          })()
+        )}
+
+        <rect
+          x={MARGEN_G.left}
+          y={MARGEN_G.top}
+          width={ANCHO_PLOT_G}
+          height={ALTO_PLOT_G}
+          fill="transparent"
+          style={{ touchAction: 'none' }}
+          onMouseMove={onPointerMove}
+          onMouseLeave={() => setHoverIndex(null)}
+          onTouchStart={onTouchMove}
+          onTouchMove={onTouchMove}
+          onTouchEnd={() => setHoverIndex(null)}
+        />
+      </svg>
+      <p className="mt-2 text-[10px] text-slate-400">
+        {etiquetaSerie}: Tasa efectiva mensual (capitalización diaria de la TNA/365). Series independientes y no acumulativas.
+      </p>
+    </div>
+  )
+}
+
+// Gráfico de tendencia genérico -mismo estilo que ReservasCard.jsx (SVG a mano,
+// ejes con escalones lindos, sin librería de gráficos)-, reusado para Inflación
+// mensual y Plazo Fijo (mismo componente, distinto color/título/datos).
+function GraficoInteranual({
+  serieCompleta,
+  rangoId,
+  color = '#7c3aed',
+  tituloEje = 'Inflación mensual',
+  gradientId = 'gradienteInflacion',
+}) {
   const [hoverIndex, setHoverIndex] = useState(null)
   const svgRef = useRef(null)
   useEffect(() => setHoverIndex(null), [rangoId])
@@ -151,9 +359,9 @@ function GraficoInteranual({ serieCompleta, rangoId }) {
     <div>
       <svg ref={svgRef} viewBox={`0 0 ${ANCHO_G} ${ALTO_G}`} className="h-64 w-full sm:h-72" preserveAspectRatio="none">
         <defs>
-          <linearGradient id="gradienteInflacion" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#7c3aed" stopOpacity="0" />
+          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.3" />
+            <stop offset="100%" stopColor={color} stopOpacity="0" />
           </linearGradient>
         </defs>
 
@@ -178,7 +386,7 @@ function GraficoInteranual({ serieCompleta, rangoId }) {
           transform={`rotate(-90, 14, ${MARGEN_G.top + ALTO_PLOT_G / 2})`}
           className="hidden fill-slate-500 text-[10px] font-semibold uppercase tracking-wide sm:block"
         >
-          Inflación mensual
+          {tituloEje}
         </text>
 
         {ticksX.map((i) => {
@@ -190,8 +398,8 @@ function GraficoInteranual({ serieCompleta, rangoId }) {
           )
         })}
 
-        <path d={areaPath} fill="url(#gradienteInflacion)" />
-        <polyline points={puntos} fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d={areaPath} fill={`url(#${gradientId})`} />
+        <polyline points={puntos} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 
         <circle cx={xMin} cy={yMin} r="4" fill="#059669" />
         <circle cx={xMax} cy={yMax} r="4" fill="#e11d48" />
@@ -209,7 +417,7 @@ function GraficoInteranual({ serieCompleta, rangoId }) {
             return (
               <g pointerEvents="none">
                 <line x1={x} x2={x} y1={MARGEN_G.top} y2={ALTO_G - MARGEN_G.bottom} stroke="#94a3b8" strokeWidth="1" strokeDasharray="3,3" />
-                <circle cx={x} cy={y} r="5" fill="#7c3aed" stroke="white" strokeWidth="2" />
+                <circle cx={x} cy={y} r="5" fill={color} stroke="white" strokeWidth="2" />
                 <rect x={xCaja} y={yCaja} width={anchoCaja} height={26} rx="5" fill="#1e293b" />
                 <text x={xCaja + anchoCaja / 2} y={yCaja + 10} textAnchor="middle" className="fill-white text-[9px] font-semibold">
                   {formatMesAnio(d.fecha)}
@@ -254,7 +462,24 @@ function GraficoInteranual({ serieCompleta, rangoId }) {
   )
 }
 
-function ModalInteranual({ onClose, serieCompleta }) {
+// Modal genérico de gráfico de tendencia -reusado para Inflación mensual (datos ya
+// en memoria, sin pedido nuevo) y Plazo Fijo (se pide a demanda, con loading/error).
+function ModalGraficoTendencia({
+  onClose,
+  titulo,
+  subtitulo,
+  subtituloMobile,
+  serieCompleta,
+  cargando,
+  onReintentar,
+  color,
+  colorTooltip,
+  gradientId,
+  tituloEje,
+  comparativa,
+  campo,
+  etiquetaSerie,
+}) {
   const [rangoId, setRangoId] = useState('2a')
 
   useEffect(() => {
@@ -270,9 +495,9 @@ function ModalInteranual({ onClose, serieCompleta }) {
       <div className="w-full max-w-2xl rounded-2xl bg-white p-4 shadow-2xl sm:p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="font-semibold text-slate-900">Inflación mensual histórica</p>
+            <p className="font-semibold text-slate-900">{titulo}</p>
             <p className="text-xs text-slate-500">
-              Variación mensual del IPC (INDEC) <span className="sm:hidden">(% mensual)</span>
+              {subtitulo} {subtituloMobile && <span className="sm:hidden">{subtituloMobile}</span>}
             </p>
           </div>
           <button
@@ -303,7 +528,32 @@ function ModalInteranual({ onClose, serieCompleta }) {
         </div>
 
         <div className="mt-4">
-          <GraficoInteranual serieCompleta={serieCompleta} rangoId={rangoId} />
+          {cargando && <div className="h-64 animate-pulse rounded bg-slate-100 sm:h-72" />}
+          {!cargando && serieCompleta && comparativa && (
+            <GraficoComparativoG
+              serieCompleta={serieCompleta}
+              rangoId={rangoId}
+              campo={campo}
+              color={color}
+              colorTooltip={colorTooltip}
+              etiquetaSerie={etiquetaSerie}
+            />
+          )}
+          {!cargando && serieCompleta && !comparativa && (
+            <GraficoInteranual serieCompleta={serieCompleta} rangoId={rangoId} color={color} gradientId={gradientId} tituloEje={tituloEje} />
+          )}
+          {!cargando && !serieCompleta && onReintentar && (
+            <div className="text-center">
+              <p className="text-sm text-rose-500">No se pudo cargar la tendencia. Puede ser un problema pasajero del BCRA.</p>
+              <button
+                type="button"
+                onClick={onReintentar}
+                className="mt-3 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+              >
+                Reintentar
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>,
@@ -372,6 +622,28 @@ export default function InflacionTab() {
   // ni calcular nada: es el mismo dato que ya carga el polling principal de esta
   // pestaña, se lo pasa directo al gráfico-.
   const [modalInteranualAbierto, setModalInteranualAbierto] = useState(false)
+
+  // Plazo Fijo, en cambio, sí necesita pedir su propio historial (TNA diaria cruda)
+  // -no está cargado por el polling principal-, a demanda, recién al abrir la
+  // tendencia. El IPC mensual (`data`) ya está disponible, se combina en memoria.
+  const [modalPlazoFijoAbierto, setModalPlazoFijoAbierto] = useState(false)
+  const [plazoFijoSerieRaw, setPlazoFijoSerieRaw] = useState(null)
+  const [cargandoPlazoFijoSerie, setCargandoPlazoFijoSerie] = useState(false)
+  const cargarPlazoFijoSerie = () => {
+    setCargandoPlazoFijoSerie(true)
+    fetchConReintento(() => fetchPlazoFijoSerie(1460))
+      .then(setPlazoFijoSerieRaw)
+      .catch(() => setPlazoFijoSerieRaw(null))
+      .finally(() => setCargandoPlazoFijoSerie(false))
+  }
+  const abrirTendenciaPlazoFijo = () => {
+    setModalPlazoFijoAbierto(true)
+    if (!plazoFijoSerieRaw) cargarPlazoFijoSerie()
+  }
+  const plazoFijoComparativa = useMemo(
+    () => (plazoFijoSerieRaw && data ? calcularSerieComparativa(plazoFijoSerieRaw, data, 'plazoFijo') : null),
+    [plazoFijoSerieRaw, data]
+  )
 
   // Acumulada de enero a hoy, para mostrar al lado de la interanual -mismo motor que
   // usa la calculadora de abajo, pero con un rango fijo (no el que el usuario elija ahí).
@@ -525,6 +797,16 @@ export default function InflacionTab() {
                   </svg>
                 </div>
                 <p className="font-semibold text-slate-900">Plazo Fijo a 30 Días (BCRA)</p>
+                <button
+                  type="button"
+                  onClick={abrirTendenciaPlazoFijo}
+                  aria-label="Ver tendencia histórica del plazo fijo"
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 transition-colors hover:bg-emerald-600 hover:text-white"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 17l5-5 4 3 6-7M18 8h3v3" />
+                  </svg>
+                </button>
               </div>
               <div className="mt-3 grid grid-cols-2 gap-4">
                 <div>
@@ -665,7 +947,33 @@ export default function InflacionTab() {
       </div>
 
       {modalInteranualAbierto && (
-        <ModalInteranual onClose={() => setModalInteranualAbierto(false)} serieCompleta={data} />
+        <ModalGraficoTendencia
+          onClose={() => setModalInteranualAbierto(false)}
+          titulo="Inflación mensual histórica"
+          subtitulo="Variación mensual del IPC (INDEC)"
+          subtituloMobile="(% mensual)"
+          serieCompleta={data}
+          color="#2065a2"
+          gradientId="gradienteInflacion"
+          tituloEje="Inflación mensual"
+        />
+      )}
+
+      {modalPlazoFijoAbierto && (
+        <ModalGraficoTendencia
+          onClose={() => setModalPlazoFijoAbierto(false)}
+          titulo="Plazo Fijo vs. IPC mensual"
+          subtitulo="Dos series independientes, sin combinar"
+          subtituloMobile="(tasa mensual, %)"
+          serieCompleta={plazoFijoComparativa}
+          cargando={cargandoPlazoFijoSerie}
+          onReintentar={cargarPlazoFijoSerie}
+          color="#059669"
+          colorTooltip="#34d399"
+          comparativa
+          campo="plazoFijo"
+          etiquetaSerie="Plazo Fijo"
+        />
       )}
     </div>
   )
