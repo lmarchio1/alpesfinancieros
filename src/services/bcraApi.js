@@ -170,10 +170,30 @@ export async function fetchReservasSerie(dias = 730) {
 }
 
 // Serie mensual de inflación (IPC - INDEC), [{ fecha, valor: %mensual }] ascendente.
+// TAMAR, BADLAR y Plazo Fijo la piden cada uno por su cuenta al abrir su gráfico de
+// tendencia -confirmado en vivo: abrir el modal de TAMAR y después el de BADLAR
+// disparaba dos pedidos idénticos a la misma serie-. Se cachea en memoria por poco
+// tiempo (60s: alcanza para cubrir a alguien mirando varias tarjetas seguidas, sin
+// pedidos redundantes) en vez de indefinidamente -InflacionTab hace polling de esta
+// misma función cada 30 min y tiene un botón "Actualizar" manual; un caché sin
+// vencimiento los hubiera dejado siempre devolviendo el primer resultado pedido en
+// toda la sesión, sin efecto real-. Si el pedido falla, se limpia para reintentar en
+// la próxima llamada en vez de esperar a que venza el caché.
+let inflacionMensualCache = null // { promesa, en: timestamp }
+const INFLACION_MENSUAL_CACHE_MS = 60 * 1000
+
 export async function fetchInflacionMensual() {
+  const ahora = Date.now()
+  if (inflacionMensualCache && ahora - inflacionMensualCache.en < INFLACION_MENSUAL_CACHE_MS) {
+    return inflacionMensualCache.promesa
+  }
   const hoy = fechaArgentinaHoy()
-  const serie = await fetchSerie(ID_INFLACION_MENSUAL, '2015-01-01', hoy)
-  return serie.slice().reverse()
+  const promesa = fetchSerie(ID_INFLACION_MENSUAL, '2015-01-01', hoy).then((serie) => serie.slice().reverse())
+  promesa.catch(() => {
+    inflacionMensualCache = null
+  })
+  inflacionMensualCache = { promesa, en: ahora }
+  return promesa
 }
 
 export async function fetchBadlar() {
