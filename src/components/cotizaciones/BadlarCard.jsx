@@ -326,7 +326,7 @@ function ModalTendencia({ onClose, badlarSerie, ipcSerie, cargando, onReintentar
           <div>
             <p className="font-semibold text-slate-900">BADLAR vs. IPC mensual</p>
             <p className="text-xs text-slate-500">
-              Comparativa entre el rendimiento efectivo mensual contra la inflación <span className="sm:hidden">(tasa mensual, %)</span>
+              Comparativa entre el rendimiento efectivo mensual contra la inflación
             </p>
           </div>
           <button

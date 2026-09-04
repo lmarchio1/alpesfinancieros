@@ -994,7 +994,6 @@ export default function InflacionTab() {
           onClose={() => setModalPlazoFijoAbierto(false)}
           titulo="Plazo Fijo vs. IPC mensual"
           subtitulo="Comparativa entre el rendimiento efectivo mensual contra la inflación"
-          subtituloMobile="(tasa mensual, %)"
           serieCompleta={plazoFijoComparativa}
           cargando={cargandoPlazoFijoSerie}
           onReintentar={cargarPlazoFijoSerie}
