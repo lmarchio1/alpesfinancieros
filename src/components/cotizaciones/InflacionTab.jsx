@@ -138,6 +138,10 @@ function calcularSerieComparativa(tnaSerie, ipcSerie, campo) {
 
 const COLOR_IPC_COMPARATIVA = '#f59e0b'
 
+// Ver comentario en TamarCard.jsx: sombra muy sutil debajo de cada línea, más
+// discreta que el degradé de área que tienen Reservas/Inflación.
+const sombra = (color) => `drop-shadow(0 2px 1.5px ${color}30)`
+
 // Gráfico de dos líneas -tasa capitalizada día a día vs. IPC mensual, cada una un
 // dato independiente, sin combinarlas en un único número-. Mismo estilo que
 // TamarCard.jsx (GraficoComparativo), reusando los ejes ya genéricos de este archivo.
@@ -229,8 +233,24 @@ function GraficoComparativoG({ serieCompleta, rangoId, campo, color, colorToolti
           </text>
         ))}
 
-        <polyline points={puntosIpc} fill="none" stroke={COLOR_IPC_COMPARATIVA} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        <polyline points={puntosPropia} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <polyline
+          points={puntosIpc}
+          fill="none"
+          stroke={COLOR_IPC_COMPARATIVA}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ filter: sombra(COLOR_IPC_COMPARATIVA) }}
+        />
+        <polyline
+          points={puntosPropia}
+          fill="none"
+          stroke={color}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ filter: sombra(color) }}
+        />
 
         {hoverIndex !== null && serie[hoverIndex] && (
           (() => {
@@ -963,7 +983,7 @@ export default function InflacionTab() {
         <ModalGraficoTendencia
           onClose={() => setModalPlazoFijoAbierto(false)}
           titulo="Plazo Fijo vs. IPC mensual"
-          subtitulo="Dos series independientes, sin combinar"
+          subtitulo="Comparativa entre el rendimiento efectivo mensual contra la inflación"
           subtituloMobile="(tasa mensual, %)"
           serieCompleta={plazoFijoComparativa}
           cargando={cargandoPlazoFijoSerie}

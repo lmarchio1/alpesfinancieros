@@ -72,6 +72,11 @@ const COLOR_IPC = '#f59e0b'
 // dentro del tooltip oscuro -mejor contraste que el color de la línea-.
 const COLOR_TAMAR_TOOLTIP = '#a78bfa'
 
+// Sombra muy sutil debajo de cada línea -más discreta que el degradé de área que
+// tienen Reservas/Inflación, el glow probado antes quedaba muy cargado-: un solo
+// drop-shadow chico, desplazado hacia abajo, con poca opacidad.
+const sombra = (color) => `drop-shadow(0 2px 1.5px ${color}30)`
+
 const RANGOS = [
   { id: '6m', label: '6 meses', dias: 182 },
   { id: '12m', label: '1 año', dias: 365 },
@@ -225,8 +230,24 @@ function GraficoComparativo({ serieCompleta, rangoId }) {
           )
         })}
 
-        <polyline points={puntosIpc} fill="none" stroke={COLOR_IPC} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        <polyline points={puntosTamar} fill="none" stroke={COLOR_TAMAR} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <polyline
+          points={puntosIpc}
+          fill="none"
+          stroke={COLOR_IPC}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ filter: sombra(COLOR_IPC) }}
+        />
+        <polyline
+          points={puntosTamar}
+          fill="none"
+          stroke={COLOR_TAMAR}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ filter: sombra(COLOR_TAMAR) }}
+        />
 
         {hoverIndex !== null && serie[hoverIndex] && (
           (() => {
@@ -301,7 +322,7 @@ function ModalTendencia({ onClose, tamarSerie, ipcSerie, cargando, onReintentar 
           <div>
             <p className="font-semibold text-slate-900">TAMAR vs. IPC mensual</p>
             <p className="text-xs text-slate-500">
-              Dos series independientes, sin combinar <span className="sm:hidden">(tasa mensual, %)</span>
+              Comparativa entre el rendimiento efectivo mensual contra la inflación <span className="sm:hidden">(tasa mensual, %)</span>
             </p>
           </div>
           <button
