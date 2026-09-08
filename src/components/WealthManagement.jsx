@@ -231,6 +231,7 @@ export default function WealthManagement() {
           src={oroMercado}
           alt=""
           aria-hidden="true"
+          loading="lazy"
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div

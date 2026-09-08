@@ -49,6 +49,7 @@ export default function Cotizaciones() {
         src={calculadoraMercado}
         alt=""
         aria-hidden="true"
+        loading="lazy"
         className={`absolute inset-0 h-full w-full object-cover saturate-[1.7] transition-opacity duration-700 ease-out ${
           abierto ? 'opacity-0' : 'opacity-100'
         }`}

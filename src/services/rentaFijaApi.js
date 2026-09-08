@@ -18,12 +18,24 @@ function noVencido(instrumento) {
   return new Date(instrumento.fechaVencimiento) > new Date()
 }
 
+// argentinadatos cambió el formato de /letras sin aviso: antes devolvía el array de
+// letras pelado y ahora lo envuelve en un objeto, { fechaActualizacion, letras: [...] }.
+// Como el código llamaba .filter() directo sobre la respuesta, la pestaña entera de
+// Renta Fija se cayó en producción con "letrasMeta.filter is not a function". Se aceptan
+// las dos formas para que siga andando si vuelven a cambiarlo de vuelta.
+function normalizarLetras(respuesta) {
+  if (Array.isArray(respuesta)) return respuesta
+  if (Array.isArray(respuesta?.letras)) return respuesta.letras
+  return []
+}
+
 export async function fetchRentaFija(forzar = false) {
-  const [letrasMeta, riesgoPais, notas] = await Promise.all([
+  const [letrasResp, riesgoPais, notas] = await Promise.all([
     getJson('letras'),
     getJson('indices/riesgo-pais/ultimo'),
     fetchArgNotes(forzar),
   ])
+  const letrasMeta = normalizarLetras(letrasResp)
 
   const precioPorTicker = new Map(notas.map((n) => [n.symbol, n.c]))
   const pctChangePorTicker = new Map(notas.map((n) => [n.symbol, n.pct_change]))

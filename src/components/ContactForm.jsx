@@ -79,6 +79,7 @@ export default function ContactForm() {
       <img
         src={toroWallStreet}
         alt="Toro de Wall Street"
+        loading="lazy"
         className="absolute inset-x-0 top-0 h-[460px] w-full object-cover object-[55%_22%] saturate-[1.35] sm:inset-0 sm:h-full sm:object-[58%_18%]"
       />
       <div

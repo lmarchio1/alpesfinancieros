@@ -13,6 +13,10 @@ dist-ssr
 *.local
 .env
 
+# Paquete crudo del generador de favicons (realfavicongenerator): los archivos que
+# el sitio realmente usa ya están en public/, esto es solo el material de origen.
+favicon/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
