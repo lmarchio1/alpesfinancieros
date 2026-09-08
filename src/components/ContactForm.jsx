@@ -2,6 +2,7 @@ import { useState } from 'react'
 import SectionHeading from './ui/SectionHeading'
 import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
 import toroWallStreet from '../assets/toro-wallstreet.jpg'
+import mapaPreview from '../assets/mapa-preview.webp'
 
 const CONTACT_ENDPOINT = import.meta.env.VITE_CONTACT_ENDPOINT
 
@@ -23,6 +24,7 @@ export default function ContactForm() {
   const [form, setForm] = useState(INITIAL_FORM)
   const [status, setStatus] = useState('idle') // idle | sending | sent | error
   const [formRef, formVisible] = useRevealOnScroll()
+  const [mapaActivo, setMapaActivo] = useState(false)
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -264,14 +266,31 @@ export default function ContactForm() {
               </div>
 
               <div className="overflow-hidden rounded-xl bg-slate-800">
-                <iframe
-                  title="Ubicación de Alpes Estados Financieros"
-                  src={MAPS_EMBED_URL}
-                  className="h-56 w-full grayscale-[15%]"
-                  style={{ border: 0 }}
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                />
+                {mapaActivo ? (
+                  <iframe
+                    title="Ubicación de Alpes Estados Financieros"
+                    src={MAPS_EMBED_URL}
+                    className="h-56 w-full grayscale-[15%]"
+                    style={{ border: 0 }}
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                ) : (
+                  // Fachada: el iframe de Google Maps pesa su propio bundle de JS y
+                  // tiles -confirmado que a veces tarda en aparecer-, y en un mapa de
+                  // "cómo llegar" casi nadie interactúa con el zoom/paneo dentro de la
+                  // página (ya está el link de arriba que lleva a Google Maps). En vez
+                  // de pagar ese costo siempre, se muestra una foto real de la
+                  // ubicación (recorte de una captura de Google Maps, sin la barra de
+                  // atribución ni los controles) y el iframe interactivo recién se
+                  // monta si alguien lo pide.
+                  <button
+                    type="button"
+                    onClick={() => setMapaActivo(true)}
+                    aria-label="Cargar mapa interactivo de la ubicación"
+                    className="block h-56 w-full cursor-pointer bg-cover bg-center transition-[filter] duration-300 ease-out hover:brightness-110"
+                    style={{ backgroundImage: `url(${mapaPreview})` }}
+                  />
+                )}
               </div>
             </div>
           </div>
