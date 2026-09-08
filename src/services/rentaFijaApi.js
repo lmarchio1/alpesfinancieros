@@ -29,6 +29,25 @@ function normalizarLetras(respuesta) {
   return []
 }
 
+// En ese mismo cambio también dejó de publicar "vpv" -el pago final pactado de la
+// letra-, que es contra lo que se compara el precio de mercado en vivo para sacar el
+// retorno (ver retornoLetra en utils/bondMath.js). Sin ese campo, el análisis de
+// breakeven mostraba "NaN%" en Retorno y TEA.
+//
+// Se reconstruye invirtiendo la TEA que la API sí publica: como esa TEA sale del mismo
+// pago final contra el precio de la propia API, precio × (1+TEA)^(días/365) devuelve ese
+// pago. No es una corazonada: verificado contra las otras dos tasas que publica (TNA y
+// TEM), las tres reconstruyen el mismo valor en todas las letras (diferencia < 0,5%).
+// Se deriva acá, y no en bondMath, para que toda la adaptación al formato de la API
+// quede en un solo lugar y el resto del código siga usando "vpv" como siempre.
+function derivarVpv(letra) {
+  if (typeof letra.vpv === 'number') return letra.vpv // por si vuelven a publicarlo
+  const { precioArs: precio, teaPorcentaje: tea, diasAlVencimiento: dias } = letra
+  if (![precio, tea, dias].every((n) => typeof n === 'number' && Number.isFinite(n))) return undefined
+  if (precio <= 0 || dias <= 0) return undefined
+  return precio * Math.pow(1 + tea / 100, dias / 365)
+}
+
 export async function fetchRentaFija(forzar = false) {
   const [letrasResp, riesgoPais, notas] = await Promise.all([
     getJson('letras'),
@@ -57,10 +76,12 @@ export async function fetchRentaFija(forzar = false) {
     .filter(noVencido)
     .map((l) => {
       const precioActual = precioPorTicker.get(l.ticker)
-      return { ...l, precioActual, variacionPorcentaje: variacionDeHoy(l.ticker, precioActual) }
+      return { ...l, precioActual, vpv: derivarVpv(l), variacionPorcentaje: variacionDeHoy(l.ticker, precioActual) }
     })
-    // solo letras con precio de mercado en vivo: sin eso no hay retorno calculable
+    // solo letras con precio de mercado en vivo y pago final conocido: sin cualquiera de
+    // los dos no hay retorno calculable, y antes se colaban mostrando "NaN%"
     .filter((l) => typeof l.precioActual === 'number' && l.precioActual > 0)
+    .filter((l) => typeof l.vpv === 'number' && Number.isFinite(l.vpv))
     .sort((a, b) => new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento))
     .slice(0, 6)
 
