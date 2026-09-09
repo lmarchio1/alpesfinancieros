@@ -19,6 +19,17 @@ function noVencido(instrumento) {
   return new Date(instrumento.fechaVencimiento) > new Date()
 }
 
+// El endpoint /letras no devuelve solo Lecap: vienen mezclados los BONCAP (serie T,
+// ej. T15E7) y los duales atados a TAMAR (serie TT, ej. TTS26) -categorías que el
+// sitio ya arma por su cuenta desde data912, con BONCAP_META y TAMAR_META-. Hasta
+// ahora no se colaban de casualidad, porque data912 no les publica precio en vivo y
+// el filtro de precio los descartaba; el día que empiece a listarlos aparecerían
+// bonos duales dentro de la solapa "Lecap" y de la calculadora de breakeven, que son
+// solo para letras. Las Lecap son las de la serie S (S + día + mes + año).
+function esLecap(instrumento) {
+  return /^S/.test(instrumento.ticker)
+}
+
 // argentinadatos cambió el formato de /letras sin aviso: antes devolvía el array de
 // letras pelado y ahora lo envuelve en un objeto, { fechaActualizacion, letras: [...] }.
 // Como el código llamaba .filter() directo sobre la respuesta, la pestaña entera de
@@ -80,6 +91,7 @@ export async function fetchRentaFija(forzar = false) {
 
   const letrasOrdenadas = letrasMeta
     .filter(noVencido)
+    .filter(esLecap)
     .map((l) => {
       const precioActual = precioPorTicker.get(l.ticker)
       return { ...l, precioActual, vpv: derivarVpv(l), variacionPorcentaje: variacionDeHoy(l.ticker, precioActual) }
@@ -89,7 +101,6 @@ export async function fetchRentaFija(forzar = false) {
     .filter((l) => typeof l.precioActual === 'number' && l.precioActual > 0)
     .filter((l) => typeof l.vpv === 'number' && Number.isFinite(l.vpv))
     .sort((a, b) => new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento))
-    .slice(0, 6)
 
   return { letras: letrasOrdenadas, riesgoPais }
 }
