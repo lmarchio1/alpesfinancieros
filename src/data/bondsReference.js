@@ -84,3 +84,38 @@ export const BONCER_META = {
   TZXM9: { vencimiento: '2029-03-28' },
   TX31: { vencimiento: '2031-11-30' },
 }
+
+// Pago final pactado de cada letra/bono capitalizable de tasa fija ("vpv"): lo que
+// paga el título al vencimiento por cada 100 de valor nominal. Es una constante del
+// instrumento, fijada en la licitación, y es contra lo que se compara el precio de
+// mercado en vivo para calcular el retorno (ver retornoLetra en utils/bondMath.js).
+//
+// Se guarda acá porque argentinadatos dejó de publicarlo: su endpoint /letras -que
+// además no figura en la documentación de la API, así que nunca prometieron
+// mantenerlo- pasó a devolver solo precio y tasas de mercado. Hoy el valor se puede
+// reconstruir invirtiendo esas tasas, pero eso depende de que ellos sigan
+// calculándolas igual. Teniéndolo acá, el sitio deja de depender de eso.
+//
+// Los marcados como "verificado" se contrastaron contra un snapshot real del formato
+// viejo (Wayback, 29/05/2026), que todavía traía el vpv publicado: coinciden con
+// diferencia 0,00%. El resto son LECAP de la serie S reconstruidas con el mismo
+// método ya validado.
+//
+// NO incluir acá instrumentos atados a TAMAR o similares (TTS26, TTD26, TY30P): su
+// pago final NO es fijo, depende de la tasa que se vaya devengando, y congelarlo sería
+// un error. Esos siguen resolviéndose con el valor que devuelve la API en el momento.
+//
+// Cuando salga una letra nueva, alcanza con sumar una línea acá; si falta, el sitio
+// igual la resuelve reconstruyéndola desde la API.
+export const PAGO_FINAL_LETRAS = {
+  S15S6: 107.2104,
+  S30S6: 117.536, // verificado
+  S16O6: 105.2803,
+  S30O6: 135.278, // verificado
+  S13N6: 109.6507,
+  S30N6: 129.888, // verificado
+  T15E7: 161.104, // verificado
+  S29E7: 111.6814,
+  T30A7: 157.341, // verificado
+  T30J7: 156.037, // verificado
+}

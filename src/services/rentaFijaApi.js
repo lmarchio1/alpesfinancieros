@@ -1,5 +1,6 @@
 import { fetchArgNotes } from './data912Api'
 import { fetchCierresDeAyer } from './supabaseClient'
+import { PAGO_FINAL_LETRAS } from '../data/bondsReference'
 
 const BASE_URL = 'https://api.argentinadatos.com/v1/finanzas'
 
@@ -42,6 +43,11 @@ function normalizarLetras(respuesta) {
 // quede en un solo lugar y el resto del código siga usando "vpv" como siempre.
 function derivarVpv(letra) {
   if (typeof letra.vpv === 'number') return letra.vpv // por si vuelven a publicarlo
+  // Valor de referencia propio: para las letras de tasa fija conocidas, el pago final
+  // es una constante que ya tenemos guardada, así que no dependemos de que la API
+  // siga calculando sus tasas igual (ver PAGO_FINAL_LETRAS en data/bondsReference.js).
+  const guardado = PAGO_FINAL_LETRAS[letra.ticker]
+  if (typeof guardado === 'number') return guardado
   const { precioArs: precio, teaPorcentaje: tea, diasAlVencimiento: dias } = letra
   if (![precio, tea, dias].every((n) => typeof n === 'number' && Number.isFinite(n))) return undefined
   if (precio <= 0 || dias <= 0) return undefined
