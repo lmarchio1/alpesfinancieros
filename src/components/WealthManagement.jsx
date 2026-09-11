@@ -3,7 +3,7 @@ import SectionHeading from './ui/SectionHeading'
 import Card from './ui/Card'
 import Modelo360Donut from './ui/Modelo360Donut'
 import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
-import oroMercado from '../assets/oro-mercado.jpg'
+import oroMercado from '../assets/oro-mercado.webp'
 
 const ICONS = {
   shield: (
@@ -209,18 +209,23 @@ export default function WealthManagement() {
           {ITEMS.map((item, i) => (
             <Card
               key={item.title}
-              className={`group min-h-[304px] !bg-[#f2f6f0] p-6 shadow-md shadow-slate-200/70 transition-all duration-700 ease-out hover:-translate-y-1 hover:shadow-xl motion-reduce:transition-none ${
+              className={`group sm:min-h-[304px] !bg-[#f2f6f0] p-6 shadow-md shadow-slate-200/70 transition-all duration-700 ease-out hover:-translate-y-1 hover:shadow-xl motion-reduce:transition-none ${
                 itemsVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
               }`}
               style={{ transitionDelay: itemsVisible ? `${i * 120}ms` : '0ms' }}
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#0e5035]/10 text-[#0e5035] transition-colors duration-300 group-hover:bg-[#0e5035] group-hover:text-white">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6">
-                  {ICONS[item.icon]}
-                </svg>
+              {/* En el celular las tarjetas van una debajo de otra, así que el ícono va al
+                  lado del título para ahorrar alto; desde tablet van lado a lado y el
+                  ícono vuelve arriba, donde deja íconos y títulos alineados en la fila. */}
+              <div className="flex items-center gap-3 sm:block">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#0e5035]/10 text-[#0e5035] transition-colors duration-300 group-hover:bg-[#0e5035] group-hover:text-white">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6">
+                    {ICONS[item.icon]}
+                  </svg>
+                </div>
+                <h3 className="font-semibold text-slate-900 sm:mt-4">{item.title}</h3>
               </div>
-              <h3 className="mt-4 font-semibold text-slate-900">{item.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">{item.description}</p>
+              <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:mt-2">{item.description}</p>
             </Card>
           ))}
         </div>
