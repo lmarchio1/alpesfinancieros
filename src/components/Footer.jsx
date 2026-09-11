@@ -24,7 +24,10 @@ export default function Footer() {
             gap="gap-4"
           />
 
-          <div className="flex flex-col gap-10 sm:flex-row sm:gap-16">
+          {/* Lado a lado también en el celular (a 375 px entran justo: 334 de 343 px
+              útiles); flex-wrap hace que en una pantalla más angosta "Seguinos" pase
+              abajo en vez de salirse de la pantalla. */}
+          <div className="flex flex-wrap gap-10 sm:flex-nowrap sm:gap-16">
             <div>
               <h3 className="text-sm font-semibold text-white">Compañía</h3>
               <ul className="mt-4 space-y-3">
