@@ -20,6 +20,7 @@ favicon/
 # Archivos temporales que genera scripts/aplicar-respuesta-bono.mjs al correr.
 respuesta-bono.md
 commit-bono.txt
+confirmacion-bono.md
 
 # Editor directories and files
 .vscode/*

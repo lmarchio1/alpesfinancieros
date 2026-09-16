@@ -38,18 +38,37 @@ async function github(ruta, { method = 'GET', body, permitir422 = false } = {}) 
 
 const formatoPrecio = (n) => n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
+// Links a los formularios de .github/ISSUE_TEMPLATE, con el ticker ya completado.
+function enlaceFormulario(accion, clave) {
+  const params = new URLSearchParams({ template: `${accion}-bono.yml`, title: `${accion === 'agregar' ? 'Agregar' : 'Descartar'} ${clave}`, ticker: clave })
+  return `https://github.com/${GITHUB_REPOSITORY}/issues/new?${params}`
+}
+
 function cuerpoDelAviso(bono) {
   const { clave, categoria, precio, prueba } = bono
   const etiqueta = CATEGORIAS[categoria].etiqueta
   const intro = prueba
     ? '**Esto es una PRUEBA** del sistema de avisos: el bono es ficticio y responder no cambia nada en el sitio.\n\n'
     : ''
+  const descartar = `### [❌ Descartar](${enlaceFormulario('descartar', clave)})`
   const instrucciones = CATEGORIAS[categoria].manual
-    ? `Este tipo de bono necesita un dato más que la fecha (la duración, para la calculadora de riesgo país), así que no se puede agregar respondiendo este mail. Si va, avisale a Claude; si no va, respondé \`no\`.`
+    ? [
+        `Este tipo de bono necesita un dato más que la fecha (la duración, para la calculadora de riesgo país), así que no se puede agregar desde acá. Si va, avisale a Claude. Si no va:`,
+        '',
+        descartar,
+      ].join('\n')
     : [
-        '**Respondé este mail con una sola línea:**',
-        `- \`agregar dd/mm/aaaa\` → lo suma a la solapa ${etiqueta} con esa fecha de vencimiento y publica el sitio.`,
-        '- `no` → lo descarta (por ejemplo, si es un dual) y no te lo vuelve a avisar.',
+        '**¿Qué hacemos?**',
+        '',
+        `### [✅ Agregar](${enlaceFormulario('agregar', clave)})`,
+        'Se abre un formulario: escribí la fecha de vencimiento y tocá **Create**.',
+        '',
+        descartar,
+        'Se abre un formulario ya completo: tocá **Create** para confirmar. No te lo vuelvo a avisar.',
+        '',
+        `También podés responder este mail con una sola línea: \`agregar dd/mm/aaaa\` o \`no\`.`,
+        '',
+        'Cuando el bono ya esté en el sitio te llega un mail de confirmación.',
       ].join('\n')
   return [
     `${intro}Apareció un bono que tu sitio todavía no muestra:`,
@@ -91,7 +110,10 @@ async function main() {
     return
   }
   console.log('Bonos nuevos:', nuevos.map((b) => `${b.clave} (${b.categoria})`).join(', '))
-  if (DRY_RUN === '1') return
+  if (DRY_RUN === '1') {
+    for (const bono of nuevos) console.log(`\n${cuerpoDelAviso(bono)}\n`)
+    return
+  }
 
   // Un aviso por bono en toda la historia: si ya se avisó (esté abierto, respondido o
   // cerrado a mano), no se repite.

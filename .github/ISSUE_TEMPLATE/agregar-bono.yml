@@ -1,0 +1,20 @@
+name: Agregar bono
+description: Sumar a su solapa un bono que avisó el detector de bonos nuevos (se abre desde el mail).
+title: Agregar bono
+labels: [respuesta-bono]
+body:
+  - type: input
+    id: ticker
+    attributes:
+      label: Ticker del bono avisado
+      description: Viene completado desde el mail, no hace falta tocarlo.
+    validations:
+      required: true
+  - type: input
+    id: fecha
+    attributes:
+      label: Fecha de vencimiento
+      description: Día, mes y año con barras. Después tocá "Create" abajo.
+      placeholder: dd/mm/aaaa
+    validations:
+      required: true

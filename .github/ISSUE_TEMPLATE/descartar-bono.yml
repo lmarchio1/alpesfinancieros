@@ -1,0 +1,12 @@
+name: Descartar bono
+description: Descartar un bono que avisó el detector de bonos nuevos, para que no vuelva a avisarlo (se abre desde el mail).
+title: Descartar bono
+labels: [respuesta-bono]
+body:
+  - type: input
+    id: ticker
+    attributes:
+      label: Ticker del bono avisado
+      description: Viene completado desde el mail. Para confirmar, tocá "Create" abajo.
+    validations:
+      required: true

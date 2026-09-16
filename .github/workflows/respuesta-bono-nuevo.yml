@@ -1,17 +1,22 @@
 name: Aplicar respuesta a bono nuevo
 
-# Cuando el dueño del repo responde el mail de un aviso de bono nuevo, GitHub lo publica
-# como comentario del issue y esto lo aplica: "agregar dd/mm/aaaa" suma el bono a
-# bondsReference.js y publica el sitio; "no" lo agrega a scripts/bonos-ignorados.json.
-# Ver scripts/aplicar-respuesta-bono.mjs.
+# Aplica la respuesta del dueño del repo a un aviso de bono nuevo, llegue por donde llegue:
+# - respondiendo el mail del aviso (GitHub lo publica como comentario del aviso)
+# - tocando ✅ Agregar / ❌ Descartar en el mail (abre un formulario, que crea un issue)
+# "Agregar" suma el bono a bondsReference.js, publica el sitio y, cuando comprueba que ya
+# está en línea, manda la confirmación. "Descartar" lo suma a scripts/bonos-ignorados.json.
+# Todas las respuestas se contestan en el aviso original, así quedan en el mismo hilo de
+# mails. Ver scripts/aplicar-respuesta-bono.mjs.
 
 on:
   issue_comment:
     types: [created]
+  issues:
+    types: [opened]
 
 permissions:
   contents: write # commitear el bono nuevo o el descarte
-  issues: write # contestar y cerrar el aviso
+  issues: write # contestar y cerrar los avisos
   actions: write # disparar el deploy (un push hecho con este token no lo dispara solo)
 
 concurrency:
@@ -19,20 +24,27 @@ concurrency:
 
 jobs:
   aplicar:
-    # El repo es público: cualquiera con cuenta de GitHub puede comentar. Solo se actúa
-    # sobre avisos abiertos que abrió el propio detector y solo con comentarios del dueño;
-    # cualquier otro comentario se ignora sin correr nada.
+    # El repo es público: cualquiera con cuenta de GitHub puede comentar o abrir issues.
+    # Solo se actúa con respuestas del dueño: comentarios sobre avisos abiertos que abrió el
+    # propio detector, o formularios de respuesta. Todo lo demás se ignora sin correr nada.
     if: >-
+      github.event.sender.login == github.repository_owner &&
       !github.event.issue.pull_request &&
-      github.event.issue.state == 'open' &&
-      contains(github.event.issue.labels.*.name, 'bono-nuevo') &&
-      github.event.issue.user.login == 'github-actions[bot]' &&
-      github.event.comment.user.login == github.repository_owner &&
-      github.event.comment.author_association == 'OWNER'
+      (
+        (github.event_name == 'issue_comment' &&
+          github.event.comment.author_association == 'OWNER' &&
+          github.event.issue.state == 'open' &&
+          github.event.issue.user.login == 'github-actions[bot]' &&
+          contains(github.event.issue.labels.*.name, 'bono-nuevo')) ||
+        (github.event_name == 'issues' &&
+          github.event.issue.author_association == 'OWNER' &&
+          contains(github.event.issue.body, '### Ticker del bono avisado'))
+      )
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
       NUMERO: ${{ github.event.issue.number }}
+      ES_FORMULARIO: ${{ github.event_name == 'issues' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,36 +54,88 @@ jobs:
           node-version: 22
 
       - id: decidir
-        # El texto del comentario llega por variable de entorno, nunca interpolado en el
-        # comando: así lo que alguien escriba en un mail no se puede ejecutar.
+        # Lo escrito por el usuario llega por variable de entorno, nunca interpolado en un
+        # comando: así lo que alguien escriba no se puede ejecutar.
         run: node scripts/aplicar-respuesta-bono.mjs
         env:
+          FORMULARIO: ${{ github.event_name == 'issues' && '1' || '0' }}
           COMENTARIO: ${{ github.event.comment.body }}
           ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Guardar el cambio
         if: steps.decidir.outputs.accion == 'agregado' || steps.decidir.outputs.accion == 'descartado'
+        env:
+          FORMULARIO: ${{ github.event_name == 'issues' && '1' || '0' }}
+          COMENTARIO: ${{ github.event.comment.body }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/data/bondsReference.js scripts/bonos-ignorados.json
-          git commit -F commit-bono.txt
-          git push || (git pull --rebase origin master && git push)
+          guardar() {
+            git add src/data/bondsReference.js scripts/bonos-ignorados.json
+            git diff --cached --quiet || git commit -F commit-bono.txt
+          }
+          guardar
+          # Si otra respuesta publicó algo en el medio, se rehace el cambio sobre la versión
+          # nueva (las dos pueden tocar la misma lista, y un rebase chocaría).
+          for intento in 1 2 3; do
+            git push && exit 0
+            sleep $((intento * 5))
+            git fetch origin master
+            git reset --hard origin/master
+            node scripts/aplicar-respuesta-bono.mjs > /dev/null
+            guardar
+          done
+          exit 1
 
       - name: Publicar el sitio
         if: steps.decidir.outputs.accion == 'agregado'
         run: gh workflow run deploy.yml --ref master
 
-      - name: Contestar el aviso
+      - name: Contestar
+        env:
+          AVISO: ${{ steps.decidir.outputs.aviso }}
+          CERRAR: ${{ steps.decidir.outputs.cerrar }}
         run: |
-          gh issue comment "$NUMERO" --body-file respuesta-bono.md
-          if [ "${{ steps.decidir.outputs.cerrar }}" = "true" ]; then
+          # Se contesta en el aviso original (mismo hilo de mails). Si el formulario no
+          # correspondía a ningún aviso abierto, se contesta en el formulario.
+          DESTINO="${AVISO:-$NUMERO}"
+          gh issue comment "$DESTINO" --body-file respuesta-bono.md
+          if [ "$CERRAR" = "true" ]; then gh issue close "$DESTINO"; fi
+          # El formulario es de un solo uso: se cierra siempre, con un enlace al aviso.
+          if [ "$ES_FORMULARIO" = "true" ] && [ "$DESTINO" != "$NUMERO" ]; then
+            gh issue close "$NUMERO" --comment "Procesado en #$DESTINO."
+          elif [ "$ES_FORMULARIO" = "true" ]; then
             gh issue close "$NUMERO"
           fi
 
+      - name: Esperar a que esté en el sitio
+        if: steps.decidir.outputs.confirmar == 'real'
+        timeout-minutes: 20
+        run: node scripts/verificar-bono-publicado.mjs
+        env:
+          TICKER: ${{ steps.decidir.outputs.ticker }}
+          FECHA: ${{ steps.decidir.outputs.fecha }}
+
+      - name: Confirmar
+        if: steps.decidir.outputs.confirmar == 'real' || steps.decidir.outputs.confirmar == 'prueba'
+        env:
+          AVISO: ${{ steps.decidir.outputs.aviso }}
+        run: |
+          # En la prueba se espera un poco para que los dos mails lleguen en orden.
+          [ "${{ steps.decidir.outputs.confirmar }}" = "prueba" ] && sleep 20
+          gh issue comment "$AVISO" --body-file confirmacion-bono.md
+          gh issue close "$AVISO"
+
       - name: Avisar si algo falló
         if: failure()
+        env:
+          AVISO: ${{ steps.decidir.outputs.aviso }}
         run: >-
-          gh issue comment "$NUMERO" --body
-          "No pude terminar de aplicar tu respuesta. Avisale a Claude para que lo revise;
-          el aviso queda abierto."
+          gh issue comment "${AVISO:-$NUMERO}" --body
+          "No pude terminar de aplicar tu respuesta (o el bono no apareció en el sitio a
+          tiempo). Avisale a Claude para que lo revise; el aviso queda abierto."
