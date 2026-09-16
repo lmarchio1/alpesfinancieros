@@ -1,0 +1,77 @@
+name: Aplicar respuesta a bono nuevo
+
+# Cuando el dueño del repo responde el mail de un aviso de bono nuevo, GitHub lo publica
+# como comentario del issue y esto lo aplica: "agregar dd/mm/aaaa" suma el bono a
+# bondsReference.js y publica el sitio; "no" lo agrega a scripts/bonos-ignorados.json.
+# Ver scripts/aplicar-respuesta-bono.mjs.
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write # commitear el bono nuevo o el descarte
+  issues: write # contestar y cerrar el aviso
+  actions: write # disparar el deploy (un push hecho con este token no lo dispara solo)
+
+concurrency:
+  group: bono-nuevo-${{ github.event.issue.number }}
+
+jobs:
+  aplicar:
+    # El repo es público: cualquiera con cuenta de GitHub puede comentar. Solo se actúa
+    # sobre avisos abiertos que abrió el propio detector y solo con comentarios del dueño;
+    # cualquier otro comentario se ignora sin correr nada.
+    if: >-
+      !github.event.issue.pull_request &&
+      github.event.issue.state == 'open' &&
+      contains(github.event.issue.labels.*.name, 'bono-nuevo') &&
+      github.event.issue.user.login == 'github-actions[bot]' &&
+      github.event.comment.user.login == github.repository_owner &&
+      github.event.comment.author_association == 'OWNER'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      NUMERO: ${{ github.event.issue.number }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - id: decidir
+        # El texto del comentario llega por variable de entorno, nunca interpolado en el
+        # comando: así lo que alguien escriba en un mail no se puede ejecutar.
+        run: node scripts/aplicar-respuesta-bono.mjs
+        env:
+          COMENTARIO: ${{ github.event.comment.body }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+
+      - name: Guardar el cambio
+        if: steps.decidir.outputs.accion == 'agregado' || steps.decidir.outputs.accion == 'descartado'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/bondsReference.js scripts/bonos-ignorados.json
+          git commit -F commit-bono.txt
+          git push || (git pull --rebase origin master && git push)
+
+      - name: Publicar el sitio
+        if: steps.decidir.outputs.accion == 'agregado'
+        run: gh workflow run deploy.yml --ref master
+
+      - name: Contestar el aviso
+        run: |
+          gh issue comment "$NUMERO" --body-file respuesta-bono.md
+          if [ "${{ steps.decidir.outputs.cerrar }}" = "true" ]; then
+            gh issue close "$NUMERO"
+          fi
+
+      - name: Avisar si algo falló
+        if: failure()
+        run: >-
+          gh issue comment "$NUMERO" --body
+          "No pude terminar de aplicar tu respuesta. Avisale a Claude para que lo revise;
+          el aviso queda abierto."

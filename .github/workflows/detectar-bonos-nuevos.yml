@@ -1,0 +1,35 @@
+name: Detectar bonos nuevos
+
+# Una vez por día hábil compara lo que cotiza data912 contra lo que muestra el sitio y
+# abre un aviso (issue) por cada bono nuevo, asignado al dueño del repo para que GitHub
+# le mande el mail. No toca el sitio: las altas se hacen cuando el dueño responde (ver
+# respuesta-bono-nuevo.yml). Ver scripts/detectar-bonos-nuevos.mjs.
+
+on:
+  schedule:
+    # 21:00 UTC = 18:00 hora argentina, después del cierre del mercado. El cron nativo de
+    # GitHub puede correr con horas de atraso, pero para un chequeo diario no importa.
+    - cron: '0 21 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      prueba:
+        description: 'Abrir un aviso de prueba (bono ficticio) para verificar que llega el mail'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  detectar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/detectar-bonos-nuevos.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PRUEBA: ${{ inputs.prueba && '1' || '0' }}

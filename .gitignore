@@ -17,6 +17,10 @@ dist-ssr
 # el sitio realmente usa ya están en public/, esto es solo el material de origen.
 favicon/
 
+# Archivos temporales que genera scripts/aplicar-respuesta-bono.mjs al correr.
+respuesta-bono.md
+commit-bono.txt
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
