@@ -1,0 +1,29 @@
+name: Cachear curva del Tesoro de EE.UU.
+
+# El Tesoro publica la curva una sola vez por día, después del cierre (~19hs ART), así
+# que alcanza con guardarla una vez al día en Supabase: el visitante la lee de ahí, tres
+# veces más rápido que pidiéndosela al Tesoro, y si la fuente se cae el sitio sigue
+# mostrando el último dato bueno con su fecha. Ver scripts/cachear-treasuries.mjs.
+
+on:
+  schedule:
+    # 20:30 ART, ya publicado el cierre del día.
+    - cron: '30 23 * * 1-5'
+    # Segunda pasada a la mañana siguiente, por si la publicación se demoró o GitHub no
+    # corrió el cron a horario (no lo garantiza).
+    - cron: '0 11 * * 2-6'
+  workflow_dispatch:
+
+jobs:
+  cachear:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install @supabase/supabase-js
+      - run: node scripts/cachear-treasuries.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

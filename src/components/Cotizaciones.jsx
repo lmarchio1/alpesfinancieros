@@ -38,6 +38,7 @@ const DolaresTab = cargarPestania(() => import('./cotizaciones/DolaresTab'))
 const BonosTab = cargarPestania(() => import('./cotizaciones/BonosTab'))
 const InflacionTab = cargarPestania(() => import('./cotizaciones/InflacionTab'))
 const OtrasMonedasTab = cargarPestania(() => import('./cotizaciones/OtrasMonedasTab'))
+const TreasuriesTab = cargarPestania(() => import('./cotizaciones/TreasuriesTab'))
 
 // Sin esto, una pestaña que falla se lleva puesta toda la sección de indicadores (el
 // límite de error más cercano está en App.jsx, alrededor de Cotizaciones entera): se
@@ -79,6 +80,7 @@ const TOGGLES = [
   { id: 'bonos', label: 'Renta Fija' },
   { id: 'inflacion', label: 'Inflación' },
   { id: 'monedas', label: 'Divisas y Metales' },
+  { id: 'treasuries', label: 'Treasuries' },
 ]
 
 const TOOLKIT_TAGS = [
@@ -151,7 +153,9 @@ export default function Cotizaciones() {
           ))}
         </div>
 
-        <div className="mb-8 inline-flex rounded-xl bg-slate-900/40 p-1 shadow-md shadow-black/20 ring-1 ring-white/10 backdrop-blur-md">
+        {/* En el celular los botones no entran en una sola línea -antes quedaban
+            cortados contra el borde- así que envuelven en varias filas. */}
+        <div className="mb-8 flex flex-wrap gap-1 rounded-xl bg-slate-900/40 p-1 shadow-md shadow-black/20 ring-1 ring-white/10 backdrop-blur-md sm:inline-flex">
           {TOGGLES.map((t) => (
             <button
               key={t.id}
@@ -194,6 +198,11 @@ export default function Cotizaciones() {
           {abierto === 'monedas' && (
             <Pestania nombre="Divisas y Metales">
               <OtrasMonedasTab />
+            </Pestania>
+          )}
+          {abierto === 'treasuries' && (
+            <Pestania nombre="Treasuries">
+              <TreasuriesTab />
             </Pestania>
           )}
         </Suspense>
