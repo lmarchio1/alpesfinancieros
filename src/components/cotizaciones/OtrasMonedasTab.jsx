@@ -242,7 +242,7 @@ export default function OtrasMonedasTab() {
         })}
       </div>
 
-      <div className="mt-5 flex items-start gap-2 rounded-lg bg-black/30 px-4 py-3 ring-1 ring-inset ring-white/10">
+      <div className="mt-5 flex items-start gap-2 rounded-xl bg-slate-900/20 px-4 py-3 ring-1 ring-inset ring-white/15">
         <svg
           viewBox="0 0 24 24"
           fill="none"

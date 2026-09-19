@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { usePolling } from '../../hooks/usePolling'
 import { fetchCurvaTreasury } from '../../services/treasuryApi'
 import { PLAZOS } from '../../utils/treasuryCurva'
@@ -13,27 +13,98 @@ import Badge from '../ui/Badge'
 const DESTACADOS = [
   { clave: 'm3', nombre: '3 meses', detalle: 'Letra (T-Bill)', icon: 'bg-sky-50 text-sky-700 group-hover:bg-sky-700 group-hover:text-white' },
   { clave: 'a2', nombre: '2 años', detalle: 'Nota (T-Note)', icon: 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white' },
-  { clave: 'a10', nombre: '10 años', detalle: 'Nota · Benchmark', icon: 'bg-emerald-50 text-emerald-700 group-hover:bg-emerald-700 group-hover:text-white' },
+  { clave: 'a10', nombre: '10 años', detalle: 'Nota (T-Note)', icon: 'bg-emerald-50 text-emerald-700 group-hover:bg-emerald-700 group-hover:text-white' },
   { clave: 'a30', nombre: '30 años', detalle: 'Bono (T-Bond)', icon: 'bg-amber-50 text-amber-700 group-hover:bg-amber-700 group-hover:text-white' },
 ]
 
 const conNumero = (v) => typeof v === 'number' && Number.isFinite(v)
 const formatTasa = (v) => `${v.toFixed(2)}%`
 
+// Entre normal e invertida está el aplanamiento. "Plana" se reserva para cuando el
+// diferencial de verdad está cerca de cero: con +25 pb y el 1M en 3,97% contra el 30A en
+// 5,34%, la curva tiene pendiente ascendente clara y llamarla plana sería falso. El
+// promedio histórico del 10A-2A es 84 pb (serie T10Y2Y de la Reserva Federal de St.
+// Louis, 1976-2026), y el diferencial estuvo entre -5 y +15 pb apenas el 7% del tiempo:
+// esa franja angosta es la que merece el nombre.
+const PLANA_DESDE_PB = -5
+const PLANA_HASTA_PB = 15
+
+function estadoDeCurva(pendiente) {
+  if (pendiente < PLANA_DESDE_PB) return 'invertida'
+  if (pendiente <= PLANA_HASTA_PB) return 'plana'
+  return 'normal'
+}
+
+const ESTADOS = {
+  normal: {
+    texto: 'Curva normal',
+    color: 'bg-brand-600',
+    borde: '!border-t-brand-600',
+    trazo: 'M2 12L8 6l6-3',
+    explicacion: (pendiente) =>
+      `El diferencial es positivo (${formatPbLlano(pendiente)}): la curva mantiene la pendiente ascendente típica, a mayor plazo mayor retorno. Un estrechamiento sostenido hacia 0 pb reflejaría aplanamiento y posibles expectativas de cambio de ciclo.`,
+  },
+  plana: {
+    texto: 'Curva plana',
+    color: 'bg-[#a35f24]',
+    borde: '!border-t-[#a35f24]',
+    trazo: 'M2 9h12',
+    explicacion: () =>
+      'El diferencial está prácticamente en cero: prestar a diez años paga casi lo mismo que a dos. El aplanamiento puede venir de una suba de las tasas cortas o de una baja de las largas, y es el paso previo a una inversión.',
+  },
+  invertida: {
+    texto: 'Curva invertida',
+    color: 'bg-rose-700',
+    borde: '!border-t-rose-700',
+    trazo: 'M2 4l6 6 6 3',
+    explicacion: () =>
+      'El tramo corto rinde más que el largo. La inversión de la curva suele anticipar una desaceleración o un cambio en la política monetaria, y es la señal que históricamente precedió a las recesiones en EE.UU.',
+  },
+}
+
+// Íconos de las dos tarjetas anchas: misma caja redondeada que la de las tarjetas de
+// plazos, para que las seis se lean como una sola familia.
+function IconoTarjeta({ className, children }) {
+  return (
+    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-all duration-300 ease-out group-hover:scale-110 ${className}`}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5" strokeLinecap="round" strokeLinejoin="round">
+        {children}
+      </svg>
+    </div>
+  )
+}
+
+// Dos tramos a distinta altura y la distancia entre ellos: la resta que muestra la
+// tarjeta.
+const iconoPendiente = (
+  <>
+    <path d="M3 16h5" />
+    <path d="M16 8h5" />
+    <path d="M12 15.5v-7" />
+    <path d="M10 10.5l2-2 2 2" />
+    <path d="M10 13.5l2 2 2-2" />
+  </>
+)
+
+// Ejes y una curva que sube y se aplana, la forma misma del gráfico.
+const iconoCurva = (
+  <>
+    <path d="M4 5v14h16" />
+    <path d="M7 16c2.5 0 4-6 6.5-7.5S18 7 20 6.8" />
+  </>
+)
+
 // Estado de la curva, no un botón: pastilla sólida con el ícono de la pendiente, para que
 // no se confunda con algo que se pueda tocar (los botones del sitio son sólidos también,
 // pero llevan texto de acción; este lleva un ícono y describe una situación).
-function EstadoCurva({ positiva }) {
+function EstadoCurva({ estado }) {
+  const { texto, color, trazo } = ESTADOS[estado]
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-white ${
-        positiva ? 'bg-brand-600' : 'bg-rose-700'
-      }`}
-    >
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-white ${color}`}>
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5 shrink-0">
-        <path strokeLinecap="round" strokeLinejoin="round" d={positiva ? 'M2 12L8 6l6-3' : 'M2 4l6 6 6 3'} />
+        <path strokeLinecap="round" strokeLinejoin="round" d={trazo} />
       </svg>
-      {positiva ? 'Curva normal' : 'Curva invertida'}
+      {texto}
     </span>
   )
 }
@@ -57,27 +128,72 @@ const formatFechaCorta = (iso) => {
   return `${d}/${m}`
 }
 
-const ANCHO = 680
-const ALTO = 300
-const MARGEN = { top: 22, right: 26, bottom: 42, left: 52 }
-const ANCHO_PLOT = ANCHO - MARGEN.left - MARGEN.right
-const ALTO_PLOT = ALTO - MARGEN.top - MARGEN.bottom
+// El gráfico se dibuja distinto según el ancho de pantalla. No alcanza con achicar el
+// mismo dibujo: el SVG escala todo por igual, así que en un celular la tipografía de
+// 11px del escritorio termina midiendo 5px reales, ilegible. En pantalla chica se usa un
+// lienzo más angosto (misma proporción que el teléfono), tipografía más grande en
+// unidades del dibujo y menos etiquetas.
+const DISENIOS = {
+  escritorio: {
+    ancho: 680,
+    alto: 244,
+    margen: { top: 26, right: 26, bottom: 38, left: 52 },
+    fuenteEje: 11,
+    fuenteValor: 11,
+    pasoY: 0.25,
+    radio: 3.5,
+    // Los cortos están muy juntos: se etiqueta uno por medio.
+    ejeX: (p, i) => p.anios >= 1 || i % 2 === 0,
+    pilares: ['m3', 'a2', 'a10', 'a30'],
+  },
+  celular: {
+    ancho: 360,
+    alto: 230,
+    margen: { top: 24, right: 14, bottom: 28, left: 40 },
+    fuenteEje: 13,
+    fuenteValor: 13,
+    pasoY: 0.5,
+    radio: 4,
+    ejeX: (p) => ['m3', 'a1', 'a2', 'a5', 'a10', 'a30'].includes(p.clave),
+    pilares: ['m3', 'a10', 'a30'],
+  },
+}
 
-function ticksY(min, max) {
-  const paso = 0.25
-  const inicio = Math.floor(min / paso) * paso
-  const fin = Math.ceil(max / paso) * paso
+function useEsMovil() {
+  const consulta = '(max-width: 639px)'
+  const [esMovil, setEsMovil] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia(consulta).matches : false,
+  )
+  useEffect(() => {
+    const mq = window.matchMedia(consulta)
+    const revisar = () => setEsMovil(mq.matches)
+    revisar()
+    // Se escuchan los dos: el evento de la media query es el correcto, pero hay
+    // navegadores -y entornos de prueba- donde el cambio de ancho no lo dispara.
+    mq.addEventListener('change', revisar)
+    window.addEventListener('resize', revisar)
+    return () => {
+      mq.removeEventListener('change', revisar)
+      window.removeEventListener('resize', revisar)
+    }
+  }, [])
+  return esMovil
+}
+
+// El eje deja un 15% de aire arriba y un 5% abajo antes de redondear al escalón: sin
+// eso, el punto más alto quedaba pegado a la línea del techo y su valor parecía cortado.
+function ticksY(min, max, paso) {
+  const rango = max - min || paso
+  const inicio = Math.floor((min - rango * 0.05) / paso) * paso
+  const fin = Math.ceil((max + rango * 0.15) / paso) * paso
   const t = []
   for (let v = inicio; v <= fin + 0.001; v += paso) t.push(Number(v.toFixed(2)))
   return t
 }
 
-// Plazos que llevan el valor escrito arriba del punto: los cuatro de referencia. Poner
-// los doce amontonaría números ilegibles, sobre todo en el celular.
-const PLAZOS_ROTULADOS = new Set(['m3', 'a2', 'a10', 'a30'])
-
-// Vértices con línea guía vertical: los tramos que estructuran la curva.
-const VERTICES = new Set(['a2', 'a10', 'a30'])
+// Vértices con línea guía vertical: los tramos que estructuran la curva, más el 5A
+// para no dejar sin referencia toda la panza de la curva.
+const VERTICES = new Set(['a2', 'a5', 'a10', 'a30'])
 
 // El eje X va por raíz cuadrada de los años, no un plazo por casillero: con casilleros
 // parejos, los ocho plazos de menos de 3 años se comen media pantalla y el salto de 10 a
@@ -86,31 +202,71 @@ const VERTICES = new Set(['a2', 'a10', 'a30'])
 // contra el margen izquierdo (que es lo que pasaría con una escala de años lisa).
 const posicionX = (anios) => Math.sqrt(anios)
 
-function GraficoCurva({ hoy, referencia }) {
+function GraficoCurva({ hoy, referencia, previo, esMovil, textoComparacion }) {
+  const [activo, setActivo] = useState(null)
+  const svgRef = useRef(null)
+  const d = esMovil ? DISENIOS.celular : DISENIOS.escritorio
+  const anchoPlot = d.ancho - d.margen.left - d.margen.right
+  const altoPlot = d.alto - d.margen.top - d.margen.bottom
+
   const plazos = PLAZOS.filter((p) => conNumero(hoy[p.clave]))
   if (plazos.length < 3) return null
 
   const valores = plazos.flatMap((p) => [hoy[p.clave], referencia?.[p.clave]].filter(conNumero))
-  const marcas = ticksY(Math.min(...valores), Math.max(...valores))
+  const marcas = ticksY(Math.min(...valores), Math.max(...valores), d.pasoY)
   const minY = marcas[0]
   const maxY = marcas[marcas.length - 1]
 
   const xMin = posicionX(plazos[0].anios)
   const xMax = posicionX(plazos[plazos.length - 1].anios)
-  const x = (anios) => MARGEN.left + ((posicionX(anios) - xMin) / (xMax - xMin)) * ANCHO_PLOT
-  const y = (v) => MARGEN.top + ALTO_PLOT - ((v - minY) / (maxY - minY || 1)) * ALTO_PLOT
+  const x = (anios) => d.margen.left + ((posicionX(anios) - xMin) / (xMax - xMin)) * anchoPlot
+  const y = (v) => d.margen.top + altoPlot - ((v - minY) / (maxY - minY || 1)) * altoPlot
   const linea = (fila) =>
     plazos
       .map((p) => (conNumero(fila?.[p.clave]) ? `${x(p.anios)},${y(fila[p.clave])}` : null))
       .filter(Boolean)
       .join(' ')
 
-  // Con la escala por raíz, los plazos cortos quedan cerca entre sí: se rotulan de a uno
-  // por medio para que las etiquetas no se toquen.
-  const etiquetaVisible = (p, i) => p.anios >= 1 || i % 2 === 0
+  // A los pilares se les suma el plazo de mayor rendimiento: es el punto más alto del
+  // dibujo y quedaba sin número, con la línea bajando después hacia un valor menor que sí
+  // estaba rotulado, lo que se leía al revés de lo que pasó.
+  const masAlto = plazos.reduce((a, b) => (hoy[b.clave] > hoy[a.clave] ? b : a))
+  const rotulados = new Set([...d.pilares, masAlto.clave])
+
+  // Un rótulo centrado sobre el primer o el último punto se saldría del dibujo: contra
+  // los bordes se alinea hacia adentro.
+  const anclaje = (px) => (px > d.ancho - 40 ? 'end' : px < d.margen.left + 16 ? 'start' : 'middle')
+
+  // Del X del mouse o del dedo al plazo más cercano: así no hay que acertarle al punto
+  // -imposible en el celular-, alcanza con moverse por encima del gráfico. El
+  // getBoundingClientRect pasa de píxeles de pantalla a unidades del dibujo, que no son
+  // lo mismo (el SVG se estira al ancho de la tarjeta).
+  const plazoDesdeClientX = (clientX) => {
+    const rect = svgRef.current.getBoundingClientRect()
+    const enDibujo = ((clientX - rect.left) / rect.width) * d.ancho
+    let mejor = plazos[0]
+    for (const p of plazos) {
+      if (Math.abs(x(p.anios) - enDibujo) < Math.abs(x(mejor.anios) - enDibujo)) mejor = p
+    }
+    return mejor
+  }
+  const alMover = (e) => setActivo(plazoDesdeClientX(e.clientX))
+  const alTocar = (e) => {
+    e.preventDefault()
+    setActivo(plazoDesdeClientX(e.touches[0].clientX))
+  }
+
+  const variacionActiva = activo && previo ? enPb(hoy[activo.clave], previo[activo.clave]) : null
+  const valorReferencia = activo && referencia ? referencia[activo.clave] : null
 
   return (
-    <svg viewBox={`0 0 ${ANCHO} ${ALTO}`} className="h-auto w-full" role="img" aria-label="Curva de rendimientos del Tesoro de Estados Unidos">
+    <svg
+      ref={svgRef}
+      viewBox={`0 0 ${d.ancho} ${d.alto}`}
+      className="h-auto w-full touch-none"
+      role="img"
+      aria-label="Curva de rendimientos del Tesoro de Estados Unidos"
+    >
       <defs>
         {/* Sombra nativa de SVG: el filtro por CSS no se dibuja en Safari de iPhone. */}
         <filter id="sombraCurvaHoy" x="-10%" y="-20%" width="120%" height="150%">
@@ -120,15 +276,13 @@ function GraficoCurva({ hoy, referencia }) {
 
       {marcas.map((v) => (
         <g key={v}>
-          <line x1={MARGEN.left} x2={MARGEN.left + ANCHO_PLOT} y1={y(v)} y2={y(v)} stroke="#e2e8f0" strokeWidth="1" />
-          <text x={MARGEN.left - 10} y={y(v) + 4} textAnchor="end" className="fill-slate-400 text-[11px]">
+          <line x1={d.margen.left} x2={d.margen.left + anchoPlot} y1={y(v)} y2={y(v)} stroke="#e2e8f0" strokeWidth="1" />
+          <text x={d.margen.left - 8} y={y(v) + 4} textAnchor="end" fontSize={d.fuenteEje} className="fill-slate-400">
             {v.toFixed(2)}%
           </text>
         </g>
       ))}
 
-      {/* Guías verticales en los vértices de referencia: con el eje por raíz de los años,
-          ayudan a ubicar dónde cae cada tramo sin contar puntos. */}
       {plazos
         .filter((p) => VERTICES.has(p.clave))
         .map((p) => (
@@ -136,8 +290,8 @@ function GraficoCurva({ hoy, referencia }) {
             key={`guia-${p.clave}`}
             x1={x(p.anios)}
             x2={x(p.anios)}
-            y1={MARGEN.top}
-            y2={MARGEN.top + ALTO_PLOT}
+            y1={d.margen.top}
+            y2={d.margen.top + altoPlot}
             stroke="#e2e8f0"
             strokeWidth="1"
             strokeDasharray="3 4"
@@ -145,32 +299,86 @@ function GraficoCurva({ hoy, referencia }) {
         ))}
 
       {plazos.map((p, i) =>
-        etiquetaVisible(p, i) ? (
-          <text key={p.clave} x={x(p.anios)} y={ALTO - 14} textAnchor="middle" className="fill-slate-500 text-[11px]">
+        d.ejeX(p, i) ? (
+          <text key={p.clave} x={x(p.anios)} y={d.alto - 10} textAnchor={anclaje(x(p.anios))} fontSize={d.fuenteEje} className="fill-slate-500">
             {p.corta}
           </text>
         ) : null,
       )}
 
       {referencia && (
-        <polyline points={linea(referencia)} fill="none" stroke="#94a3b8" strokeWidth="2" strokeDasharray="5 4" strokeLinejoin="round" strokeLinecap="round" />
+        <polyline points={linea(referencia)} fill="none" stroke="#94a3b8" strokeWidth={esMovil ? 2.5 : 2} strokeDasharray="5 4" strokeLinejoin="round" strokeLinecap="round" />
       )}
-      <polyline points={linea(hoy)} fill="none" stroke="#0f766e" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" filter="url(#sombraCurvaHoy)" />
+      <polyline points={linea(hoy)} fill="none" stroke="#0f766e" strokeWidth={esMovil ? 3.5 : 3} strokeLinejoin="round" strokeLinecap="round" filter="url(#sombraCurvaHoy)" />
       {plazos.map((p) => (
         <g key={p.clave}>
-          <circle cx={x(p.anios)} cy={y(hoy[p.clave])} r="3.5" fill="#0f766e" />
-          {PLAZOS_ROTULADOS.has(p.clave) && (
-            <text x={x(p.anios)} y={y(hoy[p.clave]) - 12} textAnchor="middle" className="fill-slate-700 text-[11px] font-semibold">
+          <circle cx={x(p.anios)} cy={y(hoy[p.clave])} r={d.radio} fill="#0f766e" />
+          {rotulados.has(p.clave) && (
+            <text
+              x={x(p.anios)}
+              // Si el punto está contra el techo, el valor va debajo: pegado al borde
+              // parecía que la línea se salía del gráfico.
+              y={y(hoy[p.clave]) - 12 < d.margen.top ? y(hoy[p.clave]) + 18 : y(hoy[p.clave]) - 12}
+              textAnchor={anclaje(x(p.anios))}
+              fontSize={d.fuenteValor}
+              className="fill-slate-700 font-semibold"
+            >
               {hoy[p.clave].toFixed(2)}%
             </text>
           )}
         </g>
       ))}
+      {activo && conNumero(hoy[activo.clave]) && (
+        (() => {
+          const px = x(activo.anios)
+          const py = y(hoy[activo.clave])
+          const alto = conNumero(valorReferencia) ? (esMovil ? 58 : 50) : esMovil ? 44 : 38
+          const ancho = esMovil ? 124 : 112
+          const xCaja = Math.min(Math.max(px - ancho / 2, d.margen.left), d.ancho - d.margen.right - ancho)
+          const yCaja = py - alto - 12 > d.margen.top ? py - alto - 12 : py + 14
+          return (
+            <g pointerEvents="none">
+              <line x1={px} x2={px} y1={d.margen.top} y2={d.margen.top + altoPlot} stroke="#94a3b8" strokeWidth="1" strokeDasharray="3,3" />
+              <circle cx={px} cy={py} r="5.5" fill="#0f766e" stroke="white" strokeWidth="2" />
+              <rect x={xCaja} y={yCaja} width={ancho} height={alto} rx="6" fill="#1e293b" />
+              <text x={xCaja + ancho / 2} y={yCaja + (esMovil ? 15 : 13)} textAnchor="middle" fontSize={d.fuenteEje} className="fill-slate-300">
+                {activo.etiqueta}
+              </text>
+              <text x={xCaja + ancho / 2} y={yCaja + (esMovil ? 32 : 27)} textAnchor="middle" fontSize={d.fuenteValor + 1} className="fill-white font-bold">
+                {formatTasa(hoy[activo.clave])}
+                {variacionActiva !== null ? `  ${formatPbLlano(variacionActiva)}` : ''}
+              </text>
+              {conNumero(valorReferencia) && (
+                <text x={xCaja + ancho / 2} y={yCaja + (esMovil ? 49 : 41)} textAnchor="middle" fontSize={d.fuenteEje} className="fill-slate-400">
+                  {textoComparacion}: {formatTasa(valorReferencia)}
+                </text>
+              )}
+            </g>
+          )
+        })()
+      )}
+
+      {/* Franja invisible sobre todo el dibujo: el seguimiento engancha desde cualquier
+          punto, no solo encima de la línea. */}
+      <rect
+        x={d.margen.left}
+        y={d.margen.top}
+        width={anchoPlot}
+        height={altoPlot}
+        fill="transparent"
+        style={{ touchAction: 'none' }}
+        onMouseMove={alMover}
+        onMouseLeave={() => setActivo(null)}
+        onTouchStart={alTocar}
+        onTouchMove={alTocar}
+        onTouchEnd={() => setActivo(null)}
+      />
     </svg>
   )
 }
 
 export default function TreasuriesTab() {
+  const esMovil = useEsMovil()
   const fetcher = useCallback(() => fetchCurvaTreasury(), [])
   const { data, error, loading, refresh } = usePolling(fetcher, {
     // Se publica una vez por día: alcanza con revisar cada hora por si la pestaña
@@ -233,6 +441,7 @@ export default function TreasuriesTab() {
   const pendientePrevia = previo ? enPb(previo.a10, previo.a2) : null
   // Se dice lo que realmente se está comparando: "hace un mes" solo si de verdad es
   // aproximadamente un mes.
+  const estado = conNumero(pendiente) ? estadoDeCurva(pendiente) : 'normal'
   const textoComparacion =
     diasDeDiferencia >= 25 ? 'Hace un mes' : diasDeDiferencia >= 10 ? `Hace ${diasDeDiferencia} días` : 'Cierre anterior'
 
@@ -292,16 +501,24 @@ export default function TreasuriesTab() {
       </div>
 
       {conNumero(pendiente) && (
-        <Card className="mt-4 p-5">
+        <Card
+          className={`group animate-fade-up border-t-4 p-5 shadow-md shadow-slate-200/70 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)] motion-reduce:transition-none motion-reduce:animate-none ${ESTADOS[estado].borde}`}
+          style={{ animationDelay: '320ms', marginTop: '1rem' }}
+        >
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <p className="font-semibold text-slate-900">Pendiente de la curva (10A − 2A)</p>
-              <p className="text-xs text-slate-500">
-                Diferencial entre la Nota a 10 años y la de 2 años: {formatTasa(hoy.a10)} − {formatTasa(hoy.a2)}
-              </p>
+            <div className="flex items-center gap-3">
+              <IconoTarjeta className="bg-brand-50 text-brand-600 group-hover:bg-brand-600 group-hover:text-white">
+                {iconoPendiente}
+              </IconoTarjeta>
+              <div>
+                <p className="font-semibold text-slate-900">Pendiente de la curva (10A − 2A)</p>
+                <p className="text-xs text-slate-500">
+                  Diferencial entre la Nota a 10 años y la de 2 años: {formatTasa(hoy.a10)} − {formatTasa(hoy.a2)}
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-3">
-              <EstadoCurva positiva={pendiente >= 0} />
+              <EstadoCurva estado={estado} />
               <div className="text-right">
                 <p className="text-2xl font-bold text-slate-900">{formatPbLlano(pendiente)}</p>
                 {conNumero(pendientePrevia) && (
@@ -312,20 +529,26 @@ export default function TreasuriesTab() {
               </div>
             </div>
           </div>
-          <p className="mt-3 border-t border-slate-100 pt-3 text-xs text-slate-500">
-            Un diferencial positivo refleja una curva normal: a mayor plazo, mayor retorno. Cuando se comprime o se
-            invierte, suele anticipar una desaceleración o un cambio en la política monetaria.
-          </p>
+          <p className="mt-3 border-t border-slate-100 pt-3 text-xs text-slate-500">{ESTADOS[estado].explicacion(pendiente)}</p>
         </Card>
       )}
 
-      <Card className="mt-4 p-5">
+      <Card
+        className="group animate-fade-up border-t-4 !border-t-[#0d9488] p-5 shadow-md shadow-slate-200/70 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)] motion-reduce:transition-none motion-reduce:animate-none"
+        style={{ animationDelay: '400ms', marginTop: '1rem' }}
+      >
         <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
-          <div>
-            <p className="font-semibold text-slate-900">Curva de rendimientos</p>
-            <p className="max-w-md text-xs text-slate-500">
-              Rendimiento anual de cada plazo, del más corto al más largo.
-            </p>
+          <div className="flex items-center gap-3">
+            <IconoTarjeta className="bg-teal-50 text-[#0d9488] group-hover:bg-[#0d9488] group-hover:text-white">
+              {iconoCurva}
+            </IconoTarjeta>
+            <div>
+              <p className="font-semibold text-slate-900">Curva de rendimientos</p>
+              <p className="max-w-md text-xs text-slate-500">
+              Rendimiento anual de cada plazo, del más corto al más largo. Pasá el mouse -o el dedo- por
+                el gráfico para ver cada uno.
+              </p>
+            </div>
           </div>
           <div className="flex flex-col gap-1.5 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600 ring-1 ring-inset ring-slate-200">
             <span className="inline-flex items-center gap-2">
@@ -341,34 +564,12 @@ export default function TreasuriesTab() {
           </div>
         </div>
         <div className="mt-3">
-          <GraficoCurva hoy={hoy} referencia={referencia} />
+          <GraficoCurva hoy={hoy} referencia={referencia} previo={previo} esMovil={esMovil} textoComparacion={textoComparacion} />
         </div>
 
-        {/* El gráfico rotula solo los cuatro plazos de las tarjetas: acá está el valor de
-            todos, para leer la curva punto por punto sin depender de pasar el mouse
-            (que en el celular directamente no existe). */}
-        <div className="mt-4 border-t border-slate-100 pt-4">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Todos los plazos</p>
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
-            {PLAZOS.filter((p) => conNumero(hoy[p.clave])).map((p) => {
-              const variacion = previo ? enPb(hoy[p.clave], previo[p.clave]) : null
-              return (
-                <div key={p.clave} className="rounded-lg bg-slate-50 px-2.5 py-2 text-center ring-1 ring-inset ring-slate-200">
-                  <p className="text-[11px] font-medium text-slate-500">{p.etiqueta}</p>
-                  <p className="text-sm font-bold tabular-nums text-slate-900">{formatTasa(hoy[p.clave])}</p>
-                  {variacion !== null && (
-                    <p className={`text-[11px] tabular-nums ${variacion >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
-                      {formatPb(variacion)}
-                    </p>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
       </Card>
 
-      <div className="mt-5 flex items-start gap-2 rounded-lg bg-black/30 px-4 py-3 ring-1 ring-inset ring-white/10">
+      <div className="mt-5 flex items-start gap-2 rounded-xl bg-slate-900/20 px-4 py-3 ring-1 ring-inset ring-white/15">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="mt-0.5 h-4 w-4 shrink-0 text-slate-300">
           <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 8h.01M11 12h1v4h1" />

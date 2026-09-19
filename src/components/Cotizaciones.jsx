@@ -153,16 +153,20 @@ export default function Cotizaciones() {
           ))}
         </div>
 
-        {/* En el celular los botones no entran en una sola línea -antes quedaban
-            cortados contra el borde- así que envuelven en varias filas. */}
-        <div className="mb-8 flex flex-wrap gap-1 rounded-xl bg-slate-900/40 p-1 shadow-md shadow-black/20 ring-1 ring-white/10 backdrop-blur-md sm:inline-flex">
-          {TOGGLES.map((t) => (
+        {/* En el celular las cinco pestañas no entran en una línea. Dejarlas envolver
+            libremente daba filas de distinto largo, desprolijas: acá van en dos columnas
+            iguales, y la que queda sola ocupa el ancho completo. Desde tablet vuelven a
+            ser una sola fila. */}
+        <div className="mb-8 grid grid-cols-2 gap-1 rounded-xl bg-slate-900/40 p-1 shadow-md shadow-black/20 ring-1 ring-white/10 backdrop-blur-md sm:inline-flex sm:gap-0">
+          {TOGGLES.map((t, i) => (
             <button
               key={t.id}
               type="button"
               onClick={() => toggle(t.id)}
               aria-expanded={abierto === t.id}
               className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors [text-shadow:0_1px_2px_rgba(0,0,0,0.4)] ${
+                i === TOGGLES.length - 1 && TOGGLES.length % 2 === 1 ? 'col-span-2 sm:col-span-1' : ''
+              } ${
                 abierto === t.id
                   ? 'bg-brand-600 text-white shadow-sm'
                   : 'text-slate-100 hover:text-white'
