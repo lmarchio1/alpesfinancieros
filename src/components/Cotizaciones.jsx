@@ -78,9 +78,9 @@ function TabSkeleton() {
 const TOGGLES = [
   { id: 'dolares', label: 'Tipos de Cambio' },
   { id: 'bonos', label: 'Renta Fija' },
+  { id: 'treasuries', label: 'Tasas EEUU' },
   { id: 'inflacion', label: 'Inflación' },
   { id: 'monedas', label: 'Divisas y Metales' },
-  { id: 'treasuries', label: 'Treasuries' },
 ]
 
 const TOOLKIT_TAGS = [
@@ -201,7 +201,7 @@ export default function Cotizaciones() {
             </Pestania>
           )}
           {abierto === 'treasuries' && (
-            <Pestania nombre="Treasuries">
+            <Pestania nombre="Tasas EEUU">
               <TreasuriesTab />
             </Pestania>
           )}
