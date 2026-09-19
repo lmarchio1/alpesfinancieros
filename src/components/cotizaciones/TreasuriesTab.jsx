@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { usePolling } from '../../hooks/usePolling'
 import { fetchCurvaTreasury } from '../../services/treasuryApi'
 import { PLAZOS } from '../../utils/treasuryCurva'
@@ -145,17 +146,45 @@ const DISENIOS = {
     // Los cortos están muy juntos: se etiqueta uno por medio.
     ejeX: (p, i) => p.anios >= 1 || i % 2 === 0,
     pilares: ['m3', 'a2', 'a10', 'a30'],
+    separacion: 0.16,
   },
   celular: {
     ancho: 360,
     alto: 230,
-    margen: { top: 24, right: 14, bottom: 28, left: 40 },
+    margen: { top: 24, right: 16, bottom: 28, left: 48 },
     fuenteEje: 13,
     fuenteValor: 13,
     pasoY: 0.5,
     radio: 4,
     ejeX: (p) => ['m3', 'a1', 'a2', 'a5', 'a10', 'a30'].includes(p.clave),
     pilares: ['m3', 'a10', 'a30'],
+    separacion: 0.16,
+  },
+  // Ampliado: el gráfico solo, sin el texto de la tarjeta alrededor, así que se le da
+  // todo el alto que en la tarjeta no entra. Es el que se abre con el botón del título.
+  escritorioAmpliado: {
+    ancho: 680,
+    alto: 380,
+    margen: { top: 28, right: 28, bottom: 44, left: 56 },
+    fuenteEje: 12,
+    fuenteValor: 12,
+    pasoY: 0.25,
+    radio: 4,
+    ejeX: () => true,
+    pilares: ['m3', 'a2', 'a10', 'a30'],
+    separacion: 0.1,
+  },
+  celularAmpliado: {
+    ancho: 360,
+    alto: 420,
+    margen: { top: 26, right: 18, bottom: 32, left: 48 },
+    fuenteEje: 12,
+    fuenteValor: 12,
+    pasoY: 0.25,
+    radio: 4.5,
+    ejeX: (p) => ['m1', 'm3', 'm6', 'a1', 'a2', 'a3', 'a5', 'a7', 'a10', 'a20', 'a30'].includes(p.clave),
+    pilares: ['m3', 'a2', 'a10', 'a30'],
+    separacion: 0.1,
   },
 }
 
@@ -202,10 +231,10 @@ const VERTICES = new Set(['a2', 'a5', 'a10', 'a30'])
 // contra el margen izquierdo (que es lo que pasaría con una escala de años lisa).
 const posicionX = (anios) => Math.sqrt(anios)
 
-function GraficoCurva({ hoy, referencia, previo, esMovil, textoComparacion }) {
+function GraficoCurva({ hoy, referencia, previo, esMovil, textoComparacion, ampliado = false }) {
   const [activo, setActivo] = useState(null)
   const svgRef = useRef(null)
-  const d = esMovil ? DISENIOS.celular : DISENIOS.escritorio
+  const d = DISENIOS[`${esMovil ? 'celular' : 'escritorio'}${ampliado ? 'Ampliado' : ''}`]
   const anchoPlot = d.ancho - d.margen.left - d.margen.right
   const altoPlot = d.alto - d.margen.top - d.margen.bottom
 
@@ -231,7 +260,20 @@ function GraficoCurva({ hoy, referencia, previo, esMovil, textoComparacion }) {
   // dibujo y quedaba sin número, con la línea bajando después hacia un valor menor que sí
   // estaba rotulado, lo que se leía al revés de lo que pasó.
   const masAlto = plazos.reduce((a, b) => (hoy[b.clave] > hoy[a.clave] ? b : a))
-  const rotulados = new Set([...d.pilares, masAlto.clave])
+  // El máximo tiene prioridad sobre los pilares: si dos rótulos caen demasiado cerca
+  // -pasaba con 20A y 30A en el celular, que se leían como "5.38%5.34%"- se deja el
+  // primero y se descarta el otro.
+  const separacionMinima = d.ancho * d.separacion
+  const rotulados = new Set()
+  let ultimoX = -Infinity
+  for (const p of plazos) {
+    if (!d.pilares.includes(p.clave) && p.clave !== masAlto.clave) continue
+    const px = x(p.anios)
+    if (p.clave !== masAlto.clave && px - ultimoX < separacionMinima) continue
+    if (p.clave === masAlto.clave && px - ultimoX < separacionMinima) rotulados.delete([...rotulados].pop())
+    rotulados.add(p.clave)
+    ultimoX = px
+  }
 
   // Un rótulo centrado sobre el primer o el último punto se saldría del dibujo: contra
   // los bordes se alinea hacia adentro.
@@ -377,8 +419,73 @@ function GraficoCurva({ hoy, referencia, previo, esMovil, textoComparacion }) {
   )
 }
 
+// Mismo patrón que la tendencia de Reservas: el gráfico ampliado se abre en una capa
+// aparte. En el celular es la única forma de que la curva entre con todos sus plazos
+// rotulados y con aire; en la tarjeta va siempre la versión compacta.
+function ModalCurva({ onClose, hoy, referencia, previo, esMovil, textoComparacion }) {
+  useEffect(() => {
+    const alTeclear = (e) => e.key === 'Escape' && onClose()
+    document.addEventListener('keydown', alTeclear)
+    return () => document.removeEventListener('keydown', alTeclear)
+  }, [onClose])
+
+  // Portal al body: la tarjeta tiene transform por el efecto de hover, y dentro de un
+  // elemento con transform el position:fixed deja de medirse contra la pantalla.
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 sm:p-4" onClick={onClose}>
+      <div className="w-full max-w-2xl rounded-2xl bg-white p-4 shadow-2xl sm:p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="font-semibold text-slate-900">Curva de rendimientos del Tesoro</p>
+            <p className="text-xs text-slate-500">Cierre del {formatFecha(hoy.fecha)}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Cerrar"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-slate-600">
+          <span className="inline-flex items-center gap-2">
+            <span className="h-[3px] w-6 shrink-0 rounded-full bg-[#0f766e]" />
+            Cierre de hoy · {formatFechaCorta(hoy.fecha)}
+          </span>
+          {referencia && (
+            <span className="inline-flex items-center gap-2">
+              <span className="w-6 shrink-0 border-t-2 border-dashed border-slate-400" />
+              {textoComparacion} · {formatFechaCorta(referencia.fecha)}
+            </span>
+          )}
+        </div>
+
+        <div className="mt-2">
+          <GraficoCurva
+            hoy={hoy}
+            referencia={referencia}
+            previo={previo}
+            esMovil={esMovil}
+            textoComparacion={textoComparacion}
+            ampliado
+          />
+        </div>
+        <p className="mt-2 text-xs text-slate-500">
+          {esMovil ? 'Deslizá el dedo' : 'Pasá el mouse'} por el gráfico para ver el rendimiento de cada plazo.
+        </p>
+      </div>
+    </div>,
+    document.body,
+  )
+}
+
 export default function TreasuriesTab() {
   const esMovil = useEsMovil()
+  const [modalAbierto, setModalAbierto] = useState(false)
   const fetcher = useCallback(() => fetchCurvaTreasury(), [])
   const { data, error, loading, refresh } = usePolling(fetcher, {
     // Se publica una vez por día: alcanza con revisar cada hora por si la pestaña
@@ -543,7 +650,19 @@ export default function TreasuriesTab() {
               {iconoCurva}
             </IconoTarjeta>
             <div>
-              <p className="font-semibold text-slate-900">Curva de rendimientos</p>
+              <div className="flex items-center gap-2">
+                <p className="font-semibold text-slate-900">Curva de rendimientos</p>
+                <button
+                  type="button"
+                  onClick={() => setModalAbierto(true)}
+                  aria-label="Ver el gráfico en grande"
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-50 text-[#0d9488] transition-colors hover:bg-[#0d9488] hover:text-white"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 4H4v5M15 20h5v-5M20 9V4h-5M4 15v5h5" />
+                  </svg>
+                </button>
+              </div>
               <p className="max-w-md text-xs text-slate-500">
               Rendimiento anual de cada plazo, del más corto al más largo. Pasá el mouse -o el dedo- por
                 el gráfico para ver cada uno.
@@ -568,6 +687,17 @@ export default function TreasuriesTab() {
         </div>
 
       </Card>
+
+      {modalAbierto && (
+        <ModalCurva
+          onClose={() => setModalAbierto(false)}
+          hoy={hoy}
+          referencia={referencia}
+          previo={previo}
+          esMovil={esMovil}
+          textoComparacion={textoComparacion}
+        />
+      )}
 
       <div className="mt-5 flex items-start gap-2 rounded-xl bg-slate-900/20 px-4 py-3 ring-1 ring-inset ring-white/15">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="mt-0.5 h-4 w-4 shrink-0 text-slate-300">
