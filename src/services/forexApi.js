@@ -50,6 +50,16 @@ function diaAnterior(fechaIso) {
   return d.toISOString().slice(0, 10)
 }
 
+// La fuente no siempre publica todas las monedas: el 18/09/2026 el archivo del día
+// salió con 301 claves en vez de 340 y le faltaban, entre otras, el platino (XPT) y el
+// paladio. Con `1 / undefined` eso daba NaN y la tarjeta mostraba "USD NaN", así que
+// cada cotización se valida acá: si la fuente no la publicó, se devuelve null y la
+// tarjeta no se dibuja, sin afectar al resto.
+function tasa(rates, codigo) {
+  const valor = rates?.[codigo.toLowerCase()]
+  return typeof valor === 'number' && Number.isFinite(valor) && valor > 0 ? valor : null
+}
+
 export async function fetchOtrasMonedas() {
   const hoy = await fetchUsdRatesHoy()
 
@@ -60,13 +70,17 @@ export async function fetchOtrasMonedas() {
     ayer = null
   }
 
-  const arsPorUsd = hoy.usd.ars
+  // Sin el peso no hay nada que mostrar: se trata como una respuesta inservible, así el
+  // hook conserva el último dato bueno en vez de reemplazarlo por tarjetas vacías.
+  const arsPorUsd = tasa(hoy.usd, 'ars')
+  if (!arsPorUsd) throw new Error('No se pudieron obtener las cotizaciones')
+
   const cotizaciones = MONEDAS.map((codigo) => {
-    const clave = codigo.toLowerCase()
-    const usdPorUnidad = 1 / hoy.usd[clave]
-    const usdPorUnidadAyer = ayer?.usd?.[clave] ? 1 / ayer.usd[clave] : null
-    const porUsd = hoy.usd[clave]
-    const porUsdAyer = ayer?.usd?.[clave] ?? null
+    const porUsd = tasa(hoy.usd, codigo)
+    if (!porUsd) return null
+    const porUsdAyer = tasa(ayer?.usd, codigo)
+    const usdPorUnidad = 1 / porUsd
+    const usdPorUnidadAyer = porUsdAyer ? 1 / porUsdAyer : null
 
     return {
       codigo,
@@ -80,12 +94,14 @@ export async function fetchOtrasMonedas() {
       // de porUsd, para que la vista "US$ → Moneda" muestre el signo correcto.
       variacionPctInverso: porUsdAyer ? ((porUsd - porUsdAyer) / porUsdAyer) * 100 : null,
     }
-  })
+  }).filter(Boolean)
 
   const metales = METALES.map((codigo) => {
-    const clave = codigo.toLowerCase()
-    const usdPorOnza = 1 / hoy.usd[clave]
-    const usdPorOnzaAyer = ayer?.usd?.[clave] ? 1 / ayer.usd[clave] : null
+    const porOnza = tasa(hoy.usd, codigo)
+    if (!porOnza) return null
+    const porOnzaAyer = tasa(ayer?.usd, codigo)
+    const usdPorOnza = 1 / porOnza
+    const usdPorOnzaAyer = porOnzaAyer ? 1 / porOnzaAyer : null
 
     return {
       codigo,
@@ -93,7 +109,11 @@ export async function fetchOtrasMonedas() {
       ars: usdPorOnza * arsPorUsd,
       variacionPct: usdPorOnzaAyer ? ((usdPorOnza - usdPorOnzaAyer) / usdPorOnzaAyer) * 100 : null,
     }
-  })
+  }).filter(Boolean)
+
+  if (cotizaciones.length === 0 && metales.length === 0) {
+    throw new Error('No se pudieron obtener las cotizaciones')
+  }
 
   return { cotizaciones, metales, fecha: hoy.date }
 }

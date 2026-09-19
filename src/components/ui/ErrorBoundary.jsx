@@ -6,7 +6,8 @@ import { Component } from 'react'
 // donde una excepción de un servicio tumbaba todo el sitio. Envolviendo cada sección por
 // separado, un error queda contenido ahí y el resto de la página sigue en pie.
 //
-// El fallback es no renderizar nada, siguiendo la convención que ya usa el resto del
+// El fallback por defecto es no renderizar nada (se puede pasar otro por `fallback`,
+// como hacen las pestañas de Cotizaciones), siguiendo la convención que ya usa el resto del
 // sitio -las tarjetas hacen `return null` cuando les falta el dato, en vez de mostrar un
 // cartel de error-: es preferible que falte una sección a que aparezca un mensaje roto
 // en una web institucional. El error igual queda en la consola para poder diagnosticarlo.
@@ -22,7 +23,7 @@ export default class ErrorBoundary extends Component {
   }
 
   render() {
-    if (this.state.falló) return null
+    if (this.state.falló) return this.props.fallback ?? null
     return this.props.children
   }
 }

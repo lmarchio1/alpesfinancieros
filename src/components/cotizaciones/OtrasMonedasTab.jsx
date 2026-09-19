@@ -43,6 +43,13 @@ const fechaCierre = (fechaIso) => {
   return d.toISOString().slice(0, 10)
 }
 
+// Segunda red de contención para lo mismo que valida forexApi.js: el dato guardado en
+// localStorage puede venir de una versión anterior del sitio, y ahí un NaN quedó escrito
+// como null -así lo serializa JSON-, que dividido daría 0 y mostraría "USD 0,00" como si
+// fuera un precio real. Lo que no tiene número, no se muestra.
+const conNumero = (valor) => typeof valor === 'number' && Number.isFinite(valor)
+const numeroONull = (valor) => (conNumero(valor) ? valor : null)
+
 export default function OtrasMonedasTab() {
   const fetcher = useCallback(() => fetchOtrasMonedas(), [])
   const { data, error, loading, refresh } = usePolling(fetcher, {
@@ -62,6 +69,11 @@ export default function OtrasMonedasTab() {
       </div>
     )
   }
+
+  const monedas = (data?.cotizaciones ?? []).filter(
+    (m) => MONEDAS_INFO[m.codigo] && conNumero(m.usd) && conNumero(m.ars) && conNumero(m.porUsd),
+  )
+  const metales = (data?.metales ?? []).filter((m) => METALES_INFO[m.codigo] && conNumero(m.usd))
 
   if (!data && error) {
     return (
@@ -123,12 +135,12 @@ export default function OtrasMonedasTab() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {data.cotizaciones.map((m, i) => {
+        {monedas.map((m, i) => {
           const info = MONEDAS_INFO[m.codigo]
           const ars = m.ars * info.unidad
           const usd = m.usd * info.unidad
           const etiqueta = info.unidad === 1 ? '1 ' + m.codigo : `${info.unidad.toLocaleString('es-AR')} ${m.codigo}`
-          const pct = inverso ? m.variacionPctInverso : m.variacionPct
+          const pct = numeroONull(inverso ? m.variacionPctInverso : m.variacionPct)
           const trendBorder = pct === null ? '!border-t-slate-200' : pct >= 0 ? '!border-t-emerald-700' : '!border-t-rose-700'
           return (
             <Card
@@ -185,10 +197,12 @@ export default function OtrasMonedasTab() {
         <span className="text-sm font-bold uppercase tracking-wide text-slate-900">Metales</span>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {data.metales.map((m, i) => {
+      {/* Si la fuente dejó de publicar alguno, las que quedan ocupan el ancho entre
+          ellas en vez de dejar un hueco vacío en la fila. */}
+      <div className={`grid grid-cols-1 gap-4 ${metales.length >= 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
+        {metales.map((m, i) => {
           const info = METALES_INFO[m.codigo]
-          const pct = m.variacionPct
+          const pct = numeroONull(m.variacionPct)
           const trendBorder = pct === null ? '!border-t-slate-200' : pct >= 0 ? '!border-t-emerald-700' : '!border-t-rose-700'
           return (
             <Card

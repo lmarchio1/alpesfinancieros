@@ -1,14 +1,68 @@
 import { lazy, Suspense, useState } from 'react'
 import SectionHeading from './ui/SectionHeading'
+import ErrorBoundary from './ui/ErrorBoundary'
 import calculadoraMercado from '../assets/calculadora-mercado.webp'
+
+const CLAVE_RECARGA = 'alpes_recarga_pestania'
+
+const marcarRecarga = () => {
+  try {
+    if (sessionStorage.getItem(CLAVE_RECARGA)) return false
+    sessionStorage.setItem(CLAVE_RECARGA, '1')
+    return true
+  } catch {
+    return false // Modo privado o sin storage: no se recarga, se muestra el aviso.
+  }
+}
+
+// Cada deploy publica los archivos con un hash nuevo y borra los viejos. Una pestaña que
+// quedó abierta desde antes pide un archivo que ya no existe, el import falla y la
+// pestaña no puede renderizar. Se reintenta una vez -alcanza para un corte de red
+// pasajero- y, si vuelve a fallar, se recarga la página una única vez para tomar la
+// versión nueva del sitio.
+function cargarPestania(importar) {
+  return lazy(() =>
+    importar().catch(() =>
+      importar().catch((err) => {
+        if (marcarRecarga()) window.location.reload()
+        throw err
+      }),
+    ),
+  )
+}
 
 // Carga diferida: estas 4 pestañas (y su dependencia de Supabase) solo se descargan
 // cuando el visitante realmente toca el botón, en vez de sumarse al bundle principal
 // que se carga siempre, aunque nunca se abra ninguna pestaña.
-const DolaresTab = lazy(() => import('./cotizaciones/DolaresTab'))
-const BonosTab = lazy(() => import('./cotizaciones/BonosTab'))
-const InflacionTab = lazy(() => import('./cotizaciones/InflacionTab'))
-const OtrasMonedasTab = lazy(() => import('./cotizaciones/OtrasMonedasTab'))
+const DolaresTab = cargarPestania(() => import('./cotizaciones/DolaresTab'))
+const BonosTab = cargarPestania(() => import('./cotizaciones/BonosTab'))
+const InflacionTab = cargarPestania(() => import('./cotizaciones/InflacionTab'))
+const OtrasMonedasTab = cargarPestania(() => import('./cotizaciones/OtrasMonedasTab'))
+
+// Sin esto, una pestaña que falla se lleva puesta toda la sección de indicadores (el
+// límite de error más cercano está en App.jsx, alrededor de Cotizaciones entera): se
+// ocultaban también los botones y el resto de las pestañas, que funcionaban bien.
+function Pestania({ nombre, children }) {
+  return (
+    <ErrorBoundary
+      seccion={`Cotizaciones · ${nombre}`}
+      fallback={
+        <div className="rounded-xl bg-slate-900/50 px-4 py-6 text-center ring-1 ring-inset ring-white/10">
+          <p className="text-sm text-slate-200">No pudimos mostrar {nombre} en este momento.</p>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="mt-3 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+          >
+            Reintentar
+          </button>
+        </div>
+      }
+    >
+      {children}
+    </ErrorBoundary>
+  )
+}
 
 function TabSkeleton() {
   return (
@@ -118,20 +172,30 @@ export default function Cotizaciones() {
         <Suspense fallback={<TabSkeleton />}>
           {abierto === 'dolares' && (
             <div className="mb-10">
-              <DolaresTab />
+              <Pestania nombre="Tipos de Cambio">
+                <DolaresTab />
+              </Pestania>
             </div>
           )}
           {abierto === 'bonos' && (
             <div className="mb-10">
-              <BonosTab />
+              <Pestania nombre="Renta Fija">
+                <BonosTab />
+              </Pestania>
             </div>
           )}
           {abierto === 'inflacion' && (
             <div className="mb-10">
-              <InflacionTab />
+              <Pestania nombre="Inflación">
+                <InflacionTab />
+              </Pestania>
             </div>
           )}
-          {abierto === 'monedas' && <OtrasMonedasTab />}
+          {abierto === 'monedas' && (
+            <Pestania nombre="Divisas y Metales">
+              <OtrasMonedasTab />
+            </Pestania>
+          )}
         </Suspense>
       </div>
     </section>
