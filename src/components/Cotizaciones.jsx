@@ -153,32 +153,27 @@ export default function Cotizaciones() {
           ))}
         </div>
 
-        {/* En el celular las cinco pestañas no entran en una línea. En vez de envolver en
-            varias filas -que come alto de pantalla y queda desprolijo- van en una sola
-            tira que se desliza de costado, con un degradado en el borde derecho que avisa
-            que hay más. Desde tablet entran todas y la tira deja de desplazarse. */}
-        <div className="relative mb-8 sm:inline-block">
-          <div className="flex gap-1 overflow-x-auto rounded-xl bg-slate-900/40 p-1 shadow-md shadow-black/20 ring-1 ring-white/10 backdrop-blur-md [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-0 sm:overflow-visible [&::-webkit-scrollbar]:hidden">
-            {TOGGLES.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => toggle(t.id)}
-                aria-expanded={abierto === t.id}
-                className={`shrink-0 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold transition-colors [text-shadow:0_1px_2px_rgba(0,0,0,0.4)] ${
-                  abierto === t.id
-                    ? 'bg-brand-600 text-white shadow-sm'
-                    : 'text-slate-100 hover:text-white'
-                }`}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-y-1 right-1 w-8 rounded-r-xl bg-gradient-to-l from-slate-900/50 to-transparent sm:hidden"
-          />
+        {/* En el celular las cinco pestañas no entran en una línea. Se probó una tira
+            deslizable, pero deja opciones fuera de la vista: van en dos columnas iguales,
+            y la que queda sola ocupa el ancho completo. Desde tablet, una sola fila. */}
+        <div className="mb-8 grid grid-cols-2 gap-1 rounded-xl bg-slate-900/40 p-1 shadow-md shadow-black/20 ring-1 ring-white/10 backdrop-blur-md sm:inline-flex sm:gap-0">
+          {TOGGLES.map((t, i) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => toggle(t.id)}
+              aria-expanded={abierto === t.id}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors [text-shadow:0_1px_2px_rgba(0,0,0,0.4)] ${
+                i === TOGGLES.length - 1 && TOGGLES.length % 2 === 1 ? 'col-span-2 sm:col-span-1' : ''
+              } ${
+                abierto === t.id
+                  ? 'bg-brand-600 text-white shadow-sm'
+                  : 'text-slate-100 hover:text-white'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
 
         <Suspense fallback={<TabSkeleton />}>

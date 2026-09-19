@@ -75,15 +75,14 @@ function IconoTarjeta({ className, children }) {
   )
 }
 
-// Dos tramos a distinta altura y la distancia entre ellos: la resta que muestra la
-// tarjeta.
+// Una regla: la tarjeta mide una distancia (cuánto más paga el plazo largo que el corto).
 const iconoPendiente = (
   <>
-    <path d="M3 16h5" />
-    <path d="M16 8h5" />
-    <path d="M12 15.5v-7" />
-    <path d="M10 10.5l2-2 2 2" />
-    <path d="M10 13.5l2 2 2-2" />
+    <rect x="2.5" y="8.5" width="19" height="7" rx="1.5" />
+    <path d="M6.5 8.5v3" />
+    <path d="M10 8.5v2" />
+    <path d="M13.5 8.5v3" />
+    <path d="M17 8.5v2" />
   </>
 )
 
@@ -174,17 +173,21 @@ const DISENIOS = {
     pilares: ['m3', 'a2', 'a10', 'a30'],
     separacion: 0.1,
   },
+  // En el celular, el ampliado no busca mostrar todo junto como en la computadora -ahí las
+  // etiquetas del tramo corto terminaban encimadas ("1M3M6M1A")-. Muestra menos cosas,
+  // más grandes: la grilla cada medio punto, siete plazos en el eje y solo tres valores
+  // escritos. El resto se consulta deslizando el dedo.
   celularAmpliado: {
     ancho: 360,
-    alto: 420,
-    margen: { top: 26, right: 18, bottom: 32, left: 48 },
-    fuenteEje: 12,
-    fuenteValor: 12,
-    pasoY: 0.25,
-    radio: 4.5,
-    ejeX: (p) => ['m1', 'm3', 'm6', 'a1', 'a2', 'a3', 'a5', 'a7', 'a10', 'a20', 'a30'].includes(p.clave),
-    pilares: ['m3', 'a2', 'a10', 'a30'],
-    separacion: 0.1,
+    alto: 440,
+    margen: { top: 28, right: 20, bottom: 34, left: 48 },
+    fuenteEje: 13,
+    fuenteValor: 13,
+    pasoY: 0.5,
+    radio: 5,
+    ejeX: (p) => ['m3', 'a2', 'a5', 'a10', 'a20', 'a30'].includes(p.clave),
+    pilares: ['a2', 'a10'],
+    separacion: 0.18,
   },
 }
 
@@ -659,17 +662,17 @@ export default function TreasuriesTab() {
                   className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-50 text-[#0d9488] transition-colors hover:bg-[#0d9488] hover:text-white"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 4H4v5M15 20h5v-5M20 9V4h-5M4 15v5h5" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 17l5-5 4 3 6-7M18 8h3v3" />
                   </svg>
                 </button>
               </div>
               <p className="max-w-md text-xs text-slate-500">
-              Rendimiento anual de cada plazo, del más corto al más largo. Pasá el mouse -o el dedo- por
-                el gráfico para ver cada uno.
+              Rendimiento anual de cada plazo, del más corto al más largo.
+              <span className="hidden sm:inline"> Pasá el mouse por el gráfico para ver cada uno.</span>
               </p>
             </div>
           </div>
-          <div className="flex flex-col gap-1.5 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600 ring-1 ring-inset ring-slate-200">
+          <div className="hidden flex-col gap-1.5 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600 ring-1 ring-inset ring-slate-200 sm:flex">
             <span className="inline-flex items-center gap-2">
               <span className="h-[3px] w-6 shrink-0 rounded-full bg-[#0f766e]" />
               Cierre de hoy · {formatFechaCorta(hoy.fecha)}
@@ -682,7 +685,20 @@ export default function TreasuriesTab() {
             )}
           </div>
         </div>
-        <div className="mt-3">
+        {/* En el celular el gráfico no entra con dignidad dentro de la tarjeta: se abre
+            con el botón, a pantalla casi completa. Acá va solo la invitación. */}
+        <button
+          type="button"
+          onClick={() => setModalAbierto(true)}
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-teal-50 px-4 py-3 text-sm font-semibold text-[#0d9488] ring-1 ring-inset ring-[#0d9488]/20 transition-colors hover:bg-[#0d9488] hover:text-white sm:hidden"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 shrink-0">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 17l5-5 4 3 6-7M18 8h3v3" />
+          </svg>
+          Ver la curva de rendimientos
+        </button>
+
+        <div className="mt-3 hidden sm:block">
           <GraficoCurva hoy={hoy} referencia={referencia} previo={previo} esMovil={esMovil} textoComparacion={textoComparacion} />
         </div>
 
