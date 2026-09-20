@@ -6,7 +6,7 @@ export default function Hero() {
       <img
         src={heroMountains}
         alt="Cordillera nevada"
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full animate-hero-abrir object-cover motion-reduce:animate-none"
       />
       <div
         className="absolute inset-0"
@@ -25,7 +25,7 @@ export default function Hero() {
           </h1>
           <p
             className="mt-6 animate-fade-up text-lg leading-relaxed text-slate-200 motion-reduce:animate-none"
-            style={{ animationDelay: '120ms' }}
+            style={{ animationDelay: '150ms' }}
           >
             Multi-Family Office independiente orientado a preservar y optimizar el patrimonio
             familiar y corporativo a través de una planificación fiscal eficiente, una
@@ -33,7 +33,7 @@ export default function Hero() {
           </p>
           <div
             className="mt-8 flex animate-fade-up flex-wrap gap-4 motion-reduce:animate-none"
-            style={{ animationDelay: '360ms' }}
+            style={{ animationDelay: '300ms' }}
           >
             <a
               href="#gestion"

@@ -39,6 +39,13 @@ export default {
           '60%': { opacity: '1', transform: 'scale(1.15)' },
           '100%': { transform: 'scale(1)' },
         },
+        // Apertura de la foto del hero: entra apenas agrandada y se asienta en su
+        // tamaño real. Una sola vez, al cargar: después queda quieta para no competir
+        // con el texto mientras se lee.
+        'hero-abrir': {
+          '0%': { opacity: '0.6', transform: 'scale(1.06)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
       },
       animation: {
         'spin-slow': 'spin-slow 80s linear infinite',
@@ -50,6 +57,8 @@ export default {
         // en el mismo elemento que el hover.
         'fade-up': 'fade-up 0.8s ease-out backwards',
         pop: 'pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both',
+        // Curva que arranca rápido y frena suave, como una cámara que se asienta.
+        'hero-abrir': 'hero-abrir 1.6s cubic-bezier(0.22,0.61,0.36,1) both',
       },
     },
   },
