@@ -49,3 +49,48 @@ export function parsearCurva(xml) {
   }
   return dias.sort((a, b) => a.fecha.localeCompare(b.fecha))
 }
+
+// Curva real: rendimiento de los bonos ajustados por inflación (TIPS). El Tesoro la
+// publica aparte, con el mismo formato. Solo se usa el plazo de 10 años, para el
+// breakeven de inflación.
+const URL_REAL =
+  'https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_real_yield_curve'
+
+export function urlRealDelMes(anio, mes) {
+  return `${URL_REAL}&field_tdr_date_value_month=${anio}${String(mes).padStart(2, '0')}`
+}
+
+export function parsearCurvaReal(xml) {
+  const dias = []
+  for (const [, bloque] of String(xml).matchAll(/<entry>([\s\S]*?)<\/entry>/g)) {
+    const fecha = /<d:NEW_DATE[^>]*>([^<]{10})/.exec(bloque)?.[1]
+    const real10 = valor(bloque, 'TC_10YEAR')
+    if (fecha && real10 !== null) dias.push({ fecha, real10 })
+  }
+  return dias
+}
+
+// Suma el rendimiento real a 10 años a cada día de la curva nominal, por fecha.
+export function unirCurvaReal(dias, reales) {
+  const porFecha = new Map(reales.map((r) => [r.fecha, r.real10]))
+  return dias.map((d) => (porFecha.has(d.fecha) ? { ...d, real10: porFecha.get(d.fecha) } : d))
+}
+
+// Año completo, para la historia del breakeven. Pesa entre 200 y 350 KB y el Tesoro
+// tarda unos 20 segundos en servirlo: solo lo baja la tarea programada, nunca el
+// navegador del visitante.
+export function urlDelAnio(anio) {
+  return `${URL_BASE}&field_tdr_date_value=${anio}`
+}
+
+export function urlRealDelAnio(anio) {
+  return `${URL_REAL}&field_tdr_date_value=${anio}`
+}
+
+// Serie diaria del breakeven a 10 años (nominal menos real), de la más vieja a la más nueva.
+export function serieBreakeven(dias) {
+  return dias
+    .filter((d) => typeof d.a10 === 'number' && typeof d.real10 === 'number')
+    .map((d) => ({ fecha: d.fecha, valor: Number((d.a10 - d.real10).toFixed(2)) }))
+    .sort((a, b) => a.fecha.localeCompare(b.fecha))
+}

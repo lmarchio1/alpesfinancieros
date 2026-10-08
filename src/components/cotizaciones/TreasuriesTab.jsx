@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { usePolling } from '../../hooks/usePolling'
-import { fetchCurvaTreasury } from '../../services/treasuryApi'
+import { fetchCurvaTreasury, fetchHistoriaBreakeven } from '../../services/treasuryApi'
 import { PLAZOS } from '../../utils/treasuryCurva'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
@@ -486,9 +486,285 @@ function ModalCurva({ onClose, hoy, referencia, previo, esMovil, textoComparacio
   )
 }
 
+// Termómetro para el ícono de la tarjeta de inflación esperada.
+const iconoInflacion = (
+  <>
+    <path d="M14 14.5V5a2 2 0 1 0-4 0v9.5a4 4 0 1 0 4 0z" />
+    <path d="M12 11v6" />
+  </>
+)
+
+// --- Historia del breakeven ----------------------------------------------------------
+// Mismo patrón que la tendencia de Reservas: botón redondo junto al título, capa aparte,
+// selector de rango y seguimiento con mouse o dedo. La serie se baja recién al abrirla.
+const RANGOS_BREAKEVEN = [
+  { id: '3m', etiqueta: '3 meses', meses: 3 },
+  { id: '6m', etiqueta: '6 meses', meses: 6 },
+  { id: '1a', etiqueta: '1 año', meses: 12 },
+  { id: '2a', etiqueta: '2 años', meses: 24 },
+]
+
+// Escalones "lindos" para el eje (1, 2, 5 o 10 por una potencia de 10), como el resto de
+// los gráficos del sitio.
+function pasoLindo(rango, objetivo) {
+  const crudo = rango / objetivo
+  const magnitud = Math.pow(10, Math.floor(Math.log10(crudo)))
+  const resto = crudo / magnitud
+  return (resto > 5 ? 10 : resto > 2 ? 5 : resto > 1 ? 2 : 1) * magnitud
+}
+
+const etiquetaMes = (iso) => `${MESES_CORTOS[Number(iso.slice(5, 7)) - 1]}-${iso.slice(2, 4)}`
+const formatFechaLarga = (iso) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}`
+
+function GraficoBreakeven({ puntos, rango, esMovil }) {
+  const [activo, setActivo] = useState(null)
+  const svgRef = useRef(null)
+  useEffect(() => setActivo(null), [rango])
+
+  const ancho = esMovil ? 360 : 680
+  const alto = esMovil ? 280 : 300
+  const margen = esMovil ? { top: 20, right: 14, bottom: 30, left: 46 } : { top: 20, right: 20, bottom: 34, left: 54 }
+  const fuente = esMovil ? 12 : 11
+  const anchoPlot = ancho - margen.left - margen.right
+  const altoPlot = alto - margen.top - margen.bottom
+
+  const valores = puntos.map((p) => p.valor)
+  const minimo = Math.min(...valores)
+  const maximo = Math.max(...valores)
+  const holgura = (maximo - minimo || 0.1) * 0.15
+  const paso = pasoLindo(maximo - minimo + 2 * holgura, esMovil ? 4 : 5)
+  const desde = Math.floor((minimo - holgura) / paso) * paso
+  const hasta = Math.ceil((maximo + holgura) / paso) * paso
+  const marcas = []
+  for (let v = desde; v <= hasta + paso / 1000; v += paso) marcas.push(Number(v.toFixed(4)))
+
+  const x = (i) => margen.left + (puntos.length === 1 ? 0 : (i / (puntos.length - 1)) * anchoPlot)
+  const y = (v) => margen.top + altoPlot - ((v - desde) / (hasta - desde || 1)) * altoPlot
+  const linea = puntos.map((p, i) => `${x(i).toFixed(1)},${y(p.valor).toFixed(1)}`).join(' ')
+  const area = `M${x(0)},${margen.top + altoPlot} L${linea.split(' ').join(' L')} L${x(puntos.length - 1)},${margen.top + altoPlot} Z`
+
+  // Una etiqueta por mes calendario (o cada N meses), anclada al primer día hábil de ese
+  // mes. El paso depende de cuántos meses se ven de verdad -no del rango elegido-: con
+  // poca historia, "1 año" igual muestra todos los meses que hay.
+  const mesesVisibles = (Date.parse(puntos.at(-1).fecha) - Date.parse(puntos[0].fecha)) / (30.44 * 86400000)
+  const pasoMeses = esMovil
+    ? mesesVisibles <= 4 ? 1 : mesesVisibles <= 8 ? 2 : mesesVisibles <= 14 ? 3 : 6
+    : mesesVisibles <= 7 ? 1 : mesesVisibles <= 13 ? 2 : 4
+  const etiquetasX = []
+  let ultimoMes = null
+  puntos.forEach((p, i) => {
+    const mes = p.fecha.slice(0, 7)
+    if (mes === ultimoMes) return
+    ultimoMes = mes
+    const indiceMes = Number(mes.slice(0, 4)) * 12 + Number(mes.slice(5, 7))
+    if (indiceMes % pasoMeses === 0 && x(i) > margen.left + 14 && x(i) < ancho - margen.right - 14) etiquetasX.push(i)
+  })
+
+  const iMin = valores.indexOf(minimo)
+  const iMax = valores.indexOf(maximo)
+
+  const indiceDesde = (clientX) => {
+    const rect = svgRef.current.getBoundingClientRect()
+    const enDibujo = ((clientX - rect.left) / rect.width) * ancho
+    const i = Math.round(((enDibujo - margen.left) / anchoPlot) * (puntos.length - 1))
+    return Math.min(Math.max(i, 0), puntos.length - 1)
+  }
+  const alTocar = (e) => {
+    e.preventDefault()
+    setActivo(indiceDesde(e.touches[0].clientX))
+  }
+
+  return (
+    <div>
+      <svg ref={svgRef} viewBox={`0 0 ${ancho} ${alto}`} className="h-auto w-full touch-none" role="img" aria-label="Evolución del breakeven de inflación a 10 años">
+        <defs>
+          <linearGradient id="gradienteBreakeven" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#ea580c" stopOpacity="0.28" />
+            <stop offset="100%" stopColor="#ea580c" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+
+        {marcas.map((v) => (
+          <g key={v}>
+            <line x1={margen.left} x2={ancho - margen.right} y1={y(v)} y2={y(v)} stroke="#e2e8f0" strokeWidth="1" />
+            <text x={margen.left - 8} y={y(v) + 4} textAnchor="end" fontSize={fuente} className="fill-slate-400">
+              {v.toFixed(2)}%
+            </text>
+          </g>
+        ))}
+
+        {etiquetasX.map((i) => (
+          <text key={i} x={x(i)} y={alto - 10} textAnchor="middle" fontSize={fuente} className="fill-slate-400">
+            {etiquetaMes(puntos[i].fecha)}
+          </text>
+        ))}
+
+        <path d={area} fill="url(#gradienteBreakeven)" />
+        <polyline points={linea} fill="none" stroke="#ea580c" strokeWidth={esMovil ? 2.5 : 2} strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx={x(iMin)} cy={y(minimo)} r="4" fill="#e11d48" />
+        <circle cx={x(iMax)} cy={y(maximo)} r="4" fill="#059669" />
+
+        {activo !== null && puntos[activo] && (() => {
+          const px = x(activo)
+          const py = y(puntos[activo].valor)
+          const anchoCaja = esMovil ? 110 : 100
+          const xCaja = Math.min(Math.max(px - anchoCaja / 2, margen.left), ancho - margen.right - anchoCaja)
+          const yCaja = py - 44 > margen.top ? py - 44 : py + 12
+          return (
+            <g pointerEvents="none">
+              <line x1={px} x2={px} y1={margen.top} y2={margen.top + altoPlot} stroke="#94a3b8" strokeWidth="1" strokeDasharray="3,3" />
+              <circle cx={px} cy={py} r="5" fill="#ea580c" stroke="white" strokeWidth="2" />
+              <rect x={xCaja} y={yCaja} width={anchoCaja} height={32} rx="5" fill="#1e293b" />
+              <text x={xCaja + anchoCaja / 2} y={yCaja + 13} textAnchor="middle" fontSize={fuente - 1} className="fill-slate-300">
+                {formatFechaLarga(puntos[activo].fecha)}
+              </text>
+              <text x={xCaja + anchoCaja / 2} y={yCaja + 26} textAnchor="middle" fontSize={fuente + 1} className="fill-white font-bold">
+                {formatTasa(puntos[activo].valor)}
+              </text>
+            </g>
+          )
+        })()}
+
+        <rect
+          x={margen.left}
+          y={margen.top}
+          width={anchoPlot}
+          height={altoPlot}
+          fill="transparent"
+          style={{ touchAction: 'none' }}
+          onMouseMove={(e) => setActivo(indiceDesde(e.clientX))}
+          onMouseLeave={() => setActivo(null)}
+          onTouchStart={alTocar}
+          onTouchMove={alTocar}
+          onTouchEnd={() => setActivo(null)}
+        />
+      </svg>
+
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-rose-600" />
+          Mínimo: <strong className="text-slate-900">{formatTasa(minimo)}</strong>
+          <span className="text-slate-400">({formatFechaLarga(puntos[iMin].fecha)})</span>
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-emerald-600" />
+          Máximo: <strong className="text-slate-900">{formatTasa(maximo)}</strong>
+          <span className="text-slate-400">({formatFechaLarga(puntos[iMax].fecha)})</span>
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function ModalBreakeven({ onClose, diasDeLaCurva, esMovil }) {
+  const [rango, setRango] = useState('1a')
+  const [historia, setHistoria] = useState(null)
+  // La curva solo hace falta como respaldo al abrir: se toma la de ese momento.
+  const [respaldo] = useState(diasDeLaCurva)
+
+  useEffect(() => {
+    let vigente = true
+    fetchHistoriaBreakeven(respaldo).then((h) => vigente && setHistoria(h))
+    return () => {
+      vigente = false
+    }
+  }, [respaldo])
+
+  useEffect(() => {
+    const alTeclear = (e) => e.key === 'Escape' && onClose()
+    document.addEventListener('keydown', alTeclear)
+    return () => document.removeEventListener('keydown', alTeclear)
+  }, [onClose])
+
+  const puntos = useMemo(() => {
+    if (!historia?.puntos?.length) return []
+    const meses = RANGOS_BREAKEVEN.find((r) => r.id === rango).meses
+    const corte = new Date(`${historia.puntos.at(-1).fecha}T00:00:00Z`)
+    corte.setUTCMonth(corte.getUTCMonth() - meses)
+    const corteIso = corte.toISOString().slice(0, 10)
+    return historia.puntos.filter((p) => p.fecha >= corteIso)
+  }, [historia, rango])
+
+  // Portal al body: la tarjeta tiene transform por el hover, y adentro de un elemento con
+  // transform el position:fixed deja de medirse contra la pantalla.
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 sm:p-4" onClick={onClose}>
+      <div className="w-full max-w-2xl rounded-2xl bg-white p-4 shadow-2xl sm:p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="font-semibold text-slate-900">Inflación esperada a 10 años (breakeven)</p>
+            <p className="text-xs text-slate-500">Treasury a 10 años menos TIPS a 10 años · cierre diario</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Cerrar"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-1 rounded-lg bg-slate-100 p-1 text-xs sm:inline-flex sm:gap-0">
+          {RANGOS_BREAKEVEN.map((r) => (
+            <button
+              key={r.id}
+              type="button"
+              onClick={() => setRango(r.id)}
+              className={`rounded-md px-3 py-1.5 font-medium transition-colors ${
+                rango === r.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              {r.etiqueta}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-4">
+          {historia === null ? (
+            <div className="h-64 animate-pulse rounded-xl bg-slate-100" />
+          ) : puntos.length < 2 ? (
+            <p className="py-10 text-center text-sm text-slate-500">Todavía no hay historia suficiente para este rango.</p>
+          ) : (
+            <GraficoBreakeven puntos={puntos} rango={rango} esMovil={esMovil} />
+          )}
+        </div>
+
+        {historia && !historia.completa && puntos.length > 0 && (
+          <p className="mt-2 text-xs text-slate-400">Historia disponible desde el {formatFechaLarga(historia.puntos[0].fecha)}.</p>
+        )}
+        <p className="mt-2 text-xs text-slate-500">
+          {esMovil ? 'Deslizá el dedo' : 'Pasá el mouse'} por el gráfico para ver el valor de cada día.
+        </p>
+      </div>
+    </div>,
+    document.body,
+  )
+}
+
+// Las dos tarjetas anchas (pendiente e inflación esperada) usan los mismos efectos que
+// las de los plazos: entrada en cascada, se levantan y se agrandan apenas con el mouse.
+const CLASE_TARJETA_PAR =
+  'group animate-fade-up border-t-4 p-5 shadow-md shadow-slate-200/70 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-2 hover:scale-[1.01] hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)] motion-reduce:transition-none motion-reduce:animate-none'
+
+// La cuenta detrás del número grande, en una pastilla clara al lado del estado.
+function ChipCuenta({ children }) {
+  return (
+    <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium tabular-nums text-slate-600">
+      {children}
+    </span>
+  )
+}
+
+const textoCambio = (pb) =>
+  Math.abs(pb) < 0.5 ? 'sin cambios contra el cierre anterior' : `${formatPbLlano(pb)} contra el cierre anterior`
+
 export default function TreasuriesTab() {
   const esMovil = useEsMovil()
   const [modalAbierto, setModalAbierto] = useState(false)
+  const [modalBreakeven, setModalBreakeven] = useState(false)
   const fetcher = useCallback(() => fetchCurvaTreasury(), [])
   const { data, error, loading, refresh } = usePolling(fetcher, {
     // Se publica una vez por día: alcanza con revisar cada hora por si la pestaña
@@ -552,6 +828,22 @@ export default function TreasuriesTab() {
   // Se dice lo que realmente se está comparando: "hace un mes" solo si de verdad es
   // aproximadamente un mes.
   const estado = conNumero(pendiente) ? estadoDeCurva(pendiente) : 'normal'
+
+  // Breakeven de inflación a 10 años: rendimiento nominal menos real (TIPS) del mismo
+  // día, los dos del Tesoro. Es el cálculo de la serie T10YIE de la Reserva Federal, y
+  // da igual. Se toma el último día que tiene los dos datos.
+  const diasConReal = (data?.dias ?? []).filter((d) => conNumero(d.a10) && conNumero(d.real10))
+  const beHoy = diasConReal.at(-1)
+  const beAntes = diasConReal.at(-2)
+  const breakeven = beHoy
+    ? {
+        fecha: beHoy.fecha,
+        valor: beHoy.a10 - beHoy.real10,
+        nominal: beHoy.a10,
+        real: beHoy.real10,
+        variacion: beAntes ? enPb(beHoy.a10 - beHoy.real10, beAntes.a10 - beAntes.real10) : null,
+      }
+    : null
   const textoComparacion =
     diasDeDiferencia >= 25 ? 'Hace un mes' : diasDeDiferencia >= 10 ? `Hace ${diasDeDiferencia} días` : 'Cierre anterior'
 
@@ -610,42 +902,102 @@ export default function TreasuriesTab() {
         })}
       </div>
 
-      {conNumero(pendiente) && (
-        <Card
-          className={`group animate-fade-up border-t-4 p-5 shadow-md shadow-slate-200/70 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)] motion-reduce:transition-none motion-reduce:animate-none ${ESTADOS[estado].borde}`}
-          style={{ animationDelay: '320ms', marginTop: '1rem' }}
-        >
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <IconoTarjeta className="bg-brand-50 text-brand-600 group-hover:bg-brand-600 group-hover:text-white">
-                {iconoPendiente}
-              </IconoTarjeta>
-              <div>
-                <p className="font-semibold text-slate-900">Pendiente de la curva (10A − 2A)</p>
-                <p className="text-xs text-slate-500">
-                  Diferencial entre la Nota a 10 años y la de 2 años: {formatTasa(hoy.a10)} − {formatTasa(hoy.a2)}
-                </p>
+      {/* Pendiente e inflación esperada: dos mitades iguales, alineadas con la grilla de los
+          plazos (el corte cae entre la tarjeta de 2 años y la de 10), y con la misma
+          estructura -título, cuenta y pastilla a la izquierda; el número a la derecha;
+          la explicación abajo-, así se leen como un par y quedan del mismo alto. */}
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-4">
+        {conNumero(pendiente) && (
+          <Card
+            className={`${CLASE_TARJETA_PAR} ${breakeven ? 'lg:col-span-2' : 'lg:col-span-4'} ${ESTADOS[estado].borde}`}
+            style={{ animationDelay: '320ms' }}
+          >
+            {/* En el celular el número va debajo del título: al costado lo apretaba a cinco
+                renglones. Desde tablet, al costado. */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+              <div className="flex min-w-0 items-start gap-3">
+                <IconoTarjeta className="bg-brand-50 text-brand-600 group-hover:bg-brand-600 group-hover:text-white">
+                  {iconoPendiente}
+                </IconoTarjeta>
+                <div className="min-w-0">
+                  <p className="font-semibold text-slate-900">Pendiente de la curva (10A − 2A)</p>
+                  <p className="text-xs text-slate-500">Diferencial entre la Nota a 10 años y la de 2 años</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <EstadoCurva estado={estado} />
+                    <ChipCuenta>
+                      {formatTasa(hoy.a10)} − {formatTasa(hoy.a2)}
+                    </ChipCuenta>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <EstadoCurva estado={estado} />
-              <div className="text-right">
-                <p className="text-2xl font-bold text-slate-900">{formatPbLlano(pendiente)}</p>
+              <div className="pl-[52px] sm:shrink-0 sm:pl-0 sm:text-right">
+                <p className="text-2xl font-bold tabular-nums text-slate-900">{formatPbLlano(pendiente)}</p>
                 {conNumero(pendientePrevia) && (
-                  <p className="text-xs text-slate-500">
-                    {formatPbLlano(pendiente - pendientePrevia)} contra el cierre anterior
-                  </p>
+                  <p className="text-xs tabular-nums text-slate-500">{textoCambio(pendiente - pendientePrevia)}</p>
                 )}
               </div>
             </div>
-          </div>
-          <p className="mt-3 border-t border-slate-100 pt-3 text-xs text-slate-500">{ESTADOS[estado].explicacion(pendiente)}</p>
-        </Card>
-      )}
+            <p className="mt-4 border-t border-slate-100 pt-3 text-xs leading-relaxed text-slate-500">
+              {ESTADOS[estado].explicacion(pendiente)}
+            </p>
+          </Card>
+        )}
+
+        {breakeven && (
+          <Card
+            // La línea superior va en el naranja de su ícono, fija, como la de la pendiente
+            // lleva el color de su estado: la variación del día ya está escrita al lado del número.
+            className={`${CLASE_TARJETA_PAR} ${conNumero(pendiente) ? 'lg:col-span-2' : 'lg:col-span-4'} !border-t-orange-600`}
+            style={{ animationDelay: '400ms' }}
+          >
+            {/* En el celular el número va debajo del título: al costado lo apretaba a cinco
+                renglones. Desde tablet, al costado. */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+              <div className="flex min-w-0 items-start gap-3">
+                <IconoTarjeta className="bg-orange-50 text-orange-600 group-hover:bg-orange-600 group-hover:text-white">
+                  {iconoInflacion}
+                </IconoTarjeta>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-slate-900">Inflación esperada 10A</p>
+                    <button
+                      type="button"
+                      onClick={() => setModalBreakeven(true)}
+                      aria-label="Ver la evolución de la inflación esperada"
+                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-orange-50 text-orange-600 transition-colors hover:bg-orange-600 hover:text-white"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 17l5-5 4 3 6-7M18 8h3v3" />
+                      </svg>
+                    </button>
+                  </div>
+                  <p className="text-xs text-slate-500">Breakeven: Treasury a 10 años menos TIPS a 10 años</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <ChipCuenta>
+                      {formatTasa(breakeven.nominal)} − {formatTasa(breakeven.real)}
+                    </ChipCuenta>
+                    {breakeven.fecha !== hoy.fecha && <ChipCuenta>al {formatFechaCorta(breakeven.fecha)}</ChipCuenta>}
+                  </div>
+                </div>
+              </div>
+              <div className="pl-[52px] sm:shrink-0 sm:pl-0 sm:text-right">
+                <p className="text-2xl font-bold tabular-nums text-slate-900">{formatTasa(breakeven.valor)}</p>
+                {breakeven.variacion !== null && (
+                  <p className="text-xs tabular-nums text-slate-500">{textoCambio(breakeven.variacion)}</p>
+                )}
+              </div>
+            </div>
+            <p className="mt-4 border-t border-slate-100 pt-3 text-xs leading-relaxed text-slate-500">
+              Inflación promedio anual que descuenta el mercado de bonos para la próxima década. Una suba presiona la
+              parte larga de la curva y le quita margen a la Fed para recortar tasas.
+            </p>
+          </Card>
+        )}
+      </div>
 
       <Card
         className="group animate-fade-up border-t-4 !border-t-[#0d9488] p-5 shadow-md shadow-slate-200/70 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)] motion-reduce:transition-none motion-reduce:animate-none"
-        style={{ animationDelay: '400ms', marginTop: '1rem' }}
+        style={{ animationDelay: '480ms', marginTop: '1rem' }}
       >
         <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
           <div className="flex items-center gap-3">
@@ -703,6 +1055,10 @@ export default function TreasuriesTab() {
         </div>
 
       </Card>
+
+      {modalBreakeven && (
+        <ModalBreakeven onClose={() => setModalBreakeven(false)} diasDeLaCurva={data?.dias ?? []} esMovil={esMovil} />
+      )}
 
       {modalAbierto && (
         <ModalCurva

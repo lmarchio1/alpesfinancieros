@@ -1,5 +1,5 @@
 import { fetchPreciosCache } from './supabaseClient'
-import { parsearCurva, urlDelMes } from '../utils/treasuryCurva'
+import { parsearCurva, parsearCurvaReal, serieBreakeven, unirCurvaReal, urlDelMes, urlRealDelMes } from '../utils/treasuryCurva'
 
 // Curva de rendimientos del Tesoro de EE.UU. (par yield curve), el dato oficial contra
 // el que se mide el riesgo país. Se publica una sola vez por día, después del cierre.
@@ -24,6 +24,22 @@ async function bajarMes(fecha) {
   return parsearCurva(await res.text())
 }
 
+// La curva real (TIPS) es opcional: si no responde, se muestra la curva igual y solo
+// falta el breakeven de inflación.
+async function bajarRealesDe(dias) {
+  const meses = [...new Set(dias.map((d) => d.fecha.slice(0, 7)))]
+  const lotes = await Promise.allSettled(
+    meses.map(async (m) => {
+      const res = await fetch(urlRealDelMes(Number(m.slice(0, 4)), Number(m.slice(5, 7))))
+      if (!res.ok) throw new Error('No se pudo obtener la curva real del Tesoro')
+      return parsearCurvaReal(await res.text())
+    }),
+  )
+  return lotes.flatMap((l) => (l.status === 'fulfilled' ? l.value : []))
+}
+
+const conReal = (dias) => dias.some((d) => typeof d.real10 === 'number')
+
 async function bajarDelTesoro() {
   const hoy = new Date()
   let dias = await bajarMes(hoy)
@@ -38,7 +54,22 @@ async function bajarDelTesoro() {
 
 export async function fetchCurvaTreasury() {
   const cache = await fetchPreciosCache(FUENTE, MAX_ANTIGUEDAD_MS)
-  const dias = Array.isArray(cache?.dias) && cache.dias.length > 0 ? cache.dias : await bajarDelTesoro()
+  let dias = Array.isArray(cache?.dias) && cache.dias.length > 0 ? cache.dias : await bajarDelTesoro()
   if (!dias || dias.length === 0) throw new Error('No se pudo obtener la curva del Tesoro')
+  // La cache guardada antes de sumar el breakeven no trae la curva real: se completa acá
+  // hasta que la tarea programada la vuelva a guardar con ese dato.
+  if (!conReal(dias)) dias = unirCurvaReal(dias, await bajarRealesDe(dias))
   return { dias, desdeCache: Boolean(cache?.dias?.length) }
+}
+
+// Historia del breakeven para el gráfico de la tarjeta de inflación esperada. La arma la
+// tarea programada (tres años, a partir de los archivos anuales del Tesoro, que tardan
+// unos 20 segundos cada uno y por eso nunca los pide el navegador). Si esa fila no está,
+// el gráfico se arma con los días que ya trae la curva, alrededor de dos meses.
+const FUENTE_HISTORIA = 'breakeven_historia'
+
+export async function fetchHistoriaBreakeven(diasDeLaCurva = []) {
+  const cache = await fetchPreciosCache(FUENTE_HISTORIA, MAX_ANTIGUEDAD_MS)
+  if (Array.isArray(cache?.puntos) && cache.puntos.length > 0) return { puntos: cache.puntos, completa: true }
+  return { puntos: serieBreakeven(diasDeLaCurva), completa: false }
 }
