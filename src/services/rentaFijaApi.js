@@ -1,5 +1,6 @@
 import { fetchArgNotes } from './data912Api'
-import { fetchCierresDeAyer } from './supabaseClient'
+import { fetchCierresDeAyer, fetchPreciosCache } from './supabaseClient'
+import { URL_HISTORIA_RIESGO_PAIS, recortarHistoria } from '../utils/riesgoPaisHistoria'
 import { PAGO_FINAL_LETRAS } from '../data/bondsReference'
 
 const BASE_URL = 'https://api.argentinadatos.com/v1/finanzas'
@@ -113,4 +114,16 @@ export async function fetchRentaFija(forzar = false) {
 export async function fetchRiesgoPaisAnterior() {
   const cierres = await fetchCierresDeAyer(['riesgo_pais'])
   return typeof cierres.riesgo_pais === 'number' ? { valor: cierres.riesgo_pais } : null
+}
+
+// Historia de 4 años para el gráfico del riesgo país, que guarda la tarea de cierre
+// diario (ver scripts/cachear-riesgo-pais.mjs). Si esa fila falta -la tarea no corrió-,
+// se baja la serie entera y se recorta acá: son ~400 KB, pero solo en ese caso y solo
+// cuando alguien abre el gráfico.
+export async function fetchHistoriaRiesgoPais() {
+  const cache = await fetchPreciosCache('riesgo_pais_historia', 7 * 24 * 60 * 60 * 1000)
+  if (Array.isArray(cache?.puntos) && cache.puntos.length > 0) return { puntos: cache.puntos, completa: true }
+  const res = await fetch(`${URL_HISTORIA_RIESGO_PAIS}?_=${Date.now()}`)
+  if (!res.ok) throw new Error('No se pudo obtener la historia del riesgo país')
+  return { puntos: recortarHistoria(await res.json()), completa: true }
 }

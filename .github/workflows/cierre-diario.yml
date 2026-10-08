@@ -26,3 +26,11 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      # Historia de 4 años para el gráfico del riesgo país. Va después del cierre y no lo
+      # frena: si falla, el cierre ya quedó guardado y el gráfico sigue mostrando la
+      # última versión buena.
+      - run: node scripts/cachear-riesgo-pais.mjs
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
