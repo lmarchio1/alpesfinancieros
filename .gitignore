@@ -17,6 +17,11 @@ dist-ssr
 # el sitio realmente usa ya están en public/, esto es solo el material de origen.
 favicon/
 
+# Fotos originales del celular que se dejan en la raíz para procesar: traen metadatos
+# (incluida la ubicación GPS) y pesan mucho. Al sitio va solo la versión procesada en
+# src/assets, sin metadatos.
+/IMG_*
+
 # Archivos temporales que genera scripts/aplicar-respuesta-bono.mjs al correr.
 respuesta-bono.md
 commit-bono.txt

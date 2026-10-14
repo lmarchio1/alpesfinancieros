@@ -6,6 +6,7 @@ const NAV_LINKS = [
   { href: '#inicio', label: 'Inicio' },
   { href: '#gestion', label: 'Gestión Patrimonial' },
   { href: '#cotizaciones', label: 'Indicadores de Mercado' },
+  { href: '#quienes-somos', label: 'Quiénes somos' },
 ]
 
 const LINKEDIN_URL = 'https://www.linkedin.com/company/alpes-estados-financieros/'

@@ -7,7 +7,7 @@ const LINKEDIN_URL = 'https://www.linkedin.com/company/alpes-estados-financieros
 const COMPANY_LINKS = [
   { label: 'Gestión patrimonial', href: '#gestion' },
   { label: 'Indicadores de Mercado', href: '#cotizaciones' },
-  { label: 'Quiénes somos', href: '#inicio' },
+  { label: 'Quiénes somos', href: '#quienes-somos' },
   { label: 'Contacto', href: '#contacto' },
 ]
 

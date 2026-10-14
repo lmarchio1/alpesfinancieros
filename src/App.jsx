@@ -2,6 +2,7 @@ import Header from './components/Header'
 import Hero from './components/Hero'
 import WealthManagement from './components/WealthManagement'
 import Cotizaciones from './components/Cotizaciones'
+import SocioDirector from './components/SocioDirector'
 import ContactForm from './components/ContactForm'
 import Footer from './components/Footer'
 import ErrorBoundary from './components/ui/ErrorBoundary'
@@ -25,6 +26,9 @@ function App() {
         </ErrorBoundary>
         <ErrorBoundary seccion="Cotizaciones">
           <Cotizaciones />
+        </ErrorBoundary>
+        <ErrorBoundary seccion="SocioDirector">
+          <SocioDirector />
         </ErrorBoundary>
         <ErrorBoundary seccion="ContactForm">
           <ContactForm />
