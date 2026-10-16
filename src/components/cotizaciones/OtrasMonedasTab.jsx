@@ -1,6 +1,9 @@
 import { useCallback, useState } from 'react'
 import { usePolling } from '../../hooks/usePolling'
-import { fetchOtrasMonedas } from '../../services/forexApi'
+import { fetchHistoriaDxy, fetchOtrasMonedas } from '../../services/forexApi'
+import { DXY_PESOS } from '../../utils/dxy'
+import HistoriaModal from '../ui/HistoriaModal'
+import { useEsMovil } from '../../hooks/useEsMovil'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
 
@@ -49,6 +52,157 @@ const fechaCierre = (fechaIso) => {
 // fuera un precio real. Lo que no tiene número, no se muestra.
 const conNumero = (valor) => typeof valor === 'number' && Number.isFinite(valor)
 const numeroONull = (valor) => (conNumero(valor) ? valor : null)
+
+// Colores de cada moneda en la barra de composición del DXY, de mayor a menor peso.
+const DXY_COLORES = {
+  EUR: 'bg-indigo-600',
+  JPY: 'bg-rose-500',
+  GBP: 'bg-sky-500',
+  CAD: 'bg-amber-500',
+  SEK: 'bg-teal-500',
+  CHF: 'bg-slate-400',
+}
+
+// "Fuerte" o "débil" siempre es contra algo: acá, contra el mismo índice hace un año.
+// Movimientos de menos del 1% en el año se toman como estables (criterio propio, no
+// hay un umbral oficial).
+const UMBRAL_ESTABLE_PCT = 1
+
+function estadoDolar(variacionAnioPct) {
+  if (!conNumero(variacionAnioPct)) return null
+  if (variacionAnioPct >= UMBRAL_ESTABLE_PCT)
+    return { texto: 'Dólar más fuerte que hace un año', clase: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20', flecha: 'M5 15l7-7 7 7' }
+  if (variacionAnioPct <= -UMBRAL_ESTABLE_PCT)
+    return { texto: 'Dólar más débil que hace un año', clase: 'bg-rose-50 text-rose-700 ring-rose-600/20', flecha: 'M19 9l-7 7-7-7' }
+  return { texto: 'Dólar estable frente a hace un año', clase: 'bg-slate-100 text-slate-600 ring-slate-500/20', flecha: 'M5 12h14' }
+}
+
+const formatVariacion = (pct) =>
+  `${pct >= 0 ? '+' : '−'}${Math.abs(pct).toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
+
+function Variacion({ etiqueta, pct }) {
+  if (!conNumero(pct)) return null
+  return (
+    <span>
+      {etiqueta}{' '}
+      <span className={`font-semibold tabular-nums ${pct >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>{formatVariacion(pct)}</span>
+    </span>
+  )
+}
+
+const formatPeso = (peso) => `${(peso * 100).toLocaleString('es-AR', { maximumFractionDigits: 1 })}%`
+
+// Rangos como la inflación esperada: la fuente arranca en marzo de 2024, así que no
+// llega a 4 años.
+const RANGOS_DXY = [
+  { id: '3m', etiqueta: '3 meses', meses: 3 },
+  { id: '6m', etiqueta: '6 meses', meses: 6 },
+  { id: '1a', etiqueta: '1 año', meses: 12 },
+  { id: '2a', etiqueta: '2 años', meses: 24 },
+]
+
+// "DXY" y "U.S. Dollar Index" son marcas de ICE, y este valor es calculado por nosotros
+// (puede diferir unas décimas del oficial): por eso el título es "Índice Dólar" y se
+// aclara que es una réplica, en vez de presentarlo como el dato de ICE.
+function TarjetaDxy({ dxy }) {
+  const esMovil = useEsMovil()
+  const [historiaAbierta, setHistoriaAbierta] = useState(false)
+  const pct = numeroONull(dxy.variacionPct)
+  const estado = estadoDolar(dxy.variacionAnioPct)
+  const trendBorder = pct === null ? '!border-t-slate-200' : pct >= 0 ? '!border-t-emerald-700' : '!border-t-rose-700'
+  return (
+    <Card
+      className={`group mb-6 animate-fade-up border-t-4 p-5 shadow-md shadow-slate-200/70 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-1 hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)] motion-reduce:transition-none motion-reduce:animate-none ${trendBorder}`}
+    >
+      <div className="flex flex-col gap-5 md:flex-row md:items-center md:gap-8">
+        <div className="md:w-5/12">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-sm font-bold text-emerald-700 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-emerald-700 group-hover:text-white">
+                US$
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-slate-900">Índice Dólar</p>
+                  <button
+                    type="button"
+                    onClick={() => setHistoriaAbierta(true)}
+                    aria-label="Ver la evolución del índice dólar"
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 transition-colors hover:bg-emerald-700 hover:text-white"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 17l5-5 4 3 6-7M18 8h3v3" />
+                    </svg>
+                  </button>
+                </div>
+                <p className="text-xs text-slate-500">Réplica del DXY · el dólar contra 6 monedas principales</p>
+              </div>
+            </div>
+            {pct !== null && (
+              <Badge variant={pct >= 0 ? 'positive' : 'negative'}>
+                {pct >= 0 ? '+' : ''}
+                {pct.toFixed(2)}%
+              </Badge>
+            )}
+          </div>
+          <p className="mt-4 text-3xl font-bold tabular-nums text-slate-900">{dxy.valor.toFixed(2)}</p>
+          {estado && (
+            <span className={`mt-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${estado.clase}`}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3 w-3 shrink-0" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d={estado.flecha} />
+              </svg>
+              {estado.texto}
+            </span>
+          )}
+          {(conNumero(dxy.variacionMesPct) || conNumero(dxy.variacionAnioPct)) && (
+            <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+              <Variacion etiqueta="1 mes" pct={dxy.variacionMesPct} />
+              <Variacion etiqueta="12 meses" pct={dxy.variacionAnioPct} />
+            </p>
+          )}
+          <p className="mt-2 text-xs text-slate-500">Sube cuando el dólar se fortalece frente a esas monedas.</p>
+        </div>
+
+        <div className="md:flex-1 md:border-l md:border-slate-100 md:pl-8">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Composición del índice</p>
+          <div className="mt-2 flex h-2.5 overflow-hidden rounded-full" aria-hidden="true">
+            {DXY_PESOS.map(({ codigo, peso }) => (
+              <div key={codigo} className={DXY_COLORES[codigo]} style={{ width: `${peso * 100}%` }} />
+            ))}
+          </div>
+          <ul className="mt-3 grid grid-cols-3 gap-x-3 gap-y-1.5 text-xs lg:grid-cols-6">
+            {DXY_PESOS.map(({ codigo, peso }) => (
+              <li key={codigo} className="flex items-center gap-1.5">
+                <span className={`h-2 w-2 shrink-0 rounded-full ${DXY_COLORES[codigo]}`} />
+                <span className="font-semibold text-slate-700">{codigo}</span>
+                <span className="tabular-nums text-slate-500">{formatPeso(peso)}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-[11px] leading-snug text-slate-400">
+            Calculado con la fórmula pública del DXY a partir de las cotizaciones de cierre; puede diferir levemente del valor oficial de ICE.
+          </p>
+        </div>
+      </div>
+
+      {historiaAbierta && (
+        <HistoriaModal
+          onClose={() => setHistoriaAbierta(false)}
+          titulo="Índice Dólar (réplica del DXY)"
+          subtitulo="El dólar contra euro, yen, libra, dólar canadiense, corona sueca y franco suizo · cierre diario"
+          cargar={fetchHistoriaDxy}
+          rangos={RANGOS_DXY}
+          rangoInicial="1a"
+          // Verde, como el ícono de la tarjeta: es el dólar.
+          color="#047857"
+          formatoValor={(v) => v.toFixed(2)}
+          formatoEje={(v) => v.toFixed(v % 1 === 0 ? 0 : 1)}
+          esMovil={esMovil}
+        />
+      )}
+    </Card>
+  )
+}
 
 export default function OtrasMonedasTab() {
   const fetcher = useCallback(() => fetchOtrasMonedas(), [])
@@ -99,6 +253,8 @@ export default function OtrasMonedasTab() {
         </svg>
         <span className="text-sm font-bold uppercase tracking-wide text-white">Divisas Globales</span>
       </div>
+
+      {conNumero(data?.dxy?.valor) && <TarjetaDxy dxy={data.dxy} />}
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-3">

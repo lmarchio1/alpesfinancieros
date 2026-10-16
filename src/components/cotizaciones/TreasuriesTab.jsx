@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { usePolling } from '../../hooks/usePolling'
 import { fetchCurvaTreasury, fetchHistoriaBreakeven } from '../../services/treasuryApi'
+import TasaFedCard from './TasaFedCard'
+import ErrorBoundary from '../ui/ErrorBoundary'
 import { PLAZOS } from '../../utils/treasuryCurva'
 import Card from '../ui/Card'
 import HistoriaModal from '../ui/HistoriaModal'
@@ -147,7 +149,9 @@ const DISENIOS = {
     // Los cortos están muy juntos: se etiqueta uno por medio.
     ejeX: (p, i) => p.anios >= 1 || i % 2 === 0,
     pilares: ['m3', 'a2', 'a10', 'a30'],
-    separacion: 0.16,
+    // Con 0,16 (109 unidades) el 2A quedaba sin número: está a 106 del 3M. Cada rótulo
+    // mide unas 35 unidades, así que con 0,12 (82) siguen sin tocarse.
+    separacion: 0.12,
   },
   celular: {
     ancho: 360,
@@ -421,7 +425,7 @@ function ModalCurva({ onClose, hoy, referencia, previo, esMovil, textoComparacio
       <div className="w-full max-w-2xl rounded-2xl bg-white p-4 shadow-2xl sm:p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="font-semibold text-slate-900">Curva de rendimientos del Tesoro</p>
+            <p className="font-semibold text-slate-900">Curva de Rendimientos del Tesoro</p>
             <p className="text-xs text-slate-500">Cierre del {formatFecha(hoy.fecha)}</p>
           </div>
           <button
@@ -660,7 +664,7 @@ export default function TreasuriesTab() {
                   {iconoPendiente}
                 </IconoTarjeta>
                 <div className="min-w-0">
-                  <p className="font-semibold text-slate-900">Pendiente de la curva (10A − 2A)</p>
+                  <p className="font-semibold text-slate-900">Pendiente de la Curva (10A − 2A)</p>
                   <p className="text-xs text-slate-500">Diferencial entre la Nota a 10 años y la de 2 años</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <EstadoCurva estado={estado} />
@@ -699,7 +703,7 @@ export default function TreasuriesTab() {
                 </IconoTarjeta>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-semibold text-slate-900">Inflación esperada 10A</p>
+                    <p className="font-semibold text-slate-900">Inflación Esperada 10A</p>
                     <button
                       type="button"
                       onClick={() => setModalBreakeven(true)}
@@ -746,7 +750,7 @@ export default function TreasuriesTab() {
             </IconoTarjeta>
             <div>
               <div className="flex items-center gap-2">
-                <p className="font-semibold text-slate-900">Curva de rendimientos</p>
+                <p className="font-semibold text-slate-900">Curva de Rendimientos</p>
                 <button
                   type="button"
                   onClick={() => setModalAbierto(true)}
@@ -787,7 +791,7 @@ export default function TreasuriesTab() {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 shrink-0">
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 17l5-5 4 3 6-7M18 8h3v3" />
           </svg>
-          Ver la curva de rendimientos
+          Ver la Curva de Rendimientos
         </button>
 
         <div className="mt-3 hidden sm:block">
@@ -796,10 +800,16 @@ export default function TreasuriesTab() {
 
       </Card>
 
+      {/* Tasa de la Fed: tiene su propia fuente, así que si falla se cae sola y el resto
+          de la pestaña sigue en pie. */}
+      <ErrorBoundary seccion="Tasa de la Fed">
+        <TasaFedCard a2={hoy.a2} fecha2A={hoy.fecha} />
+      </ErrorBoundary>
+
       {modalBreakeven && (
         <HistoriaModal
           onClose={() => setModalBreakeven(false)}
-          titulo="Inflación esperada a 10 años (breakeven)"
+          titulo="Inflación Esperada a 10 años (breakeven)"
           subtitulo="Treasury a 10 años menos TIPS a 10 años · cierre diario"
           cargar={() => fetchHistoriaBreakeven(data?.dias ?? [])}
           rangos={RANGOS_BREAKEVEN}
@@ -829,8 +839,9 @@ export default function TreasuriesTab() {
         </svg>
         <p className="text-xs text-slate-200">
           Curva oficial de rendimientos (par yield) publicada por el Departamento del Tesoro de los Estados Unidos
-          al cierre de cada rueda. Es la referencia contra la que se mide el riesgo país. Valores informativos: no
-          constituyen una recomendación operativa.
+          al cierre de cada rueda. Es la referencia contra la que se mide el riesgo país. La tasa de la Fed proviene
+          del Banco de la Reserva Federal de Nueva York. Valores informativos: no constituyen una recomendación
+          operativa.
         </p>
       </div>
     </div>

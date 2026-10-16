@@ -1,3 +1,6 @@
+import { fetchPreciosCache } from './supabaseClient'
+import { calcularDxy, fechaDeCierre, restarDias, urlCotizacionesDelDia } from '../utils/dxy'
+
 const BASE_URL = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api'
 
 const MONEDAS = ['EUR', 'GBP', 'BRL', 'CLP', 'COP', 'UYU']
@@ -25,7 +28,7 @@ async function fetchJson(url) {
 // y correcta una vez publicada. Por eso ahora se pide esa primero, y solo
 // se cae a @latest si la fecha de hoy todavía no se publicó (404).
 function fetchUsdRatesFecha(fecha) {
-  return fetchJson(`${BASE_URL}@${fecha}/v1/currencies/usd.json`)
+  return fetchJson(urlCotizacionesDelDia(fecha))
 }
 
 function fetchUsdRatesLatest(cacheBuster) {
@@ -60,8 +63,35 @@ function tasa(rates, codigo) {
   return typeof valor === 'number' && Number.isFinite(valor) && valor > 0 ? valor : null
 }
 
+// DXY de una fecha pasada, para saber si el dólar está más fuerte o más débil que antes.
+// Si ese día justo no se publicó el archivo, prueba con los anteriores.
+async function dxyEnFecha(fechaIso) {
+  for (let i = 0; i < 4; i++) {
+    try {
+      const archivo = await fetchUsdRatesFecha(restarDias(fechaIso, i))
+      const valor = calcularDxy(archivo.usd)
+      if (valor) return valor
+    } catch {
+      // Sigue con el día anterior.
+    }
+  }
+  return null
+}
+
+// Variación del DXY contra hace un mes y hace un año. Son dos archivos chicos, con fecha
+// fija, que jsdelivr cachea de forma permanente; si no llegan, la tarjeta se muestra igual
+// sin la comparación.
+async function comparacionesDxy(fechaHoy, valorHoy) {
+  const [mes, anio] = await Promise.all([dxyEnFecha(restarDias(fechaHoy, 30)), dxyEnFecha(restarDias(fechaHoy, 365))])
+  const variacion = (antes) => (antes ? ((valorHoy - antes) / antes) * 100 : null)
+  return { variacionMesPct: variacion(mes), variacionAnioPct: variacion(anio) }
+}
+
 export async function fetchOtrasMonedas() {
   const hoy = await fetchUsdRatesHoy()
+  const dxyHoy = calcularDxy(hoy.usd)
+  // Arranca en paralelo con el archivo de ayer, así no suma espera.
+  const comparaciones = dxyHoy ? comparacionesDxy(hoy.date, dxyHoy).catch(() => ({})) : Promise.resolve({})
 
   let ayer = null
   try {
@@ -115,5 +145,43 @@ export async function fetchOtrasMonedas() {
     throw new Error('No se pudieron obtener las cotizaciones')
   }
 
-  return { cotizaciones, metales, fecha: hoy.date }
+  const dxyAyer = calcularDxy(ayer?.usd)
+  const dxy = dxyHoy
+    ? {
+        valor: dxyHoy,
+        variacionPct: dxyAyer ? ((dxyHoy - dxyAyer) / dxyAyer) * 100 : null,
+        ...(await comparaciones),
+      }
+    : null
+
+  return { cotizaciones, metales, dxy, fecha: hoy.date }
+}
+
+// Historia del DXY para el gráfico de la tarjeta. La arma la tarea de cierre diario (ver
+// scripts/cachear-dxy.mjs), que calcula el índice día por día desde el primer archivo de
+// la fuente (marzo de 2024) y lo guarda en Supabase: el visitante baja solo esa fila, y
+// recién cuando abre el gráfico. Si la fila no está, se arma acá una versión liviana: un
+// punto por semana de los últimos seis meses, 26 archivos chicos pedidos en paralelo.
+const FUENTE_HISTORIA_DXY = 'dxy_historia'
+const SEMANAS_DE_RESPALDO = 26
+
+async function historiaDxyDeRespaldo() {
+  const hoy = new Date().toISOString().slice(0, 10)
+  const fechas = Array.from({ length: SEMANAS_DE_RESPALDO }, (_, i) => restarDias(hoy, 7 * i + 1))
+  const archivos = await Promise.allSettled(fechas.map((f) => fetchUsdRatesFecha(f)))
+  return archivos
+    .map((a, i) => {
+      const valor = a.status === 'fulfilled' ? calcularDxy(a.value?.usd) : null
+      return valor ? { fecha: fechaDeCierre(fechas[i]), valor: Number(valor.toFixed(3)) } : null
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.fecha.localeCompare(b.fecha))
+}
+
+export async function fetchHistoriaDxy() {
+  const cache = await fetchPreciosCache(FUENTE_HISTORIA_DXY, 7 * 24 * 60 * 60 * 1000)
+  if (Array.isArray(cache?.puntos) && cache.puntos.length > 0) return { puntos: cache.puntos, completa: true }
+  const puntos = await historiaDxyDeRespaldo()
+  if (puntos.length < 2) throw new Error('No se pudo obtener la historia del índice dólar')
+  return { puntos, completa: false }
 }

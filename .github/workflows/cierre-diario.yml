@@ -34,3 +34,18 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      # Historia del índice dólar (DXY) para el gráfico de Divisas y Metales. Incremental:
+      # la primera vez baja todo desde marzo de 2024 y después un día por noche. Igual que
+      # el anterior, si falla no frena nada y el gráfico sigue con lo último guardado.
+      - run: node scripts/cachear-dxy.mjs
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      # Tasa de la Fed (último dato, cambios de rango e historia de 4 años) desde la API
+      # oficial de la Fed de Nueva York. Mismo criterio: si falla, no frena nada.
+      - run: node scripts/cachear-fed.mjs
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
