@@ -29,33 +29,31 @@ const RANGOS = [
 const UMBRAL_PB = 15
 
 // El Treasury a 2 años refleja el promedio esperado de todo el período (en el medio puede
-// haber subas y bajas), así que los textos hablan del promedio y no de un camino.
+// haber subas y bajas), así que los textos hablan del promedio y no de un camino. Es una
+// sola frase: que el bono rinde más o menos que la tasa ya lo dicen el número y la cuenta.
 function lecturaDelMercado(pb) {
   if (pb <= -UMBRAL_PB)
     return {
       etiqueta: 'Promedio esperado: más bajo',
       clase: 'bg-sky-50 text-sky-700 ring-sky-600/20',
-      acento: 'text-sky-700',
+      borde: '!border-t-sky-600',
       flecha: 'M19 9l-7 7-7-7',
-      texto:
-        'El bono a 2 años rinde menos que la tasa actual: el mercado espera que, en promedio, la tasa de la Fed se mantenga por debajo de los niveles actuales durante los próximos dos años.',
+      texto: 'El mercado espera que, en promedio, la tasa de la Fed se mantenga por debajo de los niveles actuales durante los próximos dos años.',
     }
   if (pb >= UMBRAL_PB)
     return {
       etiqueta: 'Promedio esperado: más alto',
       clase: 'bg-amber-50 text-amber-700 ring-amber-600/20',
-      acento: 'text-amber-700',
+      borde: '!border-t-amber-500',
       flecha: 'M5 15l7-7 7 7',
-      texto:
-        'El bono a 2 años rinde más que la tasa actual: el mercado espera que, en promedio, la tasa de la Fed se mantenga por encima de los niveles actuales durante los próximos dos años.',
+      texto: 'El mercado espera que, en promedio, la tasa de la Fed se mantenga por encima de los niveles actuales durante los próximos dos años.',
     }
   return {
     etiqueta: 'Promedio esperado: similar',
     clase: 'bg-slate-100 text-slate-600 ring-slate-500/20',
-    acento: 'text-slate-800',
+    borde: '!border-t-slate-300',
     flecha: 'M5 12h14',
-    texto:
-      'El bono a 2 años rinde casi lo mismo que la tasa actual: el mercado espera que, en promedio, la tasa de la Fed se mantenga cerca de los niveles actuales durante los próximos dos años.',
+    texto: 'El mercado espera que, en promedio, la tasa de la Fed se mantenga cerca de los niveles actuales durante los próximos dos años.',
   }
 }
 
@@ -65,6 +63,29 @@ const iconoFed = (
     <path d="M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18" />
   </svg>
 )
+
+// Línea que sigue punteada hacia adelante: lo que se espera.
+const iconoExpectativa = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+    <path d="M3 17l4-4 4 2" />
+    <path d="M11 15l4-4 6-3" strokeDasharray="2 2.5" />
+    <path d="M3 21h18" />
+  </svg>
+)
+
+// Texto de método, compartido por la versión a la vista (compu) y la plegada (celular).
+const textoMetodologia = (
+  <>
+    El rendimiento del bono a 2 años refleja, en forma aproximada, el{' '}
+    <strong className="font-semibold text-slate-600">promedio</strong> que el mercado espera para la tasa de la Fed
+    durante esos dos años (no el nivel exacto dentro de dos años), más una pequeña prima por plazo. Es una lectura del
+    mercado, no un pronóstico.
+  </>
+)
+
+const CLASE_TARJETA =
+  'group flex flex-col animate-fade-up border-t-4 p-5 shadow-md shadow-slate-200/70 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-1 hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)] motion-reduce:transition-none motion-reduce:animate-none lg:row-span-2 lg:grid lg:grid-rows-subgrid'
+const CLASE_NOTA = 'mt-4 border-t border-slate-100 pt-3 text-xs leading-relaxed text-slate-500 lg:mt-0'
 
 export default function TasaFedCard({ a2, fecha2A }) {
   const esMovil = useEsMovil()
@@ -86,13 +107,13 @@ export default function TasaFedCard({ a2, fecha2A }) {
 
   return (
     <>
-      <Card className="group mt-4 animate-fade-up border-t-4 !border-t-brand-500 p-5 shadow-md shadow-slate-200/70 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-1 hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)] motion-reduce:transition-none motion-reduce:animate-none">
-        {/* Dos columnas con la misma estructura: el dato arriba y su nota al pie abajo. Es
-            una grilla de 2×2, mitad y mitad (con 5/7 el lado del mercado se veía mucho más
-            ancho), para que las dos notas arranquen sobre la misma línea divisoria;
-            en el celular queda todo en una columna, cada bloque con su nota. */}
-        <div className="grid grid-cols-1 lg:grid-cols-2">
-          <div className="lg:col-start-1 lg:row-start-1 lg:pb-4 lg:pr-8">
+      {/* Dos tarjetas separadas: el dato de la Fed, que es lo que se busca primero, y la
+          lectura del mercado. En la compu van lado a lado y comparten filas (subgrid), así
+          las dos notas al pie arrancan sobre la misma línea; en el celular, una abajo de la
+          otra. */}
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card className={`${CLASE_TARJETA} !border-t-brand-500`} style={{ animationDelay: '560ms' }}>
+          <div>
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-brand-600 group-hover:text-white">
                 {iconoFed}
@@ -135,43 +156,59 @@ export default function TasaFedCard({ a2, fecha2A }) {
             </div>
           </div>
 
-          <p className="mt-4 border-t border-slate-100 pt-3 text-xs leading-relaxed text-slate-500 lg:col-start-1 lg:row-start-2 lg:mt-0 lg:pr-8">
+          <p className={CLASE_NOTA}>
             Es la tasa a la que los bancos de EE.UU. se prestan entre sí de un día para otro. La Reserva Federal fija
-            su rango en las ocho reuniones anuales del FOMC, y de ella dependen las demás tasas en dólares. La tasa
-            efectiva es el promedio real de esas operaciones, y se mueve dentro del rango.
+            su rango en las ocho reuniones anuales del FOMC, y de ella dependen las demás tasas en dólares.
           </p>
+        </Card>
 
-          {lectura && (
-            <>
-              <div className="mt-6 lg:col-start-2 lg:row-start-1 lg:mt-0 lg:border-l lg:border-slate-100 lg:pb-4 lg:pl-8">
-                <p className="text-xs font-bold uppercase tracking-wide text-slate-900">Qué espera el mercado</p>
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${lectura.clase}`}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3 w-3 shrink-0" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d={lectura.flecha} />
-                    </svg>
-                    {lectura.etiqueta}
-                  </span>
-                  {/* La cuenta en gris; el resultado, en negrita y con el color de la lectura,
-                      que es adonde tiene que ir el ojo. */}
-                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium tabular-nums text-slate-500">
-                    Treasury 2A {formatTasa(a2)} − efectiva {formatTasa(fed.efectiva)} =
-                    <strong className={`font-bold ${lectura.acento}`}>{formatPb(diferenciaPb)}</strong>
-                  </span>
+        {lectura && (
+          <Card className={`${CLASE_TARJETA} ${lectura.borde}`} style={{ animationDelay: '640ms' }}>
+            <div>
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-slate-700 group-hover:text-white">
+                  {iconoExpectativa}
                 </div>
-                <p className="mt-3 text-sm font-medium leading-relaxed text-slate-600">{lectura.texto}</p>
+                <div>
+                  <p className="font-semibold text-slate-900">Qué Espera el Mercado</p>
+                  <p className="text-xs text-slate-500">Treasury a 2 años contra la tasa de la Fed</p>
+                </div>
               </div>
 
-              <p className="mt-4 border-t border-slate-100 pt-3 text-xs leading-relaxed text-slate-500 lg:col-start-2 lg:row-start-2 lg:mt-0 lg:border-l lg:pl-8">
-                El rendimiento del bono a 2 años refleja, en forma aproximada, el{' '}
-                <strong className="font-semibold text-slate-600">promedio</strong> que el mercado espera para la tasa de la
-                Fed durante esos dos años (no el nivel exacto dentro de dos años), más una pequeña prima por plazo. Es
-                una lectura del mercado, no un pronóstico.
-              </p>
-            </>
-          )}
-        </div>
-      </Card>
+              {/* De arriba hacia abajo: la conclusión (número y estado), la cuenta como dato
+                  secundario y la frase. */}
+              <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+                <p className="text-3xl font-bold tabular-nums text-slate-900">{formatPb(diferenciaPb)}</p>
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${lectura.clase}`}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3 w-3 shrink-0" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d={lectura.flecha} />
+                  </svg>
+                  {lectura.etiqueta}
+                </span>
+              </div>
+              <span className="mt-2 inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium tabular-nums text-slate-500">
+                Treasury 2A {formatTasa(a2)} − tasa efectiva {formatTasa(fed.efectiva)}
+              </span>
+              <p className="mt-3 text-sm font-medium leading-relaxed text-slate-600">{lectura.texto}</p>
+            </div>
+
+            {/* El detalle de cómo se lee: a la vista en la compu; en el celular, plegado para
+                que la tarjeta no se haga eterna. */}
+            <div className={CLASE_NOTA}>
+              <p className="hidden sm:block">{textoMetodologia}</p>
+              <details className="group/detalle sm:hidden">
+                <summary className="flex cursor-pointer list-none items-center gap-1.5 font-semibold text-slate-600 [&::-webkit-details-marker]:hidden">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3 w-3 shrink-0 transition-transform group-open/detalle:rotate-90" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                  ¿Cómo se interpreta?
+                </summary>
+                <p className="mt-2">{textoMetodologia}</p>
+              </details>
+            </div>
+          </Card>
+        )}
+      </div>
 
       {historiaAbierta && (
         <HistoriaModal
