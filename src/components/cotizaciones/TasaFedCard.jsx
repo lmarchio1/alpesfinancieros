@@ -170,7 +170,7 @@ export default function TasaFedCard({ a2, fecha2A }) {
                   {iconoExpectativa}
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-900">Qué Espera el Mercado</p>
+                  <p className="font-semibold text-slate-900">Expectativas</p>
                   <p className="text-xs text-slate-500">Treasury a 2 años contra la tasa de la Fed</p>
                 </div>
               </div>
