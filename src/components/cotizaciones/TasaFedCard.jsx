@@ -144,7 +144,7 @@ export default function TasaFedCard({ a2, fecha2A }) {
           {lectura && (
             <>
               <div className="mt-6 lg:col-start-2 lg:row-start-1 lg:mt-0 lg:border-l lg:border-slate-100 lg:pb-4 lg:pl-8">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Qué espera el mercado</p>
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-900">Qué espera el mercado</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${lectura.clase}`}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3 w-3 shrink-0" aria-hidden="true">
@@ -159,7 +159,7 @@ export default function TasaFedCard({ a2, fecha2A }) {
                     <strong className={`font-bold ${lectura.acento}`}>{formatPb(diferenciaPb)}</strong>
                   </span>
                 </div>
-                <p className="mt-3 text-[15px] font-medium leading-relaxed text-slate-800">{lectura.texto}</p>
+                <p className="mt-3 text-sm font-medium leading-relaxed text-slate-600">{lectura.texto}</p>
               </div>
 
               <p className="mt-4 border-t border-slate-100 pt-3 text-xs leading-relaxed text-slate-500 lg:col-start-2 lg:row-start-2 lg:mt-0 lg:border-l lg:pl-8">
