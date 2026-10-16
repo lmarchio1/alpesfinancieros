@@ -15,6 +15,42 @@ const formatTasa = (v) => `${v.toLocaleString('es-AR', { minimumFractionDigits: 
 const formatFecha = (iso) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}`
 const formatPb = (pb) => `${pb >= 0 ? '+' : '−'}${Math.abs(pb)} pb`
 
+// Reuniones del FOMC (inicio y día de la decisión), copiadas del calendario oficial:
+// federalreserve.gov/monetarypolicy/fomccalendars.htm. No hay API para esto. La Fed
+// publica el calendario del año siguiente a mitad de año: hay que sumarlo antes de que
+// se termine esta lista (después de la última fecha, la línea simplemente no aparece).
+const REUNIONES_FOMC = [
+  ['2026-10-27', '2026-10-28'],
+  ['2026-12-08', '2026-12-09'],
+  ['2027-01-26', '2027-01-27'],
+  ['2027-03-16', '2027-03-17'],
+  ['2027-04-27', '2027-04-28'],
+  ['2027-06-08', '2027-06-09'],
+  ['2027-07-27', '2027-07-28'],
+  ['2027-09-14', '2027-09-15'],
+  ['2027-10-26', '2027-10-27'],
+  ['2027-12-07', '2027-12-08'],
+]
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+
+const hoyArgentina = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date())
+
+function proximaReunion() {
+  const hoy = hoyArgentina()
+  const reunion = REUNIONES_FOMC.find(([, fin]) => fin >= hoy)
+  if (!reunion) return null
+  const [inicio, fin] = reunion
+  const dias = Math.round((Date.parse(inicio) - Date.parse(hoy)) / 86400000)
+  const cuando = dias > 1 ? `en ${dias} días` : dias === 1 ? 'mañana' : dias === 0 ? 'empieza hoy' : 'en curso'
+  const mesInicio = Number(inicio.slice(5, 7)) - 1
+  const mesFin = Number(fin.slice(5, 7)) - 1
+  const fecha =
+    mesInicio === mesFin
+      ? `${Number(inicio.slice(8, 10))} y ${Number(fin.slice(8, 10))} de ${MESES[mesFin]}`
+      : `${Number(inicio.slice(8, 10))} de ${MESES[mesInicio]} y ${Number(fin.slice(8, 10))} de ${MESES[mesFin]}`
+  return { fecha, cuando }
+}
+
 // Mismos rangos que el riesgo país: la serie guardada cubre 4 años.
 const RANGOS = [
   { id: '6m', etiqueta: '6 meses', meses: 6 },
@@ -37,6 +73,7 @@ function lecturaDelMercado(pb) {
       etiqueta: 'Promedio esperado: más bajo',
       clase: 'bg-sky-50 text-sky-700 ring-sky-600/20',
       borde: '!border-t-sky-600',
+      icono: 'bg-sky-50 text-sky-700 group-hover:bg-sky-600 group-hover:text-white',
       flecha: 'M19 9l-7 7-7-7',
       texto: 'El mercado espera que, en promedio, la tasa de la Fed se mantenga por debajo de los niveles actuales durante los próximos dos años.',
     }
@@ -45,6 +82,7 @@ function lecturaDelMercado(pb) {
       etiqueta: 'Promedio esperado: más alto',
       clase: 'bg-amber-50 text-amber-700 ring-amber-600/20',
       borde: '!border-t-amber-500',
+      icono: 'bg-amber-50 text-amber-600 group-hover:bg-amber-500 group-hover:text-white',
       flecha: 'M5 15l7-7 7 7',
       texto: 'El mercado espera que, en promedio, la tasa de la Fed se mantenga por encima de los niveles actuales durante los próximos dos años.',
     }
@@ -52,6 +90,7 @@ function lecturaDelMercado(pb) {
     etiqueta: 'Promedio esperado: similar',
     clase: 'bg-slate-100 text-slate-600 ring-slate-500/20',
     borde: '!border-t-slate-300',
+    icono: 'bg-slate-100 text-slate-600 group-hover:bg-slate-500 group-hover:text-white',
     flecha: 'M5 12h14',
     texto: 'El mercado espera que, en promedio, la tasa de la Fed se mantenga cerca de los niveles actuales durante los próximos dos años.',
   }
@@ -102,6 +141,7 @@ export default function TasaFedCard({ a2, fecha2A }) {
   if (!fed || !conNumero(fed.efectiva) || !conNumero(fed.desde) || !conNumero(fed.hasta)) return null
 
   const cambio = fed.ultimoCambio && conNumero(fed.ultimoCambio.pb) ? fed.ultimoCambio : null
+  const reunion = proximaReunion()
   const diferenciaPb = conNumero(a2) ? Math.round((a2 - fed.efectiva) * 100) : null
   const lectura = diferenciaPb !== null ? lecturaDelMercado(diferenciaPb) : null
 
@@ -154,6 +194,20 @@ export default function TasaFedCard({ a2, fecha2A }) {
                 </span>
               )}
             </div>
+            {/* La próxima reunión completa el espacio que la tarjeta de Expectativas ocupa con
+                su frase, y es el dato que más se pregunta después de la tasa. */}
+            {reunion && (
+              <div className="mt-4 flex items-center gap-2.5 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600 ring-1 ring-inset ring-slate-200">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4 shrink-0 text-brand-500" aria-hidden="true">
+                  <rect x="3.5" y="5" width="17" height="15" rx="2" />
+                  <path strokeLinecap="round" d="M3.5 10h17M8 3v4M16 3v4" />
+                </svg>
+                <span>
+                  Próxima reunión de la Fed: <strong className="font-semibold text-slate-800">{reunion.fecha}</strong>
+                  <span className="text-slate-500"> · {reunion.cuando}</span>
+                </span>
+              </div>
+            )}
           </div>
 
           <p className={CLASE_NOTA}>
@@ -166,7 +220,7 @@ export default function TasaFedCard({ a2, fecha2A }) {
           <Card className={`${CLASE_TARJETA} ${lectura.borde}`} style={{ animationDelay: '640ms' }}>
             <div>
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-slate-700 group-hover:text-white">
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-all duration-300 ease-out group-hover:scale-110 ${lectura.icono}`}>
                   {iconoExpectativa}
                 </div>
                 <div>
