@@ -18,7 +18,10 @@ const MAPS_EMBED_URL = `https://www.google.com/maps?q=${MAPS_LAT},${MAPS_LNG}&z=
 const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${MAPS_LAT},${MAPS_LNG}`
 const EMAIL_CONTACTO = 'contacto@alpesestadosfinancieros.com'
 
-const INITIAL_FORM = { firstName: '', lastName: '', email: '', phone: '', message: '' }
+// _gotcha es el campo trampa de Formspree: invisible para las personas, pero los robots
+// de spam completan todos los campos que encuentran. Si llega con algo escrito, Formspree
+// descarta el mensaje en silencio, sin que el robot se entere.
+const INITIAL_FORM = { firstName: '', lastName: '', email: '', phone: '', message: '', _gotcha: '' }
 
 export default function ContactForm() {
   const [form, setForm] = useState(INITIAL_FORM)
@@ -116,6 +119,21 @@ export default function ContactForm() {
               Mandanos tu consulta y nos comunicaremos con vos lo más pronto posible.
             </p>
             <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {/* Fuera de la pantalla (no display:none, que algunos robots saltean), sin foco
+                  con el tabulador, sin autocompletar y oculto para los lectores de pantalla. */}
+              <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
+                <label>
+                  No completar este campo
+                  <input
+                    name="_gotcha"
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={form._gotcha}
+                    onChange={handleChange}
+                  />
+                </label>
+              </div>
               <input
                 aria-label="Nombre"
                 placeholder="Nombre"

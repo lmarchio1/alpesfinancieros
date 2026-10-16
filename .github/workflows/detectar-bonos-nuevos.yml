@@ -3,7 +3,9 @@ name: Detectar bonos nuevos
 # Una vez por día hábil compara lo que cotiza data912 contra lo que muestra el sitio y
 # abre un aviso (issue) por cada bono nuevo, asignado al dueño del repo para que GitHub
 # le mande el mail. No toca el sitio: las altas se hacen cuando el dueño responde (ver
-# respuesta-bono-nuevo.yml). Ver scripts/detectar-bonos-nuevos.mjs.
+# respuesta-bono-nuevo.yml). Si data912 no responde reintenta, y si no puede revisar dos
+# días seguidos avisa. Los viernes manda un resumen de la semana, haya novedades o no.
+# Ver scripts/detectar-bonos-nuevos.mjs.
 
 on:
   schedule:
@@ -14,6 +16,10 @@ on:
     inputs:
       prueba:
         description: 'Abrir un aviso de prueba (bono ficticio) para verificar que llega el mail'
+        type: boolean
+        default: false
+      resumen:
+        description: 'Mandar el resumen semanal ahora, aunque no sea viernes'
         type: boolean
         default: false
 
@@ -33,3 +39,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           PRUEBA: ${{ inputs.prueba && '1' || '0' }}
+          RESUMEN: ${{ inputs.resumen && '1' || '0' }}
