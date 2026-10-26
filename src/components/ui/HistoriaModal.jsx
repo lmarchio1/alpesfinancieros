@@ -52,11 +52,13 @@ function Grafico({ puntos, esMovil, color, formatoValor, formatoEje, descripcion
   const area = `M${x(0)},${margen.top + altoPlot} L${linea.split(' ').join(' L')} L${x(puntos.length - 1)},${margen.top + altoPlot} Z`
 
   // Una etiqueta por mes calendario (o cada N meses), anclada al primer día hábil de ese
-  // mes. El paso depende de cuántos meses se ven de verdad, no del rango elegido.
+  // mes. El paso depende de cuántos meses se ven de verdad, no del rango elegido. Más de
+  // cuatro años (el rango de 10 del tipo de cambio real): una por año, o cada dos en el
+  // celular, siempre en enero.
   const mesesVisibles = (Date.parse(puntos.at(-1).fecha) - Date.parse(puntos[0].fecha)) / (30.44 * 86400000)
   const pasoMeses = esMovil
-    ? mesesVisibles <= 4 ? 1 : mesesVisibles <= 8 ? 2 : mesesVisibles <= 14 ? 3 : mesesVisibles <= 26 ? 6 : 12
-    : mesesVisibles <= 7 ? 1 : mesesVisibles <= 13 ? 2 : mesesVisibles <= 26 ? 4 : 6
+    ? mesesVisibles <= 4 ? 1 : mesesVisibles <= 8 ? 2 : mesesVisibles <= 14 ? 3 : mesesVisibles <= 26 ? 6 : mesesVisibles <= 50 ? 12 : 24
+    : mesesVisibles <= 7 ? 1 : mesesVisibles <= 13 ? 2 : mesesVisibles <= 26 ? 4 : mesesVisibles <= 50 ? 6 : 12
   const etiquetasX = []
   let ultimoMes = null
   puntos.forEach((p, i) => {
@@ -109,8 +111,45 @@ function Grafico({ puntos, esMovil, color, formatoValor, formatoEje, descripcion
 
         <path d={area} fill={`url(#${idGradiente})`} />
         <polyline points={linea} fill="none" stroke={color} strokeWidth={esMovil ? 2.5 : 2} strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx={x(iMin)} cy={y(minimo)} r="4" fill="#e11d48" />
-        <circle cx={x(iMax)} cy={y(maximo)} r="4" fill="#059669" />
+        {/* Mínimo y máximo: anillos (blancos por dentro, verde el máximo y rojo el mínimo)
+            centrados sobre la línea -los puntos llenos parecían salirse de la curva en los
+            picos-, con su valor escrito al lado en el mismo color. Mientras se recorre el
+            gráfico se ocultan los valores, para no competir con el recuadro del día. */}
+        {[
+          { i: iMax, v: maximo, etiqueta: 'Máx.', arriba: true, tono: '#059669', claseTexto: 'fill-emerald-700' },
+          { i: iMin, v: minimo, etiqueta: 'Mín.', arriba: false, tono: '#e11d48', claseTexto: 'fill-rose-700' },
+        ].map(({ i, v, etiqueta, arriba, tono, claseTexto }) => {
+          const px = x(i)
+          const py = y(v)
+          const anclaje = px < margen.left + 44 ? 'start' : px > ancho - margen.right - 44 ? 'end' : 'middle'
+          const dx = anclaje === 'start' ? -4 : anclaje === 'end' ? 4 : 0
+          // El valor va del lado de afuera (máximo arriba, mínimo abajo); si ahí no entra
+          // -se pisaría con el eje-, pasa del otro lado del punto.
+          const yArriba = py - 10
+          const yAbajo = py + (esMovil ? 20 : 18)
+          const yTexto = arriba
+            ? yArriba - fuente < margen.top - 14 ? yAbajo : yArriba
+            : yAbajo > margen.top + altoPlot - 2 ? yArriba : yAbajo
+          return (
+            <g key={etiqueta} pointerEvents="none">
+              <circle cx={px} cy={py} r={esMovil ? 5 : 4.5} fill="white" stroke={tono} strokeWidth="2.5" />
+              {activo === null && (
+                <text
+                  x={px + dx}
+                  y={yTexto}
+                  textAnchor={anclaje}
+                  fontSize={fuente - 1}
+                  className={`${claseTexto} font-semibold`}
+                  stroke="white"
+                  strokeWidth="3"
+                  paintOrder="stroke"
+                >
+                  {etiqueta} {formatoValor(v)}
+                </text>
+              )}
+            </g>
+          )
+        })}
 
         {activo !== null && puntos[activo] && (() => {
           const px = x(activo)
@@ -152,12 +191,12 @@ function Grafico({ puntos, esMovil, color, formatoValor, formatoEje, descripcion
 
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-rose-600" />
+          <span className="h-2.5 w-2.5 rounded-full border-2 border-rose-600 bg-white" />
           Mínimo: <strong className="text-slate-900">{formatoValor(minimo)}</strong>
           <span className="text-slate-400">({formatFecha(puntos[iMin].fecha)})</span>
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-emerald-600" />
+          <span className="h-2.5 w-2.5 rounded-full border-2 border-emerald-600 bg-white" />
           Máximo: <strong className="text-slate-900">{formatoValor(maximo)}</strong>
           <span className="text-slate-400">({formatFecha(puntos[iMax].fecha)})</span>
         </span>
@@ -231,13 +270,17 @@ export default function HistoriaModal({
           </button>
         </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-1 rounded-lg bg-slate-100 p-1 text-xs sm:inline-flex sm:gap-0">
+        {/* En el celular, todos los rangos en una sola fila, repartidos parejo. */}
+        <div
+          className="mt-4 grid gap-1 rounded-lg bg-slate-100 p-1 text-xs sm:inline-flex sm:gap-0"
+          style={{ gridTemplateColumns: `repeat(${rangos.length}, minmax(0, 1fr))` }}
+        >
           {rangos.map((r) => (
             <button
               key={r.id}
               type="button"
               onClick={() => setRango(r.id)}
-              className={`rounded-md px-3 py-1.5 font-medium transition-colors ${
+              className={`whitespace-nowrap rounded-md px-1 py-1.5 font-medium transition-colors sm:px-3 ${
                 rango === r.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
               }`}
             >

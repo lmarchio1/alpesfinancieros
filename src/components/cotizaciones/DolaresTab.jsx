@@ -6,6 +6,8 @@ import Card from '../ui/Card'
 import Badge from '../ui/Badge'
 import FlashPrice from '../ui/FlashPrice'
 import DayChangeBadge from '../ui/DayChangeBadge'
+import ErrorBoundary from '../ui/ErrorBoundary'
+import ItcrmCard from './ItcrmCard'
 
 const formatArs = (value) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(value)
@@ -237,6 +239,12 @@ export default function DolaresTab() {
           )
         })}
       </div>
+
+      {/* Tipo de cambio real: tiene su propia fuente, así que si falla se cae solo y el
+          resto de la pestaña sigue en pie. */}
+      <ErrorBoundary seccion="Tipo de cambio real multilateral">
+        <ItcrmCard />
+      </ErrorBoundary>
 
       <div className="mt-5 flex items-start gap-2 rounded-lg bg-black/30 px-4 py-3 ring-1 ring-inset ring-white/10">
         <svg

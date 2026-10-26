@@ -37,3 +37,5 @@ confirmacion-bono.md
 *.njsproj
 *.sln
 *.sw?
+# Datos de prueba del ITCRM para verlo en localhost (los genera scripts/cachear-itcrm.mjs)
+public/itcrm-dev.json

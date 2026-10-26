@@ -49,3 +49,10 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      # Tipo de cambio real multilateral (ITCRM) del BCRA: solo se publica como Excel y sin
+      # fecha fija, así que se revisa cada noche. Mismo criterio: si falla, no frena nada.
+      - run: node scripts/cachear-itcrm.mjs
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
