@@ -8,6 +8,7 @@ import { fetchConReintento } from '../../utils/fetchRetry'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
 import DayChangeBadge from '../ui/DayChangeBadge'
+import MarcasExtremos from '../ui/MarcasExtremos'
 import MonthPicker from '../ui/MonthPicker'
 
 const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
@@ -387,7 +388,8 @@ function GraficoInteranual({
 
   return (
     <div>
-      <svg ref={svgRef} viewBox={`0 0 ${ANCHO_G} ${ALTO_G}`} className="h-64 w-full sm:h-72" preserveAspectRatio="none">
+      <div className="relative">
+      <svg ref={svgRef} viewBox={`0 0 ${ANCHO_G} ${ALTO_G}`} className="block h-64 w-full sm:h-72" preserveAspectRatio="none">
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={color} stopOpacity="0.3" />
@@ -431,9 +433,6 @@ function GraficoInteranual({
         <path d={areaPath} fill={`url(#${gradientId})`} />
         <polyline points={puntos} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 
-        <circle cx={xMin} cy={yMin} r="4" fill="#059669" />
-        <circle cx={xMax} cy={yMax} r="4" fill="#e11d48" />
-
         {/* Línea de seguimiento ("crosshair"): sigue el dedo/mouse y engancha al
             dato más cercano, en vez de depender de acertarle a un puntito chico. */}
         {hoverIndex !== null && serie[hoverIndex] && (
@@ -476,14 +475,28 @@ function GraficoInteranual({
           onTouchEnd={() => setHoverIndex(null)}
         />
       </svg>
+      {/* Máximo y mínimo encima del dibujo (ver MarcasExtremos.jsx: dentro del SVG estirado
+          los círculos salían ovalados). Acá el mínimo es el verde: menos inflación. */}
+      <MarcasExtremos
+        extremos={[
+          { x: (xMax / ANCHO_G) * 100, y: (yMax / ALTO_G) * 100, texto: `Máx. ${maxValor.toFixed(1)}%`, tono: 'rojo', arriba: true },
+          { x: (xMin / ANCHO_G) * 100, y: (yMin / ALTO_G) * 100, texto: `Mín. ${minValor.toFixed(1)}%`, tono: 'verde', arriba: false },
+        ]}
+        limiteSuperior={(MARGEN_G.top / ALTO_G) * 100}
+        limiteInferior={((MARGEN_G.top + ALTO_PLOT_G) / ALTO_G) * 100}
+        limiteIzquierdo={(MARGEN_G.left / ANCHO_G) * 100}
+        limiteDerecho={((ANCHO_G - MARGEN_G.right) / ANCHO_G) * 100}
+        oculto={hoverIndex !== null}
+      />
+      </div>
       <div className="mt-3 flex flex-wrap gap-4 text-xs">
         <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-emerald-600" />
+          <span className="h-2.5 w-2.5 rounded-full border-2 border-emerald-600 bg-white" />
           Mínimo: <strong className="text-slate-900">{minValor.toFixed(1)}%</strong>
           <span className="text-slate-400">({formatFechaCorta(serie[iMin].fecha)})</span>
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-rose-600" />
+          <span className="h-2.5 w-2.5 rounded-full border-2 border-rose-600 bg-white" />
           Máximo: <strong className="text-slate-900">{maxValor.toFixed(1)}%</strong>
           <span className="text-slate-400">({formatFechaCorta(serie[iMax].fecha)})</span>
         </span>
