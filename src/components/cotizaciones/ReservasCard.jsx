@@ -291,11 +291,12 @@ function GraficoTendencia({ serieCompleta, rangoId }) {
         />
       </svg>
       {/* Máximo y mínimo encima del dibujo (ver MarcasExtremos.jsx: dentro del SVG estirado
-          los círculos salían ovalados). */}
+          los círculos salían ovalados). Solo el número, como el eje: la unidad ya está en
+          el título del eje y en el subtítulo, y la leyenda de abajo lo repite completo. */}
       <MarcasExtremos
         extremos={[
-          { x: (xMax / ANCHO) * 100, y: (yMax / ALTO) * 100, texto: `Máx. USD ${formatMilesDeMillones(maxValor)} mil M`, tono: 'verde', arriba: true },
-          { x: (xMin / ANCHO) * 100, y: (yMin / ALTO) * 100, texto: `Mín. USD ${formatMilesDeMillones(minValor)} mil M`, tono: 'rojo', arriba: false },
+          { x: (xMax / ANCHO) * 100, y: (yMax / ALTO) * 100, texto: `Máx. ${formatMilesDeMillones(maxValor)}`, tono: 'verde', arriba: true },
+          { x: (xMin / ANCHO) * 100, y: (yMin / ALTO) * 100, texto: `Mín. ${formatMilesDeMillones(minValor)}`, tono: 'rojo', arriba: false },
         ]}
         limiteSuperior={(MARGEN.top / ALTO) * 100}
         limiteInferior={((MARGEN.top + ALTO_PLOT) / ALTO) * 100}
