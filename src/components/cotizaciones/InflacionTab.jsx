@@ -992,7 +992,7 @@ export default function InflacionTab() {
       {modalInteranualAbierto && (
         <ModalGraficoTendencia
           onClose={() => setModalInteranualAbierto(false)}
-          titulo="Inflación mensual histórica"
+          titulo="Inflación Mensual Histórica"
           subtitulo="Variación mensual del IPC (INDEC)"
           subtituloMobile="(% mensual)"
           serieCompleta={data}
