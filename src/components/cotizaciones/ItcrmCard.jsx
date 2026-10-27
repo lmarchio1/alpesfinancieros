@@ -84,7 +84,7 @@ function estadoDelPeso(pctAnual) {
 function Comparacion({ etiqueta, dato, pct }) {
   if (!conNumero(dato?.valor) || !conNumero(pct)) return null
   return (
-    <div className="rounded-lg bg-slate-50 px-3 py-2 ring-1 ring-inset ring-slate-200">
+    <div className="rounded-lg bg-slate-50 px-2.5 py-1.5 ring-1 ring-inset ring-slate-200 sm:px-3 sm:py-2">
       <p className="text-[11px] text-slate-500">{etiqueta}</p>
       <p className="mt-0.5 flex flex-wrap items-baseline gap-x-2 tabular-nums">
         <span className="text-sm font-semibold text-slate-800">{formatIndice(dato.valor)}</span>
@@ -133,6 +133,9 @@ const iconoItcrm = (
 // Para que se lea de un vistazo: las puntas llevan el color de su lado, el promedio es una
 // marca que cruza la barra con su etiqueta, y "hoy" es la marca fuerte, con un halo que
 // late y que al aparecer se desliza desde la punta izquierda hasta su lugar.
+//
+// En el celular se compacta: sin los globos de "Hoy" (el valor ya está en grande arriba) y
+// del promedio, y con los extremos y el promedio en una leyenda corta debajo de la barra.
 function Termometro({ hoy, promedio, minimo, maximo, acento }) {
   const posicion = (v) => Math.min(100, Math.max(0, ((v - minimo.valor) / (maximo.valor - minimo.valor)) * 100))
   const marcaPromedio = posicion(promedio)
@@ -147,9 +150,9 @@ function Termometro({ hoy, promedio, minimo, maximo, acento }) {
   const deslizar = 'transition-[left,transform] duration-[1200ms] ease-out motion-reduce:transition-none'
   return (
     <div>
-      <div className="relative pb-7 pt-7">
+      <div className="relative pb-2 pt-3 sm:pb-7 sm:pt-7">
         <div
-          className={`absolute top-0 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums shadow-sm ${acento.etiqueta} ${deslizar}`}
+          className={`absolute top-0 hidden whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums shadow-sm sm:block ${acento.etiqueta} ${deslizar}`}
           style={{ left: `${marcaHoy}%`, transform: `translateX(-${marcaHoy}%)` }}
         >
           Hoy {formatIndice(hoy, 1)}
@@ -170,7 +173,7 @@ function Termometro({ hoy, promedio, minimo, maximo, acento }) {
           </span>
         </div>
         <div
-          className="absolute bottom-0 whitespace-nowrap rounded-full bg-white px-2 py-0.5 text-[11px] font-medium tabular-nums text-slate-700 ring-1 ring-inset ring-slate-300"
+          className="absolute bottom-0 hidden whitespace-nowrap rounded-full bg-white px-2 py-0.5 text-[11px] font-medium tabular-nums text-slate-700 ring-1 ring-inset ring-slate-300 sm:block"
           style={{ left: `${marcaPromedio}%`, transform: `translateX(-${marcaPromedio}%)` }}
         >
           Promedio histórico {formatIndice(promedio, 1)}
@@ -178,7 +181,24 @@ function Termometro({ hoy, promedio, minimo, maximo, acento }) {
       </div>
       {/* Los extremos de la barra: qué significa cada punta, en el color de su lectura, y
           al lado el valor récord de ese lado (debajo, si no entra). */}
-      <div className="mt-2 flex items-start justify-between gap-3">
+      {/* Celular: qué significa cada punta, y abajo mínimo, promedio y máximo en una línea. */}
+      <div className="mt-2 sm:hidden">
+        <div className="flex justify-between text-[11px] font-semibold">
+          <span className="text-sky-700">‹ Más apreciado</span>
+          <span className="text-amber-700">Más depreciado ›</span>
+        </div>
+        <p className="mt-1 flex flex-wrap items-center justify-center gap-x-1.5 text-[11px] tabular-nums text-slate-500">
+          <span>Mín. {formatIndice(minimo.valor, 1)} ({minimo.fecha.slice(0, 4)})</span>
+          <span aria-hidden="true">·</span>
+          <span className="inline-flex items-center gap-1">
+            <span className="inline-block h-2.5 w-1 rounded-full bg-slate-700" aria-hidden="true" />
+            Prom. {formatIndice(promedio, 1)}
+          </span>
+          <span aria-hidden="true">·</span>
+          <span>Máx. {formatIndice(maximo.valor, 1)} ({maximo.fecha.slice(0, 4)})</span>
+        </p>
+      </div>
+      <div className="mt-2 hidden items-start justify-between gap-3 sm:flex">
         {[
           { texto: 'Más apreciado', dato: minimo, clase: 'bg-sky-50 text-sky-700 ring-sky-600/20', flecha: 'M15 19l-7-7 7-7', alinear: 'items-start' },
           { texto: 'Más depreciado', dato: maximo, clase: 'bg-amber-50 text-amber-700 ring-amber-600/20', flecha: 'M9 5l7 7-7 7', alinear: 'items-end' },
@@ -237,9 +257,9 @@ export default function ItcrmCard() {
   return (
     <>
       <Card
-        className={`group mt-4 animate-fade-up border-t-4 p-5 shadow-md shadow-slate-200/70 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-1 hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)] motion-reduce:transition-none motion-reduce:animate-none ${estado?.borde ?? '!border-t-slate-300'}`}
+        className={`group mt-4 animate-fade-up border-t-4 p-4 shadow-md sm:p-5 shadow-slate-200/70 transition-all duration-300 ease-out hover:z-10 hover:-translate-y-1 hover:shadow-[0_20px_35px_-15px_rgba(0,0,0,0.5)] motion-reduce:transition-none motion-reduce:animate-none ${estado?.borde ?? '!border-t-slate-300'}`}
       >
-        <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
+        <div className="flex flex-col gap-5 sm:gap-6 lg:flex-row lg:gap-8">
           {/* En la compu, los cuadros de comparación van al pie de la columna: si la derecha
               es más alta, el aire queda arriba de ellos y no como un hueco al final. */}
           <div className="lg:flex lg:w-5/12 lg:flex-col">
@@ -269,7 +289,18 @@ export default function ItcrmCard() {
                 provisorios. La fecha va siempre a la vista, al lado del número. */}
             <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
               <p className="text-3xl font-bold tabular-nums text-slate-900">{formatIndice(ultimo.valor)}</p>
-              <div className="flex flex-wrap items-center gap-1.5">
+              {/* Celular: fecha y "provisorio" en una sola pastilla. */}
+              <span
+                className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium tabular-nums text-slate-600 sm:hidden"
+                title="Usa inflación estimada: el BCRA lo corrige cuando se conoce la oficial."
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3 w-3 shrink-0" aria-hidden="true">
+                  <rect x="3.5" y="5" width="17" height="15" rx="2" />
+                  <path strokeLinecap="round" d="M3.5 10h17M8 3v4M16 3v4" />
+                </svg>
+                {formatFecha(ultimo.fecha)} · provisorio
+              </span>
+              <div className="hidden flex-wrap items-center gap-1.5 sm:flex">
               <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium tabular-nums text-slate-600">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3 w-3 shrink-0" aria-hidden="true">
                   <rect x="3.5" y="5" width="17" height="15" rx="2" />
@@ -319,8 +350,29 @@ export default function ItcrmCard() {
               </>
             )}
             {/* Cómo se lee, en dos líneas: cada una con la flecha y el color de su estado (los
-                mismos de la pastilla y del termómetro). */}
-            <ul className="mt-3 space-y-2 text-[13px] leading-relaxed text-slate-600">
+                mismos de la pastilla y del termómetro). En el celular van plegadas: se ve el
+                título y la explicación se abre al tocarlo. */}
+            <div className="mt-3 divide-y divide-slate-100 rounded-lg ring-1 ring-inset ring-slate-200 sm:hidden">
+              {COMO_SE_LEE.map((item) => (
+                <details key={item.titulo} className="group/vineta px-3 py-2">
+                  <summary className="flex cursor-pointer list-none items-center gap-2 text-[13px] font-semibold text-slate-800 [&::-webkit-details-marker]:hidden">
+                    <span className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full ${item.icono}`}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3 w-3" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d={item.flecha} />
+                      </svg>
+                    </span>
+                    <span className="flex-1">{item.titulo}</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform group-open/vineta:rotate-180" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <p className="mt-1.5 pl-[26px] text-[13px] leading-relaxed text-slate-600">
+                    {item.texto.charAt(0).toUpperCase() + item.texto.slice(1)}
+                  </p>
+                </details>
+              ))}
+            </div>
+            <ul className="mt-3 hidden space-y-2 text-[13px] leading-relaxed text-slate-600 sm:block">
               {COMO_SE_LEE.map((item) => (
                 <li key={item.titulo} className="flex items-start gap-2.5">
                   <span className={`mt-0.5 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full ${item.icono}`}>
