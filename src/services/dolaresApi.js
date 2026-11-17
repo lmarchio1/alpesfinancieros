@@ -130,7 +130,7 @@ export async function fetchDolares() {
 // PC y celular mostraran variaciones distintas-.
 export async function fetchCierresDolares() {
   const instrumentos = Object.values(INSTRUMENTO_POR_CASA).flatMap((i) => [`${i}_compra`, `${i}_venta`])
-  const cierres = await fetchCierresDeAyer(instrumentos)
+  const cierres = await fetchCierresDeAyer(instrumentos, { buscarAnterior: true })
 
   return Object.fromEntries(
     Object.entries(INSTRUMENTO_POR_CASA).map(([casa, instrumento]) => [

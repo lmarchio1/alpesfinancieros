@@ -30,6 +30,8 @@ jobs:
       # frena: si falla, el cierre ya quedó guardado y el gráfico sigue mostrando la
       # última versión buena.
       - run: node scripts/cachear-riesgo-pais.mjs
+        # Corre aunque el cierre haya terminado en error (por ejemplo, sin MEP o CCL).
+        if: ${{ !cancelled() }}
         continue-on-error: true
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -38,6 +40,8 @@ jobs:
       # la primera vez baja todo desde marzo de 2024 y después un día por noche. Igual que
       # el anterior, si falla no frena nada y el gráfico sigue con lo último guardado.
       - run: node scripts/cachear-dxy.mjs
+        # Corre aunque el cierre haya terminado en error (por ejemplo, sin MEP o CCL).
+        if: ${{ !cancelled() }}
         continue-on-error: true
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -45,6 +49,8 @@ jobs:
       # Tasa de la Fed (último dato, cambios de rango e historia de 4 años) desde la API
       # oficial de la Fed de Nueva York. Mismo criterio: si falla, no frena nada.
       - run: node scripts/cachear-fed.mjs
+        # Corre aunque el cierre haya terminado en error (por ejemplo, sin MEP o CCL).
+        if: ${{ !cancelled() }}
         continue-on-error: true
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -52,6 +58,8 @@ jobs:
       # Tipo de cambio real multilateral (ITCRM) del BCRA: solo se publica como Excel y sin
       # fecha fija, así que se revisa cada noche. Mismo criterio: si falla, no frena nada.
       - run: node scripts/cachear-itcrm.mjs
+        # Corre aunque el cierre haya terminado en error (por ejemplo, sin MEP o CCL).
+        if: ${{ !cancelled() }}
         continue-on-error: true
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

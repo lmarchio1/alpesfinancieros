@@ -5,9 +5,12 @@
 // el front (data912Api.js) cae solo al fetch directo de siempre.
 
 import { createClient } from '@supabase/supabase-js'
+import { calcularImplicitos, esConfiable, fechaArgentina } from '../src/utils/dolaresImplicitos.js'
 
 const SUPABASE_URL = process.env.SUPABASE_URL
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+// Prueba local: DRY_RUN=1 no escribe nada en Supabase, solo muestra lo que guardaría.
+const DRY_RUN = process.env.DRY_RUN === '1'
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   console.error('Faltan SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY en el entorno.')
@@ -16,22 +19,69 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
+// Devuelve los datos si se pudieron bajar y guardar, o null si algo falló.
 async function cachear(fuente, url) {
   const res = await fetch(url)
   if (!res.ok) {
     console.error(`No se pudo obtener ${url}: ${res.status}`)
-    return false
+    return null
   }
   const datos = await res.json()
+  if (DRY_RUN) {
+    console.log(`[prueba] ${fuente}: ${Array.isArray(datos) ? datos.length : 1} registros (no se guardó).`)
+    return datos
+  }
   const { error } = await supabase
     .from('precios_cache')
     .upsert({ fuente, datos, actualizado_en: new Date().toISOString() }, { onConflict: 'fuente' })
   if (error) {
     console.error(`Error al guardar ${fuente} en Supabase:`, error.message)
-    return false
+    return null
   }
   console.log(`${fuente} cacheado: ${Array.isArray(datos) ? datos.length : 1} registros.`)
-  return true
+  return datos
+}
+
+// Último dólar MEP y CCL válidos. El cierre diario (scripts/capturar-cierre-diario.mjs)
+// corre a las 00:15, y a esa hora data912 puede devolver las puntas vacías: sin puntas no
+// hay MEP ni CCL, el cierre quedaba sin esos dos datos y al día siguiente el sitio no
+// mostraba su variación (pasó el 9 y el 10/11/2026). Por eso, cada vez que esta tarea ve
+// puntas válidas deja anotado el valor; el cierre lo usa cuando no puede calcularlo.
+//
+// Se guarda cada dólar por separado, con su fecha: si en una corrida solo se puede
+// calcular uno de los dos, el otro conserva el último que tenía.
+const FUENTE_IMPLICITOS = 'dolares_implicitos'
+
+async function guardarImplicitos(bonos, cedears) {
+  const ahora = new Date()
+  const { mep, ccl } = calcularImplicitos(bonos, cedears, ahora)
+  const nuevos = {}
+  for (const [nombre, dolar] of Object.entries({ mep, ccl })) {
+    if (esConfiable(dolar)) {
+      nuevos[nombre] = { compra: dolar.compra, venta: dolar.venta, fuente: dolar.fuente, fecha: fechaArgentina(ahora), capturado_en: ahora.toISOString() }
+    }
+  }
+  if (Object.keys(nuevos).length === 0) {
+    console.log('MEP/CCL: sin puntas válidas en este momento; se conserva el último valor guardado.')
+    return
+  }
+
+  const { data: fila, error: errorLectura } = await supabase.from('precios_cache').select('datos').eq('fuente', FUENTE_IMPLICITOS).maybeSingle()
+  if (errorLectura) {
+    console.error(`No se pudo leer ${FUENTE_IMPLICITOS}:`, errorLectura.message)
+    return
+  }
+  const datos = { ...(fila?.datos ?? {}), ...nuevos }
+  const resumen = Object.entries(nuevos).map(([n, d]) => `${n.toUpperCase()} ${d.compra.toFixed(2)} / ${d.venta.toFixed(2)}`).join(' · ')
+  if (DRY_RUN) {
+    console.log(`[prueba] ${FUENTE_IMPLICITOS}: ${resumen} (no se guardó).`)
+    return
+  }
+  const { error } = await supabase
+    .from('precios_cache')
+    .upsert({ fuente: FUENTE_IMPLICITOS, datos, actualizado_en: ahora.toISOString() }, { onConflict: 'fuente' })
+  if (error) console.error(`Error al guardar ${FUENTE_IMPLICITOS} en Supabase:`, error.message)
+  else console.log(`${FUENTE_IMPLICITOS} guardado: ${resumen}.`)
 }
 
 // BCRA: Reservas/BADLAR/TAMAR/Plazo fijo/Banda cambiaria son datos que el BCRA
@@ -119,6 +169,10 @@ async function cachearBcra() {
         : null,
     }
 
+    if (DRY_RUN) {
+      console.log('[prueba] bcra_variables (no se guardó).')
+      return true
+    }
     const { error } = await supabase
       .from('precios_cache')
       .upsert({ fuente: 'bcra_variables', datos, actualizado_en: new Date().toISOString() }, { onConflict: 'fuente' })
@@ -140,5 +194,12 @@ const resultados = await Promise.all([
   cachear('data912_ccl', 'https://data912.com/live/ccl'),
   cachearBcra(),
 ])
+
+// Es un agregado: si falla, no cambia el resultado de la tarea.
+try {
+  await guardarImplicitos(resultados[0], resultados[2])
+} catch (err) {
+  console.error('No se pudo guardar el último MEP/CCL:', err.message)
+}
 
 if (resultados.every((ok) => !ok)) process.exit(1)

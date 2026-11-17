@@ -61,16 +61,43 @@ function fechaArgentinaAyer() {
 // en Supabase: un único valor, igual para todos los visitantes sin importar cuándo
 // entren -a diferencia del respaldo por localStorage que se usaba antes, que podía
 // quedar distinto entre navegadores según el momento en que cada uno cargó la página-.
-export async function fetchCierresDeAyer(instrumentos) {
+//
+// buscarAnterior: si a algún instrumento le falta el cierre de ayer, se usa su último cierre
+// de los siete días anteriores. Lo usan los dólares: el MEP y el CCL salen de las puntas de
+// compra y venta, que los feriados no existen, y si ese cierre no quedó guardado el primer
+// día hábil no había contra qué comparar (pasó el 11/11/2026, después de dos feriados). La
+// tarea nocturna ya repite el último valor válido en esos casos; esto es la segunda red.
+const DIAS_HACIA_ATRAS = 7
+
+function listaParaFiltro(instrumentos) {
   // Cada nombre va entre comillas: así un valor con coma o paréntesis no puede alterar
   // la lista que se manda (la API separa los elementos por coma).
-  const lista = instrumentos.map((i) => `"${String(i).replaceAll('"', '')}"`).join(',')
+  return encodeURIComponent(instrumentos.map((i) => `"${String(i).replaceAll('"', '')}"`).join(','))
+}
+
+export async function fetchCierresDeAyer(instrumentos, { buscarAnterior = false } = {}) {
+  const ayer = fechaArgentinaAyer()
   const filas = await consultar(
     'cierres_diarios',
-    `select=instrumento,valor&fecha=eq.${fechaArgentinaAyer()}&instrumento=in.(${encodeURIComponent(lista)})`,
+    `select=instrumento,valor&fecha=eq.${ayer}&instrumento=in.(${listaParaFiltro(instrumentos)})`,
   )
   if (!filas) return {}
-  return Object.fromEntries(filas.map((r) => [r.instrumento, r.valor]))
+  const cierres = Object.fromEntries(filas.map((r) => [r.instrumento, r.valor]))
+  if (!buscarAnterior) return cierres
+
+  const faltan = instrumentos.filter((i) => !(i in cierres))
+  if (faltan.length === 0) return cierres
+  const desde = new Date(`${ayer}T00:00:00Z`)
+  desde.setUTCDate(desde.getUTCDate() - DIAS_HACIA_ATRAS)
+  const anteriores = await consultar(
+    'cierres_diarios',
+    `select=instrumento,valor,fecha&fecha=lt.${ayer}&fecha=gte.${desde.toISOString().slice(0, 10)}&instrumento=in.(${listaParaFiltro(faltan)})&order=fecha.desc`,
+  )
+  // Vienen del más nuevo al más viejo: queda el primero de cada instrumento.
+  for (const r of anteriores ?? []) {
+    if (!(r.instrumento in cierres)) cierres[r.instrumento] = r.valor
+  }
+  return cierres
 }
 
 const CACHE_MAX_ANTIGUEDAD_MS = 30 * 60 * 1000 // 30 minutos: bonos/CCL, se mueven en horario de rueda

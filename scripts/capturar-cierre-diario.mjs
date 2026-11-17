@@ -7,9 +7,14 @@
 // Reemplaza capturar-apertura-mep-ccl.mjs y capturar-apertura-mercado.mjs.
 
 import { createClient } from '@supabase/supabase-js'
+import { calcularImplicitos, esConfiable, fechaArgentina } from '../src/utils/dolaresImplicitos.js'
 
 const SUPABASE_URL = process.env.SUPABASE_URL
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+// Pruebas locales: DRY_RUN=1 no escribe nada en Supabase (solo muestra lo que guardaría), y
+// SIMULAR_PUNTAS_VACIAS=1 hace de cuenta que data912 vino sin puntas, como a medianoche.
+const DRY_RUN = process.env.DRY_RUN === '1'
+const SIMULAR_PUNTAS_VACIAS = process.env.SIMULAR_PUNTAS_VACIAS === '1'
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   console.error('Faltan SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY en el entorno.')
@@ -40,69 +45,57 @@ for (const d of dolares) {
   agregar(`${d.casa}_venta`, d.venta)
 }
 
-// MEP/CCL implícito y universo de bonos/letras (data912): misma metodología que
-// src/services/dolaresApi.js (fetchDolaresImplicitos) — no duplicar ese archivo acá
-// porque corre en Node, no en el navegador; se mantiene la fórmula sincronizada a mano.
+// MEP/CCL implícito y universo de bonos/letras (data912). La cuenta está en
+// src/utils/dolaresImplicitos.js, compartida con scripts/cachear-precios.mjs; es la misma
+// metodología que usa el sitio en src/services/dolaresApi.js (fetchDolaresImplicitos).
 const [bonds, notas, ccl912] = await Promise.all([
   getJson('https://data912.com/live/arg_bonds'),
   getJson('https://data912.com/live/arg_notes'),
   getJson('https://data912.com/live/ccl').catch(() => []),
 ])
 
-const porSimbolo = new Map(bonds.map((b) => [b.symbol, b]))
-const implicito = (base, variante) => {
-  if (!base?.px_bid || !base?.px_ask || !variante?.px_bid || !variante?.px_ask) return null
-  return { compra: base.px_bid / variante.px_ask, venta: base.px_ask / variante.px_bid }
-}
-const spread = (bono) => {
-  if (!bono?.px_bid || !bono?.px_ask) return Infinity
-  return (bono.px_ask - bono.px_bid) / bono.px_bid
-}
-const mep = implicito(porSimbolo.get('AL30'), porSimbolo.get('AL30D'))
+// Los feriados no hay rueda y data912 devuelve las puntas vacías, y sin puntas no hay MEP
+// ni CCL. Pasó el lunes 9 y el martes 10/11/2026: el cierre se guardó sin esos dos datos y
+// el miércoles el sitio no tenía contra qué comparar (los fines de semana no pasa porque
+// las puntas del viernes siguen ahí). Si no se pueden calcular en vivo, se usa el último
+// valor válido que deja anotado la tarea de cada 5 minutos (scripts/cachear-precios.mjs):
+// el feriado repite el cierre del último día hábil, igual que el fin de semana. Siete
+// días alcanzan para cualquier feriado largo.
+const DIAS_MAXIMOS_DEL_RESPALDO = 7
+const enVivo = calcularImplicitos(SIMULAR_PUNTAS_VACIAS ? [] : bonds, SIMULAR_PUNTAS_VACIAS ? [] : ccl912)
 
-// CCL: canasta fija de blue chips grandes (no ranking por volumen — dejaba
-// entrar a MU/MSTR, que meten ruido) — mismo criterio que
-// src/services/dolaresApi.js (cclPorCedears), ver el comentario ahí. Si data912
-// no responde ese endpoint o no hay suficientes tickers confiables, cae al
-// cálculo por bonos (GD30/GD30C, o AL30/AL30C si tiene mejor spread después de
-// las 17:30 ART).
-const CCL_CANASTA_TICKERS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'TSLA']
-function cclPorCedears(datos) {
-  if (!Array.isArray(datos)) return null
-  const porTicker = new Map(datos.map((c) => [c.ticker_ar, c]))
-  const candidatos = CCL_CANASTA_TICKERS.map((t) => porTicker.get(t)).filter(
-    (c) => c?.CCL_bid > 0 && c?.CCL_ask > 0 && (c.CCL_ask - c.CCL_bid) / c.CCL_bid < 0.01
-  )
-  if (candidatos.length < 3) return null
-  return {
-    compra: candidatos.reduce((s, c) => s + c.CCL_bid, 0) / candidatos.length,
-    venta: candidatos.reduce((s, c) => s + c.CCL_ask, 0) / candidatos.length,
+let respaldo = null
+async function ultimoValido(nombre) {
+  if (respaldo === null) {
+    const { data, error } = await supabase.from('precios_cache').select('datos').eq('fuente', 'dolares_implicitos').maybeSingle()
+    if (error) console.error('No se pudo leer el último MEP/CCL guardado:', error.message)
+    respaldo = data?.datos ?? {}
   }
+  const guardado = respaldo[nombre]
+  if (!esConfiable(guardado) || typeof guardado.fecha !== 'string') return null
+  const dias = (Date.parse(fechaArgentina()) - Date.parse(guardado.fecha)) / 86400000
+  return dias >= 0 && dias <= DIAS_MAXIMOS_DEL_RESPALDO ? guardado : null
 }
 
-const hhmm = new Intl.DateTimeFormat('en-GB', {
-  timeZone: 'America/Argentina/Buenos_Aires',
-  hour: '2-digit',
-  minute: '2-digit',
-  hourCycle: 'h23',
-}).format(new Date())
-const [hh, mm] = hhmm.split(':').map(Number)
-const despuesDelCierre = hh > 17 || (hh === 17 && mm >= 30) || hh < 11
-
-const al30c = porSimbolo.get('AL30C')
-const gd30c = porSimbolo.get('GD30C')
-const usarAl30c = despuesDelCierre && spread(al30c) < spread(gd30c)
-const cclBonos = usarAl30c
-  ? implicito(porSimbolo.get('AL30'), al30c)
-  : implicito(porSimbolo.get('GD30'), gd30c)
-const ccl = cclPorCedears(ccl912) ?? cclBonos
-if (mep) {
-  agregar('mep_compra', mep.compra)
-  agregar('mep_venta', mep.venta)
-}
-if (ccl) {
-  agregar('ccl_compra', ccl.compra)
-  agregar('ccl_venta', ccl.venta)
+// Si falta alguno de los dos al final, la tarea termina en error (después de guardar todo
+// lo demás) para que llegue el aviso, en vez de quedar en verde con el dato faltante.
+const sinDato = []
+for (const nombre of ['mep', 'ccl']) {
+  let dolar = esConfiable(enVivo[nombre]) ? enVivo[nombre] : null
+  if (dolar) {
+    console.log(`${nombre.toUpperCase()}: ${dolar.compra.toFixed(2)} / ${dolar.venta.toFixed(2)} (puntas en vivo).`)
+  } else {
+    dolar = await ultimoValido(nombre)
+    if (dolar) {
+      console.log(`${nombre.toUpperCase()}: ${dolar.compra.toFixed(2)} / ${dolar.venta.toFixed(2)} (sin puntas a esta hora; último valor válido, del ${dolar.capturado_en}).`)
+    }
+  }
+  if (!dolar) {
+    sinDato.push(nombre.toUpperCase())
+    continue
+  }
+  agregar(`${nombre}_compra`, dolar.compra)
+  agregar(`${nombre}_venta`, dolar.venta)
 }
 
 // Todos los símbolos de bonos/letras (no solo los que hoy se muestran en el sitio: el
@@ -144,10 +137,20 @@ function fechaArgentinaAyer() {
 const fecha = fechaArgentinaAyer()
 const registros = filas.map((f) => ({ fecha, ...f }))
 
-const { error } = await supabase.from('cierres_diarios').upsert(registros, { onConflict: 'fecha,instrumento' })
-if (error) {
-  console.error('Error al guardar en Supabase:', error.message)
-  process.exit(1)
+if (DRY_RUN) {
+  console.log(`[prueba] Cierre del ${fecha}: ${registros.length} instrumentos (no se guardó nada).`)
+} else {
+  const { error } = await supabase.from('cierres_diarios').upsert(registros, { onConflict: 'fecha,instrumento' })
+  if (error) {
+    console.error('Error al guardar en Supabase:', error.message)
+    process.exit(1)
+  }
+  console.log(`Cierre del ${fecha} guardado: ${registros.length} instrumentos.`)
 }
 
-console.log(`Cierre del ${fecha} guardado: ${registros.length} instrumentos.`)
+// Lo demás ya quedó guardado. Esto es para que la corrida figure en rojo y llegue el mail:
+// sin el cierre de MEP o CCL, mañana el sitio no puede mostrar su variación del día.
+if (sinDato.length > 0) {
+  console.error(`ATENCIÓN: el cierre del ${fecha} quedó sin ${sinDato.join(' ni ')}: no hubo puntas en vivo ni un valor válido reciente guardado.`)
+  process.exit(1)
+}
