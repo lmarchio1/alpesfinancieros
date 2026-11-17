@@ -5,9 +5,10 @@ import { fetchPreciosCache } from './supabaseClient'
 // puede leer, así que acá no hay pedido directo de respaldo. Si la fila no está, la
 // tarjeta no se muestra.
 //
-// La fila se reescribe cada noche, pero el dato puede tener días: el BCRA no lo actualiza
-// a diario. La tarjeta muestra la fecha del último dato; se deja de mostrar recién si la
-// tarea lleva más de 45 días sin poder guardarlo.
+// El BCRA lo actualiza cada día hábil a la tarde y la tarea lo guarda a la noche, así que
+// el dato suele ser del día hábil anterior. La tarjeta muestra siempre su fecha; se deja
+// de mostrar recién si la tarea lleva más de 45 días sin poder guardarlo (y mucho antes
+// avisa scripts/verificar-frescura.mjs).
 const ANTIGUEDAD_MAXIMA_MS = 45 * 24 * 60 * 60 * 1000
 
 // Mismo rango posible que valida la tarea nocturna.

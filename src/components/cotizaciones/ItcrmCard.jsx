@@ -235,7 +235,8 @@ export default function ItcrmCard() {
   const [historiaAbierta, setHistoriaAbierta] = useState(false)
   const fetcher = useCallback(() => fetchItcrm(), [])
   const { data: crudo } = usePolling(fetcher, {
-    // El BCRA lo actualiza cada varios días: alcanza con revisar cada seis horas.
+    // El BCRA lo publica una vez por día hábil y la tarea lo guarda de noche: alcanza con
+    // revisar cada seis horas.
     intervalMs: 6 * 60 * 60 * 1000,
     persistKey: 'itcrm',
   })
@@ -285,8 +286,8 @@ export default function ItcrmCard() {
               </div>
             </div>
 
-            {/* No es un dato del día: el BCRA lo publica cada varios días y con valores
-                provisorios. La fecha va siempre a la vista, al lado del número. */}
+            {/* No es un dato en vivo: es el del último día hábil publicado por el BCRA, y con
+                valores provisorios. La fecha va siempre a la vista, al lado del número. */}
             <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
               <p className="text-3xl font-bold tabular-nums text-slate-900">{formatIndice(ultimo.valor)}</p>
               {/* Celular: fecha y "provisorio" en una sola pastilla. */}

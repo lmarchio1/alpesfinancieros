@@ -8,18 +8,33 @@
 // no puede leer (no tiene permiso CORS). Un .xlsx es un zip con XML adentro, así que se
 // lee con zlib, que ya viene con Node, sin sumar ninguna librería.
 //
-// El BCRA no lo actualiza todos los días y avisa que los últimos datos son provisorios
-// (usan inflación estimada y se corrigen cuando sale la oficial). Por eso se guarda la
-// fecha del último dato y la tarjeta la muestra.
+// El BCRA lo actualiza cada día hábil a la tarde y avisa que los últimos datos son
+// provisorios (usan inflación estimada y los corrige cuando sale la oficial: el valor del
+// 16/10/2026 pasó de 85,42 a 82,76 un mes después). Por eso se guarda la fecha del último
+// dato y la tarjeta la muestra.
 //
-// Si el archivo viene roto, viejo o con otro formato, no se pisa lo guardado.
+// El archivo puede cambiar de dirección: en noviembre de 2026 el BCRA rediseñó su sitio,
+// empezó a publicarlo como itcrm-serie.xlsx y dejó el anterior (ITCRMSerie.xlsx) colgado y
+// sin actualizar. Esta tarea siguió leyendo el viejo, que era un Excel válido, y la tarjeta
+// quedó un mes clavada en el 16/10 sin que nada fallara. Ahora se prueban todas las
+// direcciones conocidas más los enlaces que figuren en la página del índice, y se usa el
+// archivo que traiga el dato más nuevo.
+//
+// Si ningún archivo sirve (roto, viejo o con otro formato), no se pisa lo guardado.
 //
 // Prueba local sin tocar Supabase: DRY_RUN=1 node scripts/cachear-itcrm.mjs
 // (con SALIDA=public/itcrm-dev.json escribe el resultado para verlo en localhost, y con
 // ARCHIVO=ruta.xlsx lee un Excel local en vez de bajarlo: sirve para probar archivos rotos).
 import { inflateRawSync } from 'node:zlib'
 
-const URL_ITCRM = 'https://www.bcra.gob.ar/archivos/Pdfs/PublicacionesEstadisticas/ITCRMSerie.xlsx'
+const SITIO_BCRA = 'https://www.bcra.gob.ar'
+// Direcciones conocidas del archivo, de la más nueva a la más vieja.
+const URLS_CONOCIDAS = [
+  `${SITIO_BCRA}/archivos/Pdfs/PublicacionesEstadisticas/itcrm-serie.xlsx`,
+  `${SITIO_BCRA}/archivos/Pdfs/PublicacionesEstadisticas/ITCRMSerie.xlsx`,
+]
+// Página donde el BCRA enlaza el archivo: de ahí se sacan direcciones nuevas si lo mueve.
+const PAGINA_DEL_INDICE = `${SITIO_BCRA}/indices-de-tipo-de-cambio-multilateral/`
 const SUPABASE_URL = process.env.SUPABASE_URL
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 const DRY_RUN = process.env.DRY_RUN === '1'
@@ -155,22 +170,56 @@ function datoAl(dias, fechaIso) {
   return elegido
 }
 
-async function main() {
-  let contenido
-  let publicado = null
-  if (process.env.ARCHIVO) {
-    const { readFileSync } = await import('node:fs')
-    contenido = readFileSync(process.env.ARCHIVO)
-  } else {
-    const res = await fetch(URL_ITCRM, { signal: AbortSignal.timeout(ESPERA_MAXIMA_MS) })
-    if (!res.ok) throw new Error(`El BCRA respondió ${res.status}`)
-    contenido = Buffer.from(await res.arrayBuffer())
-    publicado = res.headers.get('last-modified')
+// Enlaces a archivos Excel del ITCRM que figuren en la página del índice. Si la página no
+// responde o cambió, devuelve una lista vacía: quedan las direcciones conocidas.
+async function enlacesDeLaPagina() {
+  try {
+    const res = await fetch(PAGINA_DEL_INDICE, { signal: AbortSignal.timeout(ESPERA_MAXIMA_MS) })
+    if (!res.ok) return []
+    const html = await res.text()
+    return [...html.matchAll(/href="([^"]*itcrm[^"]*\.xlsx)"/gi)].map(([, href]) => new URL(href, PAGINA_DEL_INDICE).href)
+  } catch {
+    return []
   }
+}
+
+// Baja y lee un archivo. Devuelve null (y deja anotado por qué) si no se puede usar.
+async function leerArchivo(url) {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(ESPERA_MAXIMA_MS) })
+    if (!res.ok) throw new Error(`respondió ${res.status}`)
+    const dias = leerExcel(Buffer.from(await res.arrayBuffer()))
+    if (dias.length === 0) throw new Error('vino sin datos')
+    return { url, dias, publicado: res.headers.get('last-modified') }
+  } catch (err) {
+    console.log(`  ${url}: no sirve (${err.message})`)
+    return null
+  }
+}
+
+function leerExcel(contenido) {
   const leer = abrirZip(contenido)
   const hoja = leer('xl/worksheets/sheet1.xml')
   if (!hoja) throw new Error('El Excel del BCRA no trae la hoja esperada')
-  const dias = leerSerie(hoja, leerTextos(leer('xl/sharedStrings.xml')))
+  return leerSerie(hoja, leerTextos(leer('xl/sharedStrings.xml')))
+}
+
+async function main() {
+  let dias
+  let publicado = null
+  if (process.env.ARCHIVO) {
+    const { readFileSync } = await import('node:fs')
+    dias = leerExcel(readFileSync(process.env.ARCHIVO))
+  } else {
+    const urls = [...new Set([...URLS_CONOCIDAS, ...(await enlacesDeLaPagina())])]
+    const archivos = (await Promise.all(urls.map(leerArchivo))).filter(Boolean)
+    if (archivos.length === 0) throw new Error('No se pudo leer el ITCRM de ninguna dirección del BCRA.')
+    // Gana el que traiga el dato más nuevo.
+    const elegido = archivos.reduce((a, b) => (b.dias.at(-1).fecha > a.dias.at(-1).fecha ? b : a))
+    for (const a of archivos) console.log(`  ${a.url}: datos hasta el ${a.dias.at(-1).fecha}${a === elegido ? ' (se usa este)' : ''}`)
+    dias = elegido.dias
+    publicado = elegido.publicado
+  }
 
   const ultimo = dias.at(-1)
   if (!ultimo) throw new Error('El Excel del BCRA vino sin datos')

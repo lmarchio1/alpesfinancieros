@@ -17,8 +17,8 @@ jobs:
   capturar:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
       - run: npm install @supabase/supabase-js
@@ -61,6 +61,15 @@ jobs:
         # Corre aunque el cierre haya terminado en error (por ejemplo, sin MEP o CCL).
         if: ${{ !cancelled() }}
         continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      # Control final: si algún dato lleva más tiempo del normal sin actualizarse, este paso
+      # falla, la corrida queda en rojo y llega el mail. Los pasos de arriba no avisan solos
+      # (están hechos para no frenar el cierre), y una fuente puede dejar de actualizarse sin
+      # que nada falle. Ver scripts/verificar-frescura.mjs.
+      - run: node scripts/verificar-frescura.mjs
+        if: ${{ !cancelled() }}
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

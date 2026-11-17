@@ -1,4 +1,4 @@
-// Corre vía GitHub Actions (ver .github/workflows/cachear-precios.yml) cada 10
+// Corre vía GitHub Actions (ver .github/workflows/cachear-precios.yml) cada 5
 // minutos para cachear en Supabase la respuesta cruda de data912 (bonos y letras) —
 // la pestaña Renta Fija dejar de depender de pegarle a data912.com en cada apertura
 // de pestaña, mejorando bastante el tiempo de carga. Si esta cache falta o está vieja,
@@ -21,12 +21,22 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 // Devuelve los datos si se pudieron bajar y guardar, o null si algo falló.
 async function cachear(fuente, url) {
-  const res = await fetch(url)
-  if (!res.ok) {
-    console.error(`No se pudo obtener ${url}: ${res.status}`)
+  // Un corte de conexión o una respuesta rota de una fuente no puede tirar toda la tarea
+  // (pasó el 3 y el 6/11/2026 con un "connect ETIMEDOUT" contra data912): se anota y se
+  // sigue con las demás. La fila queda con el último dato bueno y en cinco minutos se
+  // vuelve a intentar.
+  let datos
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(30000) })
+    if (!res.ok) {
+      console.error(`No se pudo obtener ${url}: ${res.status}`)
+      return null
+    }
+    datos = await res.json()
+  } catch (err) {
+    console.error(`No se pudo obtener ${url}: ${err.cause?.code ?? err.message}`)
     return null
   }
-  const datos = await res.json()
   if (DRY_RUN) {
     console.log(`[prueba] ${fuente}: ${Array.isArray(datos) ? datos.length : 1} registros (no se guardó).`)
     return datos
