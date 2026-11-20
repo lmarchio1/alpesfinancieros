@@ -1,7 +1,7 @@
 import { fetchArgNotes } from './data912Api'
 import { fetchCierresDeAyer, fetchPreciosCache } from './supabaseClient'
 import { URL_HISTORIA_RIESGO_PAIS, recortarHistoria } from '../utils/riesgoPaisHistoria'
-import { PAGO_FINAL_LETRAS } from '../data/bondsReference'
+import { BONCAP_META, PAGO_FINAL_LETRAS } from '../data/bondsReference'
 
 const BASE_URL = 'https://api.argentinadatos.com/v1/finanzas'
 
@@ -103,7 +103,18 @@ export async function fetchRentaFija(forzar = false) {
     .filter((l) => typeof l.vpv === 'number' && Number.isFinite(l.vpv))
     .sort((a, b) => new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento))
 
-  return { letras: letrasOrdenadas, riesgoPais }
+  // Pago final de cada Boncap, para el análisis de breakeven: son de tasa fija en pesos y
+  // pagan todo al vencimiento, igual que una Lecap, así que la cuenta es la misma. Se toman
+  // solo los de BONCAP_META (lista explícita): en /letras también vienen los duales atados a
+  // TAMAR (TTD26, TY30P), cuyo pago final no es fijo y no sirven para esto. El precio en
+  // vivo de los Boncap no está acá sino en el universo de bonos (ver BonosTab.jsx).
+  const pagoFinalBoncap = {}
+  for (const ticker of Object.keys(BONCAP_META)) {
+    const pago = derivarVpv(letrasMeta.find((l) => l.ticker === ticker) ?? { ticker })
+    if (typeof pago === 'number' && Number.isFinite(pago) && pago > 0) pagoFinalBoncap[ticker] = pago
+  }
+
+  return { letras: letrasOrdenadas, riesgoPais, pagoFinalBoncap }
 }
 
 // Valor de riesgo país del cierre de ayer (capturado a las 00hs, ver

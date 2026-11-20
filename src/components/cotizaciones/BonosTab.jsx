@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { usePolling } from '../../hooks/usePolling'
 import { fetchDolares } from '../../services/dolaresApi'
 import { fetchRentaFija } from '../../services/rentaFijaApi'
@@ -37,6 +37,36 @@ export default function BonosTab() {
   }
 
   const [modelosAbierto, setModelosAbierto] = useState(false)
+
+  // Instrumentos del análisis de breakeven: las Lecap y los Boncap, que son los de tasa
+  // fija en pesos con un único pago al vencimiento. Cada vez quedan menos Lecap en el
+  // mercado (el Tesoro viene licitando otros instrumentos), y sin los Boncap el listado se
+  // iba vaciando. Las dos familias forman una sola curva, así que van juntas y ordenadas
+  // por vencimiento. Un Boncap entra solo si tiene precio en vivo y pago final conocido.
+  const letras = rentaFija.data?.letras
+  const pagoFinalBoncap = rentaFija.data?.pagoFinalBoncap
+  const boncap = universo.data?.boncap
+  const instrumentosBreakeven = useMemo(() => {
+    const ahora = new Date()
+    const deLetras = (letras ?? []).map((l) => ({
+      ticker: l.ticker,
+      tipo: 'Lecap',
+      fechaVencimiento: l.fechaVencimiento,
+      precioActual: l.precioActual,
+      vpv: l.vpv,
+    }))
+    const deBoncap = (boncap ?? [])
+      .map((b) => ({
+        ticker: b.ticker,
+        tipo: 'Boncap',
+        fechaVencimiento: b.vencimiento,
+        precioActual: b.precio,
+        vpv: pagoFinalBoncap?.[b.ticker],
+      }))
+      .filter((b) => typeof b.vpv === 'number' && b.vpv > 0 && typeof b.precioActual === 'number' && b.precioActual > 0)
+      .filter((b) => new Date(b.fechaVencimiento) > ahora)
+    return [...deLetras, ...deBoncap].sort((a, b) => new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento))
+  }, [letras, boncap, pagoFinalBoncap])
 
   const loading = rentaFija.loading || dolares.loading || universo.loading
   const error = rentaFija.error || dolares.error || universo.error
@@ -129,7 +159,7 @@ export default function BonosTab() {
         {modelosAbierto && (
           <div className="mt-6 space-y-6">
             <DolarEsperadoCard />
-            <BreakevenCalculator letras={rentaFija.data.letras} dolares={dolares.data} />
+            <BreakevenCalculator instrumentos={instrumentosBreakeven} dolares={dolares.data} />
             <RiesgoPaisSensitivity
               riesgoPais={rentaFija.data.riesgoPais}
               globales={universo.data.globales}

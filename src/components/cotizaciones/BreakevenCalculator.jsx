@@ -30,10 +30,12 @@ const DOLAR_LABELS_PROSA = {
 
 const CASAS_HABILITADAS = ['oficial', 'blue', 'bolsa', 'contadoconliqui', 'cripto']
 
-export default function BreakevenCalculator({ letras, dolares }) {
+// instrumentos: Lecap y Boncap ({ ticker, tipo, fechaVencimiento, precioActual, vpv }),
+// ordenados por vencimiento. Los arma BonosTab.jsx.
+export default function BreakevenCalculator({ instrumentos, dolares }) {
   const opciones = useMemo(
-    () => letras.map((l) => ({ id: `letra-${l.ticker}`, ticker: l.ticker, data: l })),
-    [letras],
+    () => instrumentos.map((i) => ({ id: i.ticker, ticker: i.ticker, tipo: i.tipo, data: i })),
+    [instrumentos],
   )
   const dolaresHabilitados = useMemo(
     () => dolares.filter((d) => CASAS_HABILITADAS.includes(d.casa)),
@@ -107,7 +109,7 @@ export default function BreakevenCalculator({ letras, dolares }) {
           >
             {opciones.map((o) => (
               <option key={o.id} value={o.id}>
-                {o.ticker} · vto. {formatDate(o.data.fechaVencimiento)}
+                {o.ticker} · {o.tipo} · vto. {formatDate(o.data.fechaVencimiento)}
               </option>
             ))}
           </select>

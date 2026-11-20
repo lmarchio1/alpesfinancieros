@@ -3,7 +3,7 @@ export function diasHasta(fechaISO) {
   return Math.max(Math.ceil(ms / (1000 * 60 * 60 * 24)), 1)
 }
 
-// LECAP: "vpv" es el pago final pactado al emitirse (100 capitalizado a la
+// LECAP y BONCAP: "vpv" es el pago final pactado al emitirse (100 capitalizado a la
 // TEM contractual), no el precio de hoy. El retorno real de comprar ahora
 // sale de comparar ese pago final contra el precio de mercado actual.
 export function retornoLetra(letra) {

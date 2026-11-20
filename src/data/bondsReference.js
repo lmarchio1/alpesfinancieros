@@ -116,6 +116,11 @@ export const PAGO_FINAL_LETRAS = {
   S30N6: 129.888, // verificado
   T15E7: 161.104, // verificado
   S29E7: 111.6814,
+  // Reconstruidos el 16/11/2026 con el mismo método (precio × (1+TEA)^(días/365), y
+  // contrastados con la TNA: dan lo mismo). Ese día el método reprodujo los cinco valores
+  // verificados o ya guardados de esta lista con una diferencia de 0,00% a 0,01%.
+  S26F7: 108.368,
   T30A7: 157.341, // verificado
+  T31Y7: 151.564,
   T30J7: 156.037, // verificado
 }
